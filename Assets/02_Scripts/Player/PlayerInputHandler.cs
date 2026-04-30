@@ -38,11 +38,17 @@ namespace Nexush.Player
         /// </summary>
         public bool IsAiming { get; private set; }
 
+        /// <summary>
+        /// 사격 입력 여부 (왼쪽 클릭 등)
+        /// </summary>
+        public bool IsFiring { get; private set; }
+
         private InputAction _moveAction;
         private InputAction _lookAction;
         private InputAction _jumpAction;
         private InputAction _sprintAction;
         private InputAction _aimAction;
+        private InputAction _fireAction;
 
         private void Awake()
         {
@@ -58,6 +64,10 @@ namespace Nexush.Player
             _jumpAction = playerMap.FindAction("Jump");
             _sprintAction = playerMap.FindAction("Sprint");
             _aimAction = playerMap.FindAction("Aim");
+            _fireAction = playerMap.FindAction("Fire");
+
+            if (_fireAction == null) Debug.LogError("[PlayerInputHandler] 'Fire' 액션을 찾을 수 없습니다! Input Action Asset에 'Fire' 액션이 있는지 확인해주세요.");
+            else Debug.Log("[PlayerInputHandler] 'Fire' 액션 바인딩 성공.");
         }
 
         private void OnEnable()
@@ -77,7 +87,8 @@ namespace Nexush.Player
             
             IsJumping = _jumpAction.WasPressedThisFrame();
             IsSprinting = _sprintAction.IsPressed();
-            IsAiming = _aimAction.IsPressed();
+            IsAiming = _aimAction != null && _aimAction.IsPressed();
+            IsFiring = _fireAction != null && _fireAction.IsPressed();
         }
     }
 }

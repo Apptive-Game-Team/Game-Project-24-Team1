@@ -54,6 +54,7 @@ namespace Nexush.Player
         private CharacterController _controller;
         private PlayerInputHandler _input;
         private Animator _animator;
+        private PlayerWeapon _weapon; // 사격 컴포넌트 참조 추가
 
         // 애니메이터 파라미터 해시 캐싱 (성능 최적화)
         private static readonly int AnimIDSpeed = Animator.StringToHash("Speed");
@@ -67,6 +68,10 @@ namespace Nexush.Player
             _controller = GetComponent<CharacterController>();
             _input = GetComponent<PlayerInputHandler>();
             _animator = GetComponent<Animator>();
+            _weapon = GetComponentInChildren<PlayerWeapon>(); // 자식 오브젝트(WeaponRoot 등)에서 사격 컴포넌트 찾기
+            
+            if (_weapon == null) Debug.LogError("[PlayerController] PlayerWeapon 컴포넌트를 찾을 수 없습니다! 오브젝트에 추가되어 있나요?");
+            else Debug.Log("[PlayerController] PlayerWeapon 컴포넌트 연결 성공.");
 
             _jumpTimeoutDelta = jumpTimeout;
             _fallTimeoutDelta = fallTimeout;
@@ -89,6 +94,15 @@ namespace Nexush.Player
             float deltaTime = Time.deltaTime;
             ApplyGravity(deltaTime);
             ApplyMovement(deltaTime);
+            HandleShootingInput();
+        }
+
+        private void HandleShootingInput()
+        {
+            if (_input.IsFiring && _weapon != null)
+            {
+                _weapon.FireWeapon();
+            }
         }
 
         /// <summary>

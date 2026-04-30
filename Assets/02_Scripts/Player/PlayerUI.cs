@@ -13,7 +13,7 @@ namespace Nexush.Player
         [Tooltip("중앙에 표시될 조준점 이미지입니다.")]
         [FormerlySerializedAs("crosshairImage")]
         [SerializeField] private Image img_crosshair;
-        
+
         [Tooltip("조준점 표시 여부입니다.")]
         [SerializeField] private bool showCrosshair = true;
 
@@ -32,9 +32,5 @@ namespace Nexush.Player
                 img_crosshair.enabled = showCrosshair;
             }
         }
-
-        // 💡 Update에서 매 프레임 체크하는 불필요한 로직을 제거했습니다.
-        // 상태 변경이 필요할 경우 외부에서 UpdateCrosshairVisibility를 호출하거나
-        // 프로퍼티를 통해 제어하는 것이 성능상 유리합니다.
     }
 }
