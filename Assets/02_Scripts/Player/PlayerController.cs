@@ -11,7 +11,8 @@ namespace Nexush.Player
         Idle,
         Move,
         Jump,
-        Fall
+        Fall,
+        Climbing
     }
 
     [RequireComponent(typeof(CharacterController))]
@@ -27,6 +28,9 @@ namespace Nexush.Player
 
         [Tooltip("속도 변화의 가속도 계수입니다.")]
         [SerializeField] private float speedChangeRate = 10.0f;
+
+        [Tooltip("사다리 등반 속도입니다.")]
+        [SerializeField] private float climbSpeed = 3.0f;
 
         [Header("점프 및 중력")]
         [Tooltip("점프 높이입니다.")]
@@ -51,6 +55,7 @@ namespace Nexush.Player
         private float _verticalVelocity;
         private float _fallTimeoutDelta;
         private bool _isGrounded = true;
+        private bool _isNearLadder = false;
         private PlayerState _currentState;
         private PlayerState _previousState;
         private Vector3 _hitNormal = Vector3.up; // 지면의 기울기(법선) 정보
@@ -67,6 +72,7 @@ namespace Nexush.Player
         private static readonly int AnimIDJump = Animator.StringToHash("Jump");
         private static readonly int AnimIDFreeFall = Animator.StringToHash("FreeFall");
         private static readonly int AnimIDMotionSpeed = Animator.StringToHash("MotionSpeed");
+        private static readonly int AnimIDClimbing = Animator.StringToHash("Climbing");
 
         private void Start()
         {
@@ -117,6 +123,9 @@ namespace Nexush.Player
                 case PlayerState.Fall:
                     HandleAirborneState(deltaTime);
                     break;
+                case PlayerState.Climbing:
+                    HandleClimbingState(deltaTime);
+                    break;
             }
         }
 
@@ -139,6 +148,7 @@ namespace Nexush.Player
                     {
                         _animator.SetBool(AnimIDJump, false);
                         _animator.SetBool(AnimIDFreeFall, false);
+                        _animator.SetBool(AnimIDClimbing, false);
                     }
                     break;
                 case PlayerState.Move:
@@ -146,13 +156,31 @@ namespace Nexush.Player
                     {
                         _animator.SetBool(AnimIDJump, false);
                         _animator.SetBool(AnimIDFreeFall, false);
+                        _animator.SetBool(AnimIDClimbing, false);
                     }
                     break;
                 case PlayerState.Jump:
-                    if (_animator) _animator.SetBool(AnimIDJump, true);
+                    if (_animator)
+                    {
+                        _animator.SetBool(AnimIDJump, true);
+                        _animator.SetBool(AnimIDClimbing, false);
+                    }
                     break;
                 case PlayerState.Fall:
-                    if (_animator) _animator.SetBool(AnimIDFreeFall, true);
+                    if (_animator)
+                    {
+                        _animator.SetBool(AnimIDFreeFall, true);
+                        _animator.SetBool(AnimIDClimbing, false);
+                    }
+                    break;
+                case PlayerState.Climbing:
+                    _verticalVelocity = 0f; // 사다리 진입 시 속도 초기화
+                    if (_animator)
+                    {
+                        _animator.SetBool(AnimIDClimbing, true);
+                        _animator.SetBool(AnimIDJump, false);
+                        _animator.SetBool(AnimIDFreeFall, false);
+                    }
                     break;
             }
         }
@@ -167,6 +195,13 @@ namespace Nexush.Player
 
             ApplyMovement(deltaTime);
             HandleJumpInput();
+
+            // 사다리 타기 체크
+            if (_isNearLadder && Mathf.Abs(_input.MoveInput.y) > 0.1f)
+            {
+                ChangeState(PlayerState.Climbing);
+                return;
+            }
 
             // 점프 입력 등으로 인해 상태가 이미 변경되었다면 지면 전이 로직 무시
             if (_currentState != PlayerState.Idle && _currentState != PlayerState.Move) return;
@@ -190,6 +225,13 @@ namespace Nexush.Player
         {
             ApplyGravity(deltaTime);
             ApplyMovement(deltaTime); // 공중 제어 포함
+
+            // 사다리 타기 체크
+            if (_isNearLadder && Mathf.Abs(_input.MoveInput.y) > 0.1f)
+            {
+                ChangeState(PlayerState.Climbing);
+                return;
+            }
 
             // 상태 전이 체크
             // 점프 직후 바로 착지 판정이 나는 것을 방지하기 위해 수직 속도가 0 이하일 때만 착지 체크
@@ -372,6 +414,58 @@ namespace Nexush.Player
                 
                 // 미끄러지는 동안에는 아래로 살짝 힘을 주어 자연스러운 낙하 유도
                 movement.y -= 2f;
+            }
+        }
+
+        /// <summary>
+        /// 사다리 타기 상태의 로직을 처리합니다.
+        /// </summary>
+        private void HandleClimbingState(float deltaTime)
+        {
+            // 사다리를 타는 동안은 중력을 무시하고 W/S 입력을 Y축 이동으로 변환
+            float verticalMove = _input.MoveInput.y * climbSpeed;
+            
+            // 이동 방향 계산 (Y축만 이동)
+            Vector3 movement = Vector3.up * verticalMove;
+            
+            _controller.Move(movement * deltaTime);
+
+            // 애니메이션 파라미터 업데이트 (사다리 전용 애니메이션이 있다면 추가 필요)
+            if (_animator)
+            {
+                _animator.SetFloat(AnimIDSpeed, Mathf.Abs(verticalMove));
+            }
+
+            // 상태 탈출 체크: 점프 시 또는 사다리 영역을 벗어났을 때
+            if (_input.IsJumping || !_isNearLadder)
+            {
+                if (_input.IsJumping)
+                {
+                    _verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+                    ChangeState(PlayerState.Jump);
+                }
+                else
+                {
+                    ChangeState(_isGrounded ? PlayerState.Idle : PlayerState.Fall);
+                }
+                return;
+            }
+
+            // 바닥에 닿았고 아래로 내려가려 할 때 상태 탈출
+            if (_isGrounded && verticalMove < -0.1f)
+            {
+                ChangeState(PlayerState.Idle);
+            }
+        }
+
+        public void SetNearLadder(bool value)
+        {
+            _isNearLadder = value;
+            
+            // 사다리에서 멀어졌는데 아직 Climbing 상태라면 상태 변경
+            if (!value && _currentState == PlayerState.Climbing)
+            {
+                ChangeState(_isGrounded ? PlayerState.Idle : PlayerState.Fall);
             }
         }
 
