@@ -282,6 +282,7 @@ GameObject:
   - component: {fileID: 88642487201728139}
   - component: {fileID: 1252149464552228726}
   - component: {fileID: 3250843187412488170}
+  - component: {fileID: 631956462637772088}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -484,7 +485,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Nexush.Player.PlayerWeapon
   weaponData: {fileID: 11400000, guid: c13e4d27c11176d4fbae8ab65046e51c, type: 2}
   muzzleTransform: {fileID: 8630052139414368803}
+  dartTracerPrefab: {fileID: 566576921725277279, guid: b6e8a3298eb112e4b8fafee34c82b9b2, type: 3}
+  projectileSpeed: 60
   targetTag: Enemy
+--- !u!114 &631956462637772088
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3792993914397075666}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c78e3c45b6487ec4996eb10f03a8b2d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Nexush.Player.PlayerInteractor
+  interactRange: 3
+  maxRaycastDistance: 10
+  interactableLayer:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1 &4880717469844751553
 GameObject:
   m_ObjectHideFlags: 0

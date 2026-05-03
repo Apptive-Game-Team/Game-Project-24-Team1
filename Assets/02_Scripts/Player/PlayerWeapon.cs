@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using Nexush.Interfaces;
 using Nexush.Combat;
@@ -17,6 +18,13 @@ namespace Nexush.Player
         
         [Tooltip("마취 침이 실제로 발사되는 총구(Muzzle)의 위치입니다.")]
         [SerializeField] private Transform muzzleTransform;
+
+        [Header("Fake Projectile Settings (지연 히트스캔)")]
+        [Tooltip("다트 트레이서 (시각적 가짜 투사체) 프리팹 (옵션)")]
+        [SerializeField] private GameObject dartTracerPrefab;
+        
+        [Tooltip("가짜 투사체의 날아가는 속도")]
+        [SerializeField] private float projectileSpeed = 100f;
 
         [Header("Tag Settings")]
         [Tooltip("물리적으로 충돌한 객체 중, 실제로 피격 처리를 허용할 타겟의 태그입니다.")]
@@ -54,7 +62,6 @@ namespace Nexush.Player
             if (weaponData == null) return;
             if (Time.time < _lastFireTime + weaponData.fireRate) return;
 
-            Debug.Log($"[{name}] FireWeapon() 호출됨!"); // 호출 확인 로그
             ExecuteDoubleRaycast();
             
             _lastFireTime = Time.time;
@@ -68,61 +75,102 @@ namespace Nexush.Player
         /// </summary>
         private void ExecuteDoubleRaycast()
         {
-            // 1. 첫 번째 레이: 카메라 시점의 정중앙에서 정면으로 쏘아 실제 목표 지점(Target Point)을 찾습니다.
-            // Viewport (0.5, 0.5)는 해상도에 상관없이 항상 화면 정중앙을 가리킵니다.
+            // 1. 첫 번째 레이: 카메라 시점의 정중앙에서 정면으로 쏘아 실제 발사할 방향(Target Point)을 찾습니다.
             Ray cameraRay = _mainCam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
             Vector3 targetPoint;
 
-            // [복구] WeaponDataSO의 targetLayer를 사용하여 물리적 충돌 대상을 필터링합니다.
             if (Physics.Raycast(cameraRay, out RaycastHit camHit, weaponData.range, weaponData.targetLayer))
             {
                 targetPoint = camHit.point;
             }
             else
             {
-                // 타격된 물체가 없다면 사거리 내 최대 지점을 목표로 설정합니다.
+                // 타격된 물체가 없다면 사거리 내 최대 지점을 목표 방향으로 설정합니다.
                 targetPoint = cameraRay.GetPoint(weaponData.range);
             }
 
-            // 2. 두 번째 레이: 실제 총구 위치에서 방금 찾은 targetPoint를 향해 발사하여 실제 피격 판정을 수행합니다.
-            // 이를 통해 카메라와 총구 사이의 시차(Parallax) 문제를 해결합니다.
+            // 2. 두 번째 단계: 실제 총구 위치에서 목표 지점을 향한 '발사 방향'을 계산합니다.
             Vector3 fireDirection = (targetPoint - muzzleTransform.position).normalized;
-            float distanceToTarget = Vector3.Distance(muzzleTransform.position, targetPoint);
 
-            // 총구에서 목표 지점 사이의 장애물을 체크합니다.
-            // Physics.Raycast의 거리를 distanceToTarget으로 제한하여 목표 지점 너머의 물체를 체크하지 않도록 합니다.
-            if (Physics.Raycast(muzzleTransform.position, fireDirection, out RaycastHit muzzleHit, distanceToTarget, weaponData.targetLayer))
+            // 디버그용: 씬 뷰 발사 방향 궤적 (에디터 전용)
+            Debug.DrawRay(muzzleTransform.position, fireDirection * weaponData.range, Color.cyan, 1.0f);
+
+            // 3. 계산된 방향으로 매 프레임 충돌을 검사하며 날아가는 '실제 투사체 코루틴'을 시작합니다.
+            StartCoroutine(TrueProjectileRoutine(muzzleTransform.position, fireDirection, weaponData.range));
+        }
+
+        /// <summary>
+        /// 실제 투사체 방식으로 매 프레임 위치를 이동하며 충돌을 검사하는 코루틴입니다.
+        /// 중간에 궤적에 들어온 적도 정상적으로 피격 판정을 받습니다.
+        /// </summary>
+        private IEnumerator TrueProjectileRoutine(Vector3 startPos, Vector3 direction, float maxDistance)
+        {
+            float distanceTraveled = 0f;
+            Vector3 currentPos = startPos;
+            
+            // 시각적 연출을 위한 트레이서 프리팹 생성 (할당된 경우)
+            GameObject tracer = null;
+            if (dartTracerPrefab != null)
             {
-                // 장애물이나 타겟에 맞았다면 targetPoint를 실제 충돌 지점으로 업데이트합니다.
-                // 이렇게 하면 시각적인 라인(DrawLine)이 장애물에서 멈추게 됩니다.
-                targetPoint = muzzleHit.point;
-
-                // 설정된 태그와 일치하는지 확인하여 유효한 타겟인지 검증합니다.
-                if (muzzleHit.collider.CompareTag(targetTag))
-                {
-                    // [Rule C] 인터페이스 활용: TryGetComponent를 통해 대상과의 결합도를 제거합니다.
-                    if (muzzleHit.collider.TryGetComponent<IHittable>(out var hittable))
-                    {
-                        Debug.Log($"[{name}] 명중! 대상: {muzzleHit.collider.name}"); // 명중 확인 로그
-                        HitInfo hitInfo = new HitInfo
-                        {
-                            amount = weaponData.tranquilizerAmount,
-                            hitPoint = muzzleHit.point,
-                            normal = muzzleHit.normal
-                        };
-
-                        // 인터페이스 메서드 호출
-                        hittable.OnHit(hitInfo);
-                        
-                        // [Rule A] 명중 이벤트 알림
-                        OnHitTarget?.Invoke(hitInfo);
-                    }
-                }
+                tracer = Instantiate(dartTracerPrefab, startPos, Quaternion.LookRotation(direction));
             }
 
-            // 디버그용: 씬 뷰에서 실제 발사 궤적을 확인하기 위한 라인 드로잉
-            // 이제 targetPoint가 충돌 지점으로 업데이트되었으므로 장애물을 뚫지 않습니다.
-            Debug.DrawLine(muzzleTransform.position, targetPoint, Color.cyan, 1.0f);
+            // 최대 사거리(maxDistance)에 도달할 때까지 매 프레임 검사하며 전진
+            while (distanceTraveled < maxDistance)
+            {
+                // 이번 프레임에 이동할 거리 (속도 * 시간)
+                float moveStep = projectileSpeed * Time.deltaTime;
+
+                // [핵심] 이동하기 전에, 내 현재 위치에서 이동할 위치 사이에 충돌체가 있는지 레이캐스트로 검사!
+                if (Physics.Raycast(currentPos, direction, out RaycastHit hit, moveStep, weaponData.targetLayer))
+                {
+                    // 무언가에 부딪혔다면! (벽이든, 적이든)
+                    if (hit.collider.CompareTag(targetTag))
+                    {
+                        if (hit.collider.TryGetComponent<IHittable>(out var hittable))
+                        {
+                            HitInfo hitInfo = new HitInfo
+                            {
+                                amount = weaponData.tranquilizerAmount,
+                                hitPoint = hit.point,
+                                normal = hit.normal
+                            };
+
+                            // 인터페이스 메서드 호출 (실제 마취 수치 적용)
+                            hittable.OnHit(hitInfo);
+                            
+                            // 명중 이벤트 알림 (UI나 사운드 등에 전달)
+                            OnHitTarget?.Invoke(hitInfo);
+                        }
+                    }
+
+                    // 대상의 종류와 상관없이(벽이든 적이든) 무언가에 부딪혔으므로 트레이서 위치를 충돌 지점으로 맞추고 파괴
+                    if (tracer != null) 
+                    {
+                        tracer.transform.position = hit.point;
+                        Destroy(tracer); 
+                    }
+                    
+                    yield break; // 부딪혔으므로 코루틴 즉시 종료 (투사체 소멸)
+                }
+
+                // 충돌이 없으면 실제 위치 이동
+                currentPos += direction * moveStep;
+                distanceTraveled += moveStep;
+                
+                if (tracer != null) 
+                {
+                    tracer.transform.position = currentPos;
+                }
+
+                yield return null; // 다음 프레임까지 대기
+            }
+
+            // 루프가 끝남 == 사거리를 다 날아가도 부딪히지 않은 경우 파괴
+            if (tracer != null) 
+            {
+                Destroy(tracer);
+            }
         }
     }
 }

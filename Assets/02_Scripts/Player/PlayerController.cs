@@ -13,33 +13,33 @@ namespace Nexush.Player
         [Header("이동 설정")]
         [Tooltip("기본 이동 속도입니다.")]
         [SerializeField] private float moveSpeed = 5.0f;
-        
+
         [Tooltip("전력 질주 시 속도입니다.")]
         [SerializeField] private float sprintSpeed = 8.0f;
-        
+
         [Tooltip("속도 변화의 가속도 계수입니다.")]
         [SerializeField] private float speedChangeRate = 10.0f;
 
         [Header("점프 및 중력")]
         [Tooltip("점프 높이입니다.")]
         [SerializeField] private float jumpHeight = 1.2f;
-        
+
         [Tooltip("적용될 중력 값입니다.")]
         [SerializeField] private float gravity = -15.0f;
-        
+
         [Tooltip("점프 후 재점프가 가능해지기까지의 대기 시간입니다.")]
         [SerializeField] private float jumpTimeout = 0.50f;
-        
+
         [Tooltip("낙하 상태로 판정되기까지의 대기 시간입니다.")]
         [SerializeField] private float fallTimeout = 0.15f;
 
         [Header("지면 체크 설정")]
         [Tooltip("지면으로 인식할 레이어들입니다.")]
         [SerializeField] private LayerMask groundLayers;
-        
+
         [Tooltip("지면 체크 구체의 오프셋입니다.")]
         [SerializeField] private float groundedOffset = -0.14f;
-        
+
         [Tooltip("지면 체크 구체의 반지름입니다.")]
         [SerializeField] private float groundedRadius = 0.28f;
 
@@ -49,6 +49,9 @@ namespace Nexush.Player
         private float _jumpTimeoutDelta;
         private float _fallTimeoutDelta;
         private bool _isGrounded = true;
+
+        // 지면 체크용 콜라이더 버퍼 (가비지 컬렉션 할당 방지)
+        private Collider[] _groundOverlapResults = new Collider[5];
 
         // 컴포넌트 캐싱
         private CharacterController _controller;
@@ -68,10 +71,9 @@ namespace Nexush.Player
             _controller = GetComponent<CharacterController>();
             _input = GetComponent<PlayerInputHandler>();
             _animator = GetComponent<Animator>();
-            _weapon = GetComponentInChildren<PlayerWeapon>(); // 자식 오브젝트(WeaponRoot 등)에서 사격 컴포넌트 찾기
-            
+            _weapon = GetComponent<PlayerWeapon>(); // 사격 컴포넌트 캐싱
+
             if (_weapon == null) Debug.LogError("[PlayerController] PlayerWeapon 컴포넌트를 찾을 수 없습니다! 오브젝트에 추가되어 있나요?");
-            else Debug.Log("[PlayerController] PlayerWeapon 컴포넌트 연결 성공.");
 
             _jumpTimeoutDelta = jumpTimeout;
             _fallTimeoutDelta = fallTimeout;
@@ -88,7 +90,7 @@ namespace Nexush.Player
             // 지면 체크 및 점프 입력은 프레임별로 업데이트
             CheckGrounded();
             HandleJumpInput();
-            
+
             // 💡 CharacterController는 시각적 매끄러움(Jitter 방지)을 위해 Update에서 이동을 처리합니다.
             // 물리 로직은 규칙을 준수하되, 실행 타이밍은 렌더링 프레임에 동기화합니다.
             float deltaTime = Time.deltaTime;
@@ -110,9 +112,27 @@ namespace Nexush.Player
         /// </summary>
         private void CheckGrounded()
         {
-            Vector3 pos = transform.position;
-            Vector3 checkPos = new Vector3(pos.x, pos.y - groundedOffset, pos.z);
-            _isGrounded = Physics.CheckSphere(checkPos, groundedRadius, groundLayers, QueryTriggerInteraction.Ignore);
+            // CharacterController의 실제 바닥 Y 좌표 계산 (피벗 위치 무관)
+            float bottomY = transform.position.y;
+            if (_controller != null)
+            {
+                bottomY = transform.position.y + _controller.center.y - (_controller.height / 2f);
+            }
+            Vector3 checkPos = new Vector3(transform.position.x, bottomY - groundedOffset, transform.position.z);
+            
+            // OverlapSphereNonAlloc를 사용해 충돌한 콜라이더들을 수집
+            int hitCount = Physics.OverlapSphereNonAlloc(checkPos, groundedRadius, _groundOverlapResults, groundLayers, QueryTriggerInteraction.Ignore);
+            
+            _isGrounded = false;
+            for (int i = 0; i < hitCount; i++)
+            {
+                // 플레이어 자기 자신(gameObject)을 제외한 다른 물체와 닿았을 때만 지면으로 인정
+                if (_groundOverlapResults[i].gameObject != gameObject)
+                {
+                    _isGrounded = true;
+                    break;
+                }
+            }
 
             if (_animator)
             {
@@ -125,10 +145,16 @@ namespace Nexush.Player
         /// </summary>
         private void HandleJumpInput()
         {
+            // 점프 쿨타임은 땅에 닿은 시점이 아니라 항상 감소하도록 변경
+            if (_jumpTimeoutDelta > 0f)
+            {
+                _jumpTimeoutDelta -= Time.deltaTime;
+            }
+
             if (_isGrounded)
             {
                 _fallTimeoutDelta = fallTimeout;
-                
+
                 if (_animator)
                 {
                     _animator.SetBool(AnimIDJump, false);
@@ -149,17 +175,13 @@ namespace Nexush.Player
                     {
                         _animator.SetBool(AnimIDJump, true);
                     }
-                }
-
-                if (_jumpTimeoutDelta > 0f)
-                {
-                    _jumpTimeoutDelta -= Time.deltaTime;
+                    
+                    // 점프를 실행한 순간에 쿨타임 시작!
+                    _jumpTimeoutDelta = jumpTimeout;
                 }
             }
             else
             {
-                _jumpTimeoutDelta = jumpTimeout;
-
                 if (_fallTimeoutDelta > 0f)
                 {
                     _fallTimeoutDelta -= Time.deltaTime;
@@ -177,8 +199,8 @@ namespace Nexush.Player
         /// <param name="deltaTime">프레임 증분 시간</param>
         private void ApplyGravity(float deltaTime)
         {
-            // 터미널 벨로시티 제한
-            if (_verticalVelocity < 53f)
+            // 터미널 벨로시티 제한 (최대 낙하 속도)
+            if (_verticalVelocity > -53f)
             {
                 _verticalVelocity += gravity * deltaTime;
             }
@@ -218,8 +240,15 @@ namespace Nexush.Player
         private void OnDrawGizmosSelected()
         {
             Gizmos.color = _isGrounded ? new Color(0f, 1f, 0f, 0.35f) : new Color(1f, 0f, 0f, 0.35f);
-            Vector3 pos = transform.position;
-            Gizmos.DrawSphere(new Vector3(pos.x, pos.y - groundedOffset, pos.z), groundedRadius);
+            
+            float bottomY = transform.position.y;
+            var controller = GetComponent<CharacterController>();
+            if (controller != null)
+            {
+                bottomY = transform.position.y + controller.center.y - (controller.height / 2f);
+            }
+            
+            Gizmos.DrawSphere(new Vector3(transform.position.x, bottomY - groundedOffset, transform.position.z), groundedRadius);
         }
     }
 }
