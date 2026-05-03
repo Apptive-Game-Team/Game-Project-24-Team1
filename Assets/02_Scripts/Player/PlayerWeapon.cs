@@ -15,16 +15,16 @@ namespace Nexush.Player
         [Header("Weapon Settings")]
         [Tooltip("[Rule B] 무기 수치 및 레이어 설정 데이터가 담긴 Scriptable Object입니다.")]
         [SerializeField] private WeaponDataSO weaponData;
-        
+
         [Tooltip("마취 침이 실제로 발사되는 총구(Muzzle)의 위치입니다.")]
         [SerializeField] private Transform muzzleTransform;
 
         [Header("Fake Projectile Settings (지연 히트스캔)")]
         [Tooltip("다트 트레이서 (시각적 가짜 투사체) 프리팹 (옵션)")]
         [SerializeField] private GameObject dartTracerPrefab;
-        
+
         [Tooltip("가짜 투사체의 날아가는 속도")]
-        [SerializeField] private float projectileSpeed = 100f;
+        [SerializeField] private float projectileSpeed = 60f;
 
         [Header("Tag Settings")]
         [Tooltip("물리적으로 충돌한 객체 중, 실제로 피격 처리를 허용할 타겟의 태그입니다.")]
@@ -33,7 +33,7 @@ namespace Nexush.Player
         /// <summary>
         /// [Rule A] 관찰자 패턴: 사격이 발생했을 때 사운드나 VFX 시스템에 알리기 위한 이벤트입니다.
         /// </summary>
-        public event Action OnShoot; 
+        public event Action OnShoot;
 
         /// <summary>
         /// [Rule A] 관찰자 패턴: 타겟에 정확히 명중했을 때 명중 정보를 전달하기 위한 이벤트입니다.
@@ -63,9 +63,9 @@ namespace Nexush.Player
             if (Time.time < _lastFireTime + weaponData.fireRate) return;
 
             ExecuteDoubleRaycast();
-            
+
             _lastFireTime = Time.time;
-            
+
             // [Rule A] 사격 발생 이벤트를 발생시켜 사운드/이펙트 등이 동작하게 합니다.
             OnShoot?.Invoke();
         }
@@ -92,6 +92,13 @@ namespace Nexush.Player
             // 2. 두 번째 단계: 실제 총구 위치에서 목표 지점을 향한 '발사 방향'을 계산합니다.
             Vector3 fireDirection = (targetPoint - muzzleTransform.position).normalized;
 
+            // [버그 수정] 3인칭 시점에서 벽에 완전히 밀착했을 때 카메라 레이캐스트의 충돌 지점(targetPoint)이
+            // 총구 위치(muzzleTransform)보다 뒤에 있거나 너무 가까워져 발사 방향이 기형적으로 꺾이는 현상을 방지합니다.
+            if (Vector3.Dot(fireDirection, cameraRay.direction) <= 0.1f || (targetPoint - muzzleTransform.position).sqrMagnitude < 2.0f)
+            {
+                fireDirection = cameraRay.direction;
+            }
+
             // 디버그용: 씬 뷰 발사 방향 궤적 (에디터 전용)
             Debug.DrawRay(muzzleTransform.position, fireDirection * weaponData.range, Color.cyan, 1.0f);
 
@@ -107,7 +114,7 @@ namespace Nexush.Player
         {
             float distanceTraveled = 0f;
             Vector3 currentPos = startPos;
-            
+
             // 시각적 연출을 위한 트레이서 프리팹 생성 (할당된 경우)
             GameObject tracer = null;
             if (dartTracerPrefab != null)
@@ -138,27 +145,27 @@ namespace Nexush.Player
 
                             // 인터페이스 메서드 호출 (실제 마취 수치 적용)
                             hittable.OnHit(hitInfo);
-                            
+
                             // 명중 이벤트 알림 (UI나 사운드 등에 전달)
                             OnHitTarget?.Invoke(hitInfo);
                         }
                     }
 
                     // 대상의 종류와 상관없이(벽이든 적이든) 무언가에 부딪혔으므로 트레이서 위치를 충돌 지점으로 맞추고 파괴
-                    if (tracer != null) 
+                    if (tracer != null)
                     {
                         tracer.transform.position = hit.point;
-                        Destroy(tracer); 
+                        Destroy(tracer);
                     }
-                    
+
                     yield break; // 부딪혔으므로 코루틴 즉시 종료 (투사체 소멸)
                 }
 
                 // 충돌이 없으면 실제 위치 이동
                 currentPos += direction * moveStep;
                 distanceTraveled += moveStep;
-                
-                if (tracer != null) 
+
+                if (tracer != null)
                 {
                     tracer.transform.position = currentPos;
                 }
@@ -167,7 +174,7 @@ namespace Nexush.Player
             }
 
             // 루프가 끝남 == 사거리를 다 날아가도 부딪히지 않은 경우 파괴
-            if (tracer != null) 
+            if (tracer != null)
             {
                 Destroy(tracer);
             }

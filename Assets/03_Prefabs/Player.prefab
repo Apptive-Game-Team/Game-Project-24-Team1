@@ -276,7 +276,6 @@ GameObject:
   - component: {fileID: 1135230876647321719}
   - component: {fileID: 1966947829624485538}
   - component: {fileID: 3641825247542415146}
-  - component: {fileID: 1036602216559688817}
   - component: {fileID: 3125539531361113661}
   - component: {fileID: 4756171172210569144}
   - component: {fileID: 88642487201728139}
@@ -285,7 +284,7 @@ GameObject:
   - component: {fileID: 631956462637772088}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -367,29 +366,6 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &1036602216559688817
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3792993914397075666}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!143 &3125539531361113661
 CharacterController:
   m_ObjectHideFlags: 0
