@@ -149,12 +149,6 @@ namespace Nexush.Player
                             // 명중 이벤트 알림 (UI나 사운드 등에 전달)
                             OnHitTarget?.Invoke(hitInfo);
                         }
-
-                        // 충돌한 객체가 적(Enemy)이라면 상태를 기절(Stunned)로 변경
-                        if (hit.collider.TryGetComponent<GameProject24.Enemy.EnemyStatus>(out var enemyStatus))
-                        {
-                            enemyStatus.ChangeState(GameProject24.Enemy.EnemyStatus.State.Stunned);
-                        }
                     }
 
                     // 대상의 종류와 상관없이(벽이든 적이든) 무언가에 부딪혔으므로 트레이서 위치를 충돌 지점으로 맞추고 파괴

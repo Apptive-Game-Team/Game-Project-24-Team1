@@ -1,11 +1,12 @@
 using UnityEngine;
+using Nexush.Interfaces;
 
 namespace GameProject24.Enemy
 {
     /// <summary>
     /// 적의 상태와 체력, 이동 속도 등 기본 스탯을 관리하는 클래스입니다.
     /// </summary>
-    public class EnemyStatus : MonoBehaviour
+    public class EnemyStatus : MonoBehaviour, IHittable
     {
         /// <summary>
         /// 적의 상태들을 열거형(enum)으로 정의합니다. (bool 여러 개를 대체)
@@ -217,6 +218,26 @@ namespace GameProject24.Enemy
             {
                 ChangeState(State.Damaged);
                 // TODO: 피격 애니메이션 재생
+            }
+        }
+
+        /// <summary>
+        /// [Rule C] IHittable 인터페이스 구현: 마취총 등에 피격 시 호출됩니다.
+        /// </summary>
+        /// <param name="hitInfo">피격 정보 (마취 수치 등)</param>
+        public void OnHit(HitInfo hitInfo)
+        {
+            if (_currentState == State.Dead)
+            {
+                return;
+            }
+
+            // 마취 수치가 있다면 기절 상태로 전환
+            if (hitInfo.amount > 0)
+            {
+                ChangeState(State.Stunned);
+                Debug.Log($"[EnemyStatus] 마취총 피격! 기절 상태로 변경됩니다. (마취 수치: {hitInfo.amount})");
+                // TODO: 기절 애니메이션 재생 및 기절 지속 시간 처리 로직
             }
         }
     }
