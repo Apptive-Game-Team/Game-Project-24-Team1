@@ -76,9 +76,9 @@ namespace GameProject24.Enemy
             // 5. 이동 재개
             _agent.isStopped = false;
 
-            // 6. 이전 상태로 복귀
+            // 6. 초기 상태로 복귀
             _isRunning = false;
-            _enemyStatus.ChangeState(_enemyStatus.PreviousState);
+            _enemyStatus.ChangeState(_enemyStatus.InitialState);
         }
 
         private void OnDisable()
