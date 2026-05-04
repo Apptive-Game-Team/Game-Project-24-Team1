@@ -56,34 +56,36 @@ namespace GameProject24.Enemy
             float detectionDist = _enemyStatus.SightDistance;
             float fov = _enemyStatus.FieldOfView;
 
-            // 1. 거리 확인
-            if (distToPlayer <= detectionDist)
+            // 근접 탐지 박스 검사
+            Vector3 boxSize = _enemyStatus.CloseDetectionBoxSize;
+            Vector3 localPos = transform.InverseTransformPoint(_playerTransform.position);
+            bool inCloseBox = (Mathf.Abs(localPos.x) <= boxSize.x * 0.5f) && 
+                              (localPos.y >= 0f && localPos.y <= boxSize.y) && 
+                              (localPos.z >= 0f && localPos.z <= boxSize.z);
+
+            // 1. 거리 및 시야각 확인, 또는 근접 박스 내에 있는지
+            if ((distToPlayer <= detectionDist && Vector3.Angle(transform.forward, dirToPlayer) <= fov * 0.5f) || inCloseBox)
             {
-                float angleToPlayer = Vector3.Angle(transform.forward, dirToPlayer);
+                // 바닥/장애물 회피를 위해 Y축을 1 높여서 Ray 발사
+                Vector3 origin = transform.position + Vector3.up * 1.0f;
+                Vector3 targetPos = _playerTransform.position + Vector3.up * 1.0f;
+                Vector3 rayDir = (targetPos - origin).normalized;
 
-                // 2. 시야각 확인
-                if (angleToPlayer <= fov * 0.5f)
+                // 2. Raycast (시야 방해물 확인, CompareTag 사용)
+                float rayDist = Mathf.Max(detectionDist, distToPlayer);
+                if (Physics.Raycast(origin, rayDir, out RaycastHit hit, rayDist, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
                 {
-                    // 바닥/장애물 회피를 위해 Y축을 1 높여서 Ray 발사
-                    Vector3 origin = transform.position + Vector3.up * 1.0f;
-                    Vector3 targetPos = _playerTransform.position + Vector3.up * 1.0f;
-                    Vector3 rayDir = (targetPos - origin).normalized;
-
-                    // 3. Raycast (시야 방해물 확인, CompareTag 사용)
-                    if (Physics.Raycast(origin, rayDir, out RaycastHit hit, detectionDist, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+                    if (hit.transform.CompareTag("Player"))
                     {
-                        if (hit.transform.CompareTag("Player"))
-                        {
-                            canSee = true;
-                            
-                            // 플레이어의 현재 위치로 LPP 지속 갱신
-                            _enemyStatus.LatestPlayerPosition = _playerTransform.position;
+                        canSee = true;
+                        
+                        // 플레이어의 현재 위치로 LPP 지속 갱신
+                        _enemyStatus.LatestPlayerPosition = _playerTransform.position;
 
-                            // Chasing 상태가 아니라면 Chasing으로 전환
-                            if (_enemyStatus.CurrentState != EnemyStatus.State.Chasing)
-                            {
-                                _enemyStatus.ChangeState(EnemyStatus.State.Chasing);
-                            }
+                        // Chasing 상태가 아니라면 Chasing으로 전환
+                        if (_enemyStatus.CurrentState != EnemyStatus.State.Chasing)
+                        {
+                            _enemyStatus.ChangeState(EnemyStatus.State.Chasing);
                         }
                     }
                 }
@@ -127,11 +129,25 @@ namespace GameProject24.Enemy
             Gizmos.DrawLine(origin + rightBoundary, origin + bottomBoundary);
             Gizmos.DrawLine(origin + bottomBoundary, origin + leftBoundary);
 
+            // 근접 탐지 박스 시각화
+            Vector3 boxSize = status.CloseDetectionBoxSize;
+            Gizmos.color = Color.blue;
+            Matrix4x4 oldMatrix = Gizmos.matrix;
+            Gizmos.matrix = transform.localToWorldMatrix;
+            Gizmos.DrawWireCube(new Vector3(0f, boxSize.y * 0.5f, boxSize.z * 0.5f), boxSize);
+            Gizmos.matrix = oldMatrix;
+
             // 플레이어 탐지 시각화
             if (Application.isPlaying && _playerTransform != null)
             {
                 Vector3 dirToPlayer = _playerTransform.position - transform.position;
-                if (dirToPlayer.magnitude <= detectionDist && Vector3.Angle(transform.forward, dirToPlayer) <= fov * 0.5f)
+                
+                Vector3 localPos = transform.InverseTransformPoint(_playerTransform.position);
+                bool inCloseBox = (Mathf.Abs(localPos.x) <= boxSize.x * 0.5f) && 
+                                  (localPos.y >= 0f && localPos.y <= boxSize.y) && 
+                                  (localPos.z >= 0f && localPos.z <= boxSize.z);
+
+                if ((dirToPlayer.magnitude <= detectionDist && Vector3.Angle(transform.forward, dirToPlayer) <= fov * 0.5f) || inCloseBox)
                 {
                     Vector3 targetPos = _playerTransform.position + Vector3.up * 1.0f;
                     Gizmos.color = Color.yellow;
