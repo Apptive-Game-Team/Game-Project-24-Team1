@@ -83,7 +83,7 @@ namespace GameProject24.Enemy
                     float distToLpp = Vector3.Distance(transform.position, _enemyStatus.LatestPlayerPosition.Value);
 
                     // LPP에 도달했는지 확인 (거리상 가까워졌거나, 길찾기가 완전히 완료되었을 때)
-                    if (distToLpp <= _agent.stoppingDistance + 0.5f || (!_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance))
+                    if (distToLpp <= _agent.stoppingDistance + 0.5f || (_agent.hasPath && !_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance))
                     {
                         // LPP 초기화 및 수색 모드 진입
                         _enemyStatus.LatestPlayerPosition = null;

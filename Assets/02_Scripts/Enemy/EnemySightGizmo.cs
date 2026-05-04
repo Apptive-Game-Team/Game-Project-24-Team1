@@ -63,6 +63,13 @@ namespace GameProject24.Enemy
         {
             if (_enemyStatus == null || _coneMaterial == null) return;
 
+            // 사망하거나 기절한 상태면 탐지 범위 기즈모를 숨김
+            if (_enemyStatus.CurrentState == EnemyStatus.State.Dead || 
+                _enemyStatus.CurrentState == EnemyStatus.State.Stunned)
+            {
+                return;
+            }
+
             float fov       = _enemyStatus.FieldOfView;
             float sightDist = _enemyStatus.SightDistance;
             bool isSpotted  = _enemyStatus.IsPlayerSpotted;

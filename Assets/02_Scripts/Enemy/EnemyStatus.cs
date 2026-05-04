@@ -23,6 +23,9 @@ namespace GameProject24.Enemy
         }
 
         [Header("Current State")]
+        [Tooltip("시작 시 적의 초기 상태를 설정합니다.")]
+        [SerializeField] private State _initialState = State.Idle;
+
         [Tooltip("현재 적의 상태를 나타냅니다.")]
         [SerializeField] private State _currentState;
 
@@ -70,6 +73,9 @@ namespace GameProject24.Enemy
         /// <summary>
         /// 프로퍼티 (getters)
         /// </summary>
+        /// <summary> 게임 시작 시의 초기 상태를 반환합니다. </summary>
+        public State InitialState => _initialState;
+
         /// <summary> 현재 상태를 반환합니다. </summary>
         public State CurrentState => _currentState;
 
@@ -161,6 +167,9 @@ namespace GameProject24.Enemy
             if (_currentHp == 0) {
                 _currentHp = _maxHp;
             }
+
+            _currentState = _initialState;
+            _previousState = _initialState;
         }
 
         /// <summary>
@@ -264,11 +273,12 @@ namespace GameProject24.Enemy
 
                 if (iterator.name == "_patrolPointB")
                 {
-                    SerializedProperty currentStateProp = serializedObject.FindProperty("_currentState");
-                    if (currentStateProp != null)
+                    // 이제 초기 상태를 기준으로 검사 (실행 전 인스펙터 기준)
+                    SerializedProperty initialStateProp = serializedObject.FindProperty("_initialState");
+                    if (initialStateProp != null)
                     {
-                        // 현 상태가 Idle이면 _patrolPointB를 인스펙터에서 숨김
-                        if (currentStateProp.enumValueIndex == (int)EnemyStatus.State.Idle)
+                        // 초기 상태가 Idle이면 _patrolPointB를 인스펙터에서 숨김
+                        if (initialStateProp.enumValueIndex == (int)EnemyStatus.State.Idle)
                         {
                             continue;
                         }
