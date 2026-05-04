@@ -38,11 +38,23 @@ namespace Nexush.Player
         /// </summary>
         public bool IsAiming { get; private set; }
 
+        /// <summary>
+        /// 사격 입력 여부 (왼쪽 클릭 등)
+        /// </summary>
+        public bool IsFiring { get; private set; }
+
+        /// <summary>
+        /// 상호작용 입력 여부 (E 키 등)
+        /// </summary>
+        public bool IsInteracting { get; private set; }
+
         private InputAction _moveAction;
         private InputAction _lookAction;
         private InputAction _jumpAction;
         private InputAction _sprintAction;
         private InputAction _aimAction;
+        private InputAction _fireAction;
+        private InputAction _interactAction;
 
         private void Awake()
         {
@@ -58,6 +70,8 @@ namespace Nexush.Player
             _jumpAction = playerMap.FindAction("Jump");
             _sprintAction = playerMap.FindAction("Sprint");
             _aimAction = playerMap.FindAction("Aim");
+            _fireAction = playerMap.FindAction("Fire");
+            _interactAction = playerMap.FindAction("Interact");
         }
 
         private void OnEnable()
@@ -74,10 +88,12 @@ namespace Nexush.Player
         {
             MoveInput = _moveAction.ReadValue<Vector2>();
             LookInput = _lookAction.ReadValue<Vector2>();
-            
+
             IsJumping = _jumpAction.WasPressedThisFrame();
             IsSprinting = _sprintAction.IsPressed();
-            IsAiming = _aimAction.IsPressed();
+            IsAiming = _aimAction != null && _aimAction.IsPressed();
+            IsFiring = _fireAction != null && _fireAction.IsPressed();
+            IsInteracting = _interactAction != null && _interactAction.WasPressedThisFrame();
         }
     }
 }

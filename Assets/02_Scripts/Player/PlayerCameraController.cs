@@ -19,6 +19,10 @@ namespace Nexush.Player
         [Tooltip("1인칭(FPS) 카메라 컴포넌트입니다.")]
         [SerializeField] private CinemachineCamera fpsCamera;
 
+        [Header("캐릭터 모델 설정")]
+        [Tooltip("1인칭 시 숨길 캐릭터 모델의 최상위 오브젝트입니다.")]
+        [SerializeField] private GameObject playerMeshRoot;
+
         [Header("감도 및 부드러움 설정")]
         [Tooltip("마우스 감도입니다.")]
         [SerializeField] private float mouseSensitivity = 1.0f;
@@ -103,13 +107,24 @@ namespace Nexush.Player
                 _currentPitch = _targetPitch;
             }
 
-            // 1. 플레이어 몸체 회전 (좌우)
-            transform.rotation = Quaternion.Euler(0f, _currentYaw, 0f);
-            
-            // 2. 카메라 타겟 회전 (상하)
-            if (cameraTarget != null)
+            // 1. 회전 적용
+            if (_isFPS)
             {
-                cameraTarget.localRotation = Quaternion.Euler(_currentPitch, 0f, 0f);
+                // FPS 모드(또는 조준 중): 캐릭터 몸체(Yaw)와 카메라 타겟(Pitch)을 함께 제어
+                transform.rotation = Quaternion.Euler(0f, _currentYaw, 0f);
+                if (cameraTarget != null)
+                {
+                    cameraTarget.localRotation = Quaternion.Euler(_currentPitch, 0f, 0f);
+                }
+            }
+            else
+            {
+                // TPS 모드: 캐릭터 몸체는 가만히 두고, 카메라 타겟(피벗)만 캐릭터 주위를 돌게 함
+                if (cameraTarget != null)
+                {
+                    // 카메라 타겟에 상하(Pitch)와 좌우(Yaw) 회전을 모두 적용
+                    cameraTarget.rotation = Quaternion.Euler(_currentPitch, _currentYaw, 0f);
+                }
             }
         }
 
@@ -148,6 +163,12 @@ namespace Nexush.Player
             {
                 fpsCamera.Priority = 10;
                 tpsCamera.Priority = 20;
+            }
+
+            // 1인칭 모드일 때 캐릭터 메쉬 숨기기
+            if (playerMeshRoot != null)
+            {
+                playerMeshRoot.SetActive(!isFPSMode);
             }
         }
 
