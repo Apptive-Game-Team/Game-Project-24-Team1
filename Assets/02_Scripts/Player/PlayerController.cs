@@ -12,11 +12,13 @@ namespace Nexush.Player
         Move,
         Jump,
         Fall,
-        Climbing
+        Climbing,
+        ClimbOver
     }
 
     [RequireComponent(typeof(CharacterController))]
     [RequireComponent(typeof(PlayerInputHandler))]
+    [RequireComponent(typeof(PlayerClimbHandler))]
     public class PlayerController : MonoBehaviour
     {
         [Header("이동 설정")]
@@ -29,8 +31,6 @@ namespace Nexush.Player
         [Tooltip("속도 변화의 가속도 계수입니다.")]
         [SerializeField] private float speedChangeRate = 10.0f;
 
-        [Tooltip("사다리 등반 속도입니다.")]
-        [SerializeField] private float climbSpeed = 3.0f;
 
         [Header("점프 및 중력")]
         [Tooltip("점프 높이입니다.")]
@@ -55,16 +55,19 @@ namespace Nexush.Player
         private float _verticalVelocity;
         private float _fallTimeoutDelta;
         private bool _isGrounded = true;
-        private bool _isNearLadder = false;
         private PlayerState _currentState;
         private PlayerState _previousState;
         private Vector3 _hitNormal = Vector3.up; // 지면의 기울기(법선) 정보
+
+        public PlayerState CurrentState => _currentState;
+        public bool IsGrounded => _isGrounded;
 
         // 컴포넌트 캐싱
         private CharacterController _controller;
         private PlayerInputHandler _input;
         private Animator _animator;
         private PlayerWeapon _weapon; // 사격 컴포넌트 참조 추가
+        private PlayerClimbHandler _climbHandler;
 
         // 애니메이터 파라미터 해시 캐싱 (성능 최적화)
         private static readonly int AnimIDSpeed = Animator.StringToHash("Speed");
@@ -73,6 +76,7 @@ namespace Nexush.Player
         private static readonly int AnimIDFreeFall = Animator.StringToHash("FreeFall");
         private static readonly int AnimIDMotionSpeed = Animator.StringToHash("MotionSpeed");
         private static readonly int AnimIDClimbing = Animator.StringToHash("Climbing");
+        private static readonly int AnimIDClimbOver = Animator.StringToHash("ClimbOver");
 
         private void Start()
         {
@@ -100,6 +104,10 @@ namespace Nexush.Player
                 Debug.LogWarning("[PlayerController] groundLayers가 설정되지 않아 모든 레이어를 지면으로 인식합니다.");
             }
 
+            // 클라이밍 핸들러 캐싱
+            _climbHandler = GetComponent<PlayerClimbHandler>();
+            _climbHandler.Initialize(this, _input, _controller, _animator);
+
             // 초기 상태 설정
             ChangeState(PlayerState.Idle);
         }
@@ -107,10 +115,13 @@ namespace Nexush.Player
         private void Update()
         {
             float deltaTime = Time.deltaTime;
-            
-            // 모든 상태에서 공통적으로 필요한 처리
-            CheckGrounded();
-            HandleShootingInput();
+
+            // 현재 상태에 따른 로직 실행 전 공통 처리 (ClimbOver 상태 제외)
+            if (_currentState != PlayerState.ClimbOver)
+            {
+                CheckGrounded();
+                HandleShootingInput();
+            }
 
             // 현재 상태에 따른 로직 실행
             switch (_currentState)
@@ -124,16 +135,20 @@ namespace Nexush.Player
                     HandleAirborneState(deltaTime);
                     break;
                 case PlayerState.Climbing:
-                    HandleClimbingState(deltaTime);
+                    _climbHandler.HandleClimbingState(deltaTime, gravity, jumpHeight, moveSpeed, _isGrounded);
+                    break;
+                case PlayerState.ClimbOver:
+                    _climbHandler.HandleClimbOver(deltaTime);
                     break;
             }
         }
+
 
         /// <summary>
         /// 플레이어의 상태를 변경하고 필요한 초기화 로직을 수행합니다.
         /// </summary>
         /// <param name="newState">새로운 상태</param>
-        private void ChangeState(PlayerState newState)
+        public void ChangeState(PlayerState newState)
         {
             if (_currentState == newState) return;
 
@@ -149,6 +164,7 @@ namespace Nexush.Player
                         _animator.SetBool(AnimIDJump, false);
                         _animator.SetBool(AnimIDFreeFall, false);
                         _animator.SetBool(AnimIDClimbing, false);
+                        _animator.SetBool(AnimIDClimbOver, false);
                     }
                     break;
                 case PlayerState.Move:
@@ -157,6 +173,7 @@ namespace Nexush.Player
                         _animator.SetBool(AnimIDJump, false);
                         _animator.SetBool(AnimIDFreeFall, false);
                         _animator.SetBool(AnimIDClimbing, false);
+                        _animator.SetBool(AnimIDClimbOver, false);
                     }
                     break;
                 case PlayerState.Jump:
@@ -164,6 +181,7 @@ namespace Nexush.Player
                     {
                         _animator.SetBool(AnimIDJump, true);
                         _animator.SetBool(AnimIDClimbing, false);
+                        _animator.SetBool(AnimIDClimbOver, false); // [추가]
                     }
                     break;
                 case PlayerState.Fall:
@@ -171,6 +189,7 @@ namespace Nexush.Player
                     {
                         _animator.SetBool(AnimIDFreeFall, true);
                         _animator.SetBool(AnimIDClimbing, false);
+                        _animator.SetBool(AnimIDClimbOver, false); // [추가]
                     }
                     break;
                 case PlayerState.Climbing:
@@ -178,6 +197,17 @@ namespace Nexush.Player
                     if (_animator)
                     {
                         _animator.SetBool(AnimIDClimbing, true);
+                        _animator.SetBool(AnimIDJump, false);
+                        _animator.SetBool(AnimIDFreeFall, false);
+                        _animator.SetBool(AnimIDClimbOver, false);
+                    }
+                    break;
+                case PlayerState.ClimbOver:
+                    _verticalVelocity = 0f; // 넘기 동작 진입 시 속도 초기화
+                    if (_animator)
+                    {
+                        _animator.SetBool(AnimIDClimbOver, true);
+                        _animator.SetBool(AnimIDClimbing, false);
                         _animator.SetBool(AnimIDJump, false);
                         _animator.SetBool(AnimIDFreeFall, false);
                     }
@@ -196,8 +226,8 @@ namespace Nexush.Player
             ApplyMovement(deltaTime);
             HandleJumpInput();
 
-            // 사다리 타기 체크
-            if (_isNearLadder && Mathf.Abs(_input.MoveInput.y) > 0.1f)
+            // 사다리 타기 체크 (사용자 요청: 절대적으로 트리거 박스로만 진입)
+            if (_climbHandler.IsNearLadder && Mathf.Abs(_input.MoveInput.y) > 0.1f)
             {
                 ChangeState(PlayerState.Climbing);
                 return;
@@ -226,8 +256,9 @@ namespace Nexush.Player
             ApplyGravity(deltaTime);
             ApplyMovement(deltaTime); // 공중 제어 포함
 
-            // 사다리 타기 체크
-            if (_isNearLadder && Mathf.Abs(_input.MoveInput.y) > 0.1f)
+            // 사다리 타기 체크 (사용자 요청: 절대적으로 트리거 박스로만 진입)
+            // [보정] 공중에서는 점프 중이 아닐 때(낙하 중일 때)만 사다리를 잡을 수 있게 하여 '공중 부양' 현상 방지
+            if (_climbHandler.IsNearLadder && Mathf.Abs(_input.MoveInput.y) > 0.1f && _verticalVelocity <= 0f)
             {
                 ChangeState(PlayerState.Climbing);
                 return;
@@ -281,6 +312,8 @@ namespace Nexush.Player
                 _animator.SetBool(AnimIDGrounded, _isGrounded);
             }
         }
+
+        public void SetVerticalVelocity(float value) => _verticalVelocity = value;
 
         private void HandleJumpInput()
         {
@@ -371,7 +404,7 @@ namespace Nexush.Player
             Gizmos.color = _isGrounded ? Color.green : Color.red;
             Vector3 rayOrigin = transform.position + Vector3.up * 0.05f;
             float rayLength = (_controller != null) ? _controller.skinWidth + 0.1f : 0.2f;
-            
+
             Gizmos.DrawLine(rayOrigin, rayOrigin + Vector3.down * rayLength);
             Gizmos.DrawWireSphere(rayOrigin + Vector3.down * rayLength, 0.05f);
 
@@ -406,68 +439,17 @@ namespace Nexush.Player
             {
                 // 미끄러질 방향 (법선의 수평 성분)
                 Vector3 slideDir = new Vector3(_hitNormal.x, 0f, _hitNormal.z);
-                
+
                 // 미끄러지는 강도 (경사면은 강하게, 모서리는 적당히)
                 float slideSpeed = isSteep ? 5f : 2.5f;
-                
+
                 movement += slideDir * slideSpeed;
-                
-                // 미끄러지는 동안에는 아래로 살짝 힘을 주어 자연스러운 낙하 유도
+
+                // 미끄러지는 동안에는 아래로 살짝 힙을 주어 자연스러운 낙하 유도
                 movement.y -= 2f;
             }
         }
 
-        /// <summary>
-        /// 사다리 타기 상태의 로직을 처리합니다.
-        /// </summary>
-        private void HandleClimbingState(float deltaTime)
-        {
-            // 사다리를 타는 동안은 중력을 무시하고 W/S 입력을 Y축 이동으로 변환
-            float verticalMove = _input.MoveInput.y * climbSpeed;
-            
-            // 이동 방향 계산 (Y축만 이동)
-            Vector3 movement = Vector3.up * verticalMove;
-            
-            _controller.Move(movement * deltaTime);
-
-            // 애니메이션 파라미터 업데이트 (사다리 전용 애니메이션이 있다면 추가 필요)
-            if (_animator)
-            {
-                _animator.SetFloat(AnimIDSpeed, Mathf.Abs(verticalMove));
-            }
-
-            // 상태 탈출 체크: 점프 시 또는 사다리 영역을 벗어났을 때
-            if (_input.IsJumping || !_isNearLadder)
-            {
-                if (_input.IsJumping)
-                {
-                    _verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
-                    ChangeState(PlayerState.Jump);
-                }
-                else
-                {
-                    ChangeState(_isGrounded ? PlayerState.Idle : PlayerState.Fall);
-                }
-                return;
-            }
-
-            // 바닥에 닿았고 아래로 내려가려 할 때 상태 탈출
-            if (_isGrounded && verticalMove < -0.1f)
-            {
-                ChangeState(PlayerState.Idle);
-            }
-        }
-
-        public void SetNearLadder(bool value)
-        {
-            _isNearLadder = value;
-            
-            // 사다리에서 멀어졌는데 아직 Climbing 상태라면 상태 변경
-            if (!value && _currentState == PlayerState.Climbing)
-            {
-                ChangeState(_isGrounded ? PlayerState.Idle : PlayerState.Fall);
-            }
-        }
 
         #region Animation Events
 
