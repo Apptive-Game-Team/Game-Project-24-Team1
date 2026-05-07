@@ -15,18 +15,24 @@ namespace Nexush.Interactables
 
         private void OnTriggerEnter(Collider other)
         {
-            if (other.TryGetComponent<PlayerController>(out var player))
+            if (other.TryGetComponent<PlayerClimbHandler>(out var climbHandler))
             {
                 // 사다리의 정면 방향과 꼭대기 위치를 함께 전달
-                player.SetNearLadder(true, transform.forward, topPoint != null ? topPoint.position : Vector3.zero, topPoint != null);
+                bool isGrounded = false;
+                if (other.TryGetComponent<PlayerController>(out var player)) isGrounded = player.IsGrounded;
+                
+                climbHandler.SetNearLadder(true, transform.forward, topPoint != null ? topPoint.position : Vector3.zero, topPoint != null, isGrounded);
             }
         }
 
         private void OnTriggerExit(Collider other)
         {
-            if (other.TryGetComponent<PlayerController>(out var player))
+            if (other.TryGetComponent<PlayerClimbHandler>(out var climbHandler))
             {
-                player.SetNearLadder(false, Vector3.zero, Vector3.zero, false);
+                bool isGrounded = false;
+                if (other.TryGetComponent<PlayerController>(out var player)) isGrounded = player.IsGrounded;
+
+                climbHandler.SetNearLadder(false, Vector3.zero, Vector3.zero, false, isGrounded);
             }
         }
 

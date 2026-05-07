@@ -12,11 +12,13 @@ namespace Nexush.Player
         Move,
         Jump,
         Fall,
-        Climbing
+        Climbing,
+        ClimbOver
     }
 
     [RequireComponent(typeof(CharacterController))]
     [RequireComponent(typeof(PlayerInputHandler))]
+    [RequireComponent(typeof(PlayerClimbHandler))]
     public class PlayerController : MonoBehaviour
     {
         [Header("이동 설정")]
@@ -29,8 +31,6 @@ namespace Nexush.Player
         [Tooltip("속도 변화의 가속도 계수입니다.")]
         [SerializeField] private float speedChangeRate = 10.0f;
 
-        [Tooltip("사다리 등반 속도입니다.")]
-        [SerializeField] private float climbSpeed = 3.0f;
 
         [Header("점프 및 중력")]
         [Tooltip("점프 높이입니다.")]
@@ -55,25 +55,19 @@ namespace Nexush.Player
         private float _verticalVelocity;
         private float _fallTimeoutDelta;
         private bool _isGrounded = true;
-        private bool _isNearLadder = false;
         private PlayerState _currentState;
         private PlayerState _previousState;
         private Vector3 _hitNormal = Vector3.up; // 지면의 기울기(법선) 정보
-        private Vector3 _ladderForward = Vector3.forward; // 사다리가 바라보는 방향
 
-        // 사다리 꼭대기 climb-over 상태 변수
-        private bool _hasLadderTop = false;       // topPoint가 유효한지 여부
-        private Vector3 _ladderTopPoint;          // 꼭대기 도달 목표 월드 좌표
-        private bool _isClimbingOver = false;     // 꼭대기 올라가는 모션 중인지
-
-        [Tooltip("꼭대기 판정 거리 (플레이어 Y 기준, 미터 단위)입니다.")]
-        [SerializeField] private float climbTopThreshold = 0.5f;
+        public PlayerState CurrentState => _currentState;
+        public bool IsGrounded => _isGrounded;
 
         // 컴포넌트 캐싱
         private CharacterController _controller;
         private PlayerInputHandler _input;
         private Animator _animator;
         private PlayerWeapon _weapon; // 사격 컴포넌트 참조 추가
+        private PlayerClimbHandler _climbHandler;
 
         // 애니메이터 파라미터 해시 캐싱 (성능 최적화)
         private static readonly int AnimIDSpeed = Animator.StringToHash("Speed");
@@ -82,7 +76,7 @@ namespace Nexush.Player
         private static readonly int AnimIDFreeFall = Animator.StringToHash("FreeFall");
         private static readonly int AnimIDMotionSpeed = Animator.StringToHash("MotionSpeed");
         private static readonly int AnimIDClimbing = Animator.StringToHash("Climbing");
-        private static readonly int AnimIDClimbOver = Animator.StringToHash("ClimbOver"); // 꼭대기 climb-over 트리거
+        private static readonly int AnimIDClimbOver = Animator.StringToHash("ClimbOver");
 
         private void Start()
         {
@@ -110,6 +104,10 @@ namespace Nexush.Player
                 Debug.LogWarning("[PlayerController] groundLayers가 설정되지 않아 모든 레이어를 지면으로 인식합니다.");
             }
 
+            // 클라이밍 핸들러 캐싱
+            _climbHandler = GetComponent<PlayerClimbHandler>();
+            _climbHandler.Initialize(this, _input, _controller, _animator);
+
             // 초기 상태 설정
             ChangeState(PlayerState.Idle);
         }
@@ -118,17 +116,12 @@ namespace Nexush.Player
         {
             float deltaTime = Time.deltaTime;
 
-            // ── climb-over는 state machine보다 먼저, 독립적으로 실행 ──
-            // state가 Climbing 밖으로 바뀌더라도 중단되지 않습니다.
-            if (_isClimbingOver)
+            // 현재 상태에 따른 로직 실행 전 공통 처리 (ClimbOver 상태 제외)
+            if (_currentState != PlayerState.ClimbOver)
             {
-                HandleClimbOver(deltaTime);
-                return;
+                CheckGrounded();
+                HandleShootingInput();
             }
-
-            // 모든 상태에서 공통적으로 필요한 처리
-            CheckGrounded();
-            HandleShootingInput();
 
             // 현재 상태에 따른 로직 실행
             switch (_currentState)
@@ -142,66 +135,20 @@ namespace Nexush.Player
                     HandleAirborneState(deltaTime);
                     break;
                 case PlayerState.Climbing:
-                    HandleClimbingState(deltaTime);
+                    _climbHandler.HandleClimbingState(deltaTime, gravity, jumpHeight, moveSpeed, _isGrounded);
+                    break;
+                case PlayerState.ClimbOver:
+                    _climbHandler.HandleClimbOver(deltaTime);
                     break;
             }
         }
 
-        /// <summary>
-        /// 꼭대기 climb-over 모션을 독립적으로 처리합니다.
-        /// Update() 최상단에서 호출되므로 state에 무관하게 실행됩니다.
-        /// 종료 조건: Y 위치가 topPoint에 도달하면 자동 종료.
-        /// </summary>
-        private void HandleClimbOver(float deltaTime)
-        {
-            // 사다리를 바라보는 방향 유지
-            Vector3 lookDirCO = new Vector3(_ladderForward.x, 0f, _ladderForward.z);
-            if (lookDirCO.sqrMagnitude > 0.001f)
-            {
-                Quaternion targetRotCO = Quaternion.LookRotation(-lookDirCO);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotCO, deltaTime * 15f);
-            }
-
-            // Y만 topPoint 높이로 이동 (X, Z 고정)
-            float currentY = transform.position.y;
-            float targetY = _ladderTopPoint.y;
-            float newY = Mathf.MoveTowards(currentY, targetY, climbSpeed * 1.5f * deltaTime);
-            _controller.Move(new Vector3(0f, newY - currentY, 0f));
-
-            // 클라이밍 애니메이션 파라미터 강제 유지
-            if (_animator)
-            {
-                _animator.SetBool(AnimIDClimbing, true);
-                _animator.SetFloat(AnimIDSpeed, climbSpeed);
-                _animator.SetFloat(AnimIDMotionSpeed, 1f);
-            }
-
-            // Y가 topPoint에 도달하면 종료
-            if (Mathf.Abs(transform.position.y - targetY) < 0.01f)
-            {
-                FinishClimbOver();
-            }
-        }
-
-        /// <summary>
-        /// climb-over를 종료하고 정상 상태로 복귀합니다.
-        /// HandleClimbOver에서 Y 도달 시 자동 호출됩니다.
-        /// 또한 Animation Event에서 직접 호출해도 됩니다.
-        /// </summary>
-        public void FinishClimbOver()
-        {
-            if (!_isClimbingOver) return; // 중복 호출 방지
-
-            _input.EnableInput();
-            _isClimbingOver = false;
-            ChangeState(PlayerState.Idle);
-        }
 
         /// <summary>
         /// 플레이어의 상태를 변경하고 필요한 초기화 로직을 수행합니다.
         /// </summary>
         /// <param name="newState">새로운 상태</param>
-        private void ChangeState(PlayerState newState)
+        public void ChangeState(PlayerState newState)
         {
             if (_currentState == newState) return;
 
@@ -217,6 +164,7 @@ namespace Nexush.Player
                         _animator.SetBool(AnimIDJump, false);
                         _animator.SetBool(AnimIDFreeFall, false);
                         _animator.SetBool(AnimIDClimbing, false);
+                        _animator.SetBool(AnimIDClimbOver, false);
                     }
                     break;
                 case PlayerState.Move:
@@ -225,6 +173,7 @@ namespace Nexush.Player
                         _animator.SetBool(AnimIDJump, false);
                         _animator.SetBool(AnimIDFreeFall, false);
                         _animator.SetBool(AnimIDClimbing, false);
+                        _animator.SetBool(AnimIDClimbOver, false);
                     }
                     break;
                 case PlayerState.Jump:
@@ -232,6 +181,7 @@ namespace Nexush.Player
                     {
                         _animator.SetBool(AnimIDJump, true);
                         _animator.SetBool(AnimIDClimbing, false);
+                        _animator.SetBool(AnimIDClimbOver, false); // [추가]
                     }
                     break;
                 case PlayerState.Fall:
@@ -239,6 +189,7 @@ namespace Nexush.Player
                     {
                         _animator.SetBool(AnimIDFreeFall, true);
                         _animator.SetBool(AnimIDClimbing, false);
+                        _animator.SetBool(AnimIDClimbOver, false); // [추가]
                     }
                     break;
                 case PlayerState.Climbing:
@@ -246,6 +197,17 @@ namespace Nexush.Player
                     if (_animator)
                     {
                         _animator.SetBool(AnimIDClimbing, true);
+                        _animator.SetBool(AnimIDJump, false);
+                        _animator.SetBool(AnimIDFreeFall, false);
+                        _animator.SetBool(AnimIDClimbOver, false);
+                    }
+                    break;
+                case PlayerState.ClimbOver:
+                    _verticalVelocity = 0f; // 넘기 동작 진입 시 속도 초기화
+                    if (_animator)
+                    {
+                        _animator.SetBool(AnimIDClimbOver, true);
+                        _animator.SetBool(AnimIDClimbing, false);
                         _animator.SetBool(AnimIDJump, false);
                         _animator.SetBool(AnimIDFreeFall, false);
                     }
@@ -264,8 +226,8 @@ namespace Nexush.Player
             ApplyMovement(deltaTime);
             HandleJumpInput();
 
-            // 사다리 타기 체크
-            if (_isNearLadder && Mathf.Abs(_input.MoveInput.y) > 0.1f)
+            // 사다리 타기 체크 (사용자 요청: 절대적으로 트리거 박스로만 진입)
+            if (_climbHandler.IsNearLadder && Mathf.Abs(_input.MoveInput.y) > 0.1f)
             {
                 ChangeState(PlayerState.Climbing);
                 return;
@@ -294,8 +256,9 @@ namespace Nexush.Player
             ApplyGravity(deltaTime);
             ApplyMovement(deltaTime); // 공중 제어 포함
 
-            // 사다리 타기 체크
-            if (_isNearLadder && Mathf.Abs(_input.MoveInput.y) > 0.1f)
+            // 사다리 타기 체크 (사용자 요청: 절대적으로 트리거 박스로만 진입)
+            // [보정] 공중에서는 점프 중이 아닐 때(낙하 중일 때)만 사다리를 잡을 수 있게 하여 '공중 부양' 현상 방지
+            if (_climbHandler.IsNearLadder && Mathf.Abs(_input.MoveInput.y) > 0.1f && _verticalVelocity <= 0f)
             {
                 ChangeState(PlayerState.Climbing);
                 return;
@@ -349,6 +312,8 @@ namespace Nexush.Player
                 _animator.SetBool(AnimIDGrounded, _isGrounded);
             }
         }
+
+        public void SetVerticalVelocity(float value) => _verticalVelocity = value;
 
         private void HandleJumpInput()
         {
@@ -434,7 +399,6 @@ namespace Nexush.Player
             }
         }
 
-
         private void OnDrawGizmosSelected()
         {
             Gizmos.color = _isGrounded ? Color.green : Color.red;
@@ -444,7 +408,7 @@ namespace Nexush.Player
             Gizmos.DrawLine(rayOrigin, rayOrigin + Vector3.down * rayLength);
             Gizmos.DrawWireSphere(rayOrigin + Vector3.down * rayLength, 0.05f);
 
-            // 미끄러짘 체크용 레이 (중심)
+            // 미끄러짐 체크용 레이 (중심)
             Gizmos.color = Color.yellow;
             Gizmos.DrawRay(transform.position + Vector3.up * 0.1f, Vector3.down * 0.2f);
         }
@@ -486,102 +450,6 @@ namespace Nexush.Player
             }
         }
 
-
-        /// <summary>
-        /// 사다리 타기 상태의 로직을 처리합니다.
-        /// </summary>
-        private void HandleClimbingState(float deltaTime)
-        {
-            // ── 1. 사다리를 바라보도록 캐릭터 방향 고정 ──
-            Vector3 lookDir = new Vector3(_ladderForward.x, 0f, _ladderForward.z);
-            if (lookDir.sqrMagnitude > 0.001f)
-            {
-                Quaternion targetRot = Quaternion.LookRotation(-lookDir);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, deltaTime * 15f);
-            }
-
-            // ── 2. 스페이스바 → 뒤로 점프 후 클라이밍 취소 ──
-            if (_input.IsJumping)
-            {
-                Vector3 jumpBackDir = lookDir.normalized;
-                float horizontalForce = moveSpeed * 1.2f;
-                _verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
-                _controller.Move(jumpBackDir * horizontalForce * deltaTime + Vector3.up * _verticalVelocity * deltaTime);
-                ChangeState(PlayerState.Jump);
-                return;
-            }
-
-            // ── 3. 사다리 영역 이탈 시 자동 탈출 ──
-            if (!_isNearLadder)
-            {
-                ChangeState(_isGrounded ? PlayerState.Idle : PlayerState.Fall);
-                return;
-            }
-
-            // ── 4. 사다리 수직 이동 ──
-            float verticalMove = _input.MoveInput.y * climbSpeed;
-            _controller.Move(Vector3.up * verticalMove * deltaTime);
-
-            // ── 5. 꼭대기 도달 체크 (topPoint 유효 + 위로 이동 중) ──
-            if (_hasLadderTop && verticalMove > 0.1f)
-            {
-                float distToTop = _ladderTopPoint.y - transform.position.y;
-                if (distToTop <= climbTopThreshold)
-                {
-                    // climb-over 시작: 입력 차단
-                    _isClimbingOver = true;
-                    _input.DisableInput();
-                    if (_animator) _animator.SetTrigger(AnimIDClimbOver);
-                    // 이후 프레임부터 Update()에서 HandleClimbOver()가 수행
-                    return;
-                }
-            }
-
-            // ── 6. 애니메이션 파라미터 업데이트 ──
-            if (_animator)
-            {
-                _animator.SetFloat(AnimIDSpeed, Mathf.Abs(verticalMove));
-                float motionSpeed = 0f;
-                if (_input.MoveInput.y > 0.1f)       motionSpeed =  1f;
-                else if (_input.MoveInput.y < -0.1f) motionSpeed = -1f;
-                _animator.SetFloat(AnimIDMotionSpeed, motionSpeed);
-            }
-
-            // ── 7. 바닥에서 아래 입력 시 하강 완료 탈출 ──
-            if (_isGrounded && verticalMove < -0.1f)
-            {
-                ChangeState(PlayerState.Idle);
-            }
-        }
-
-        /// <param name="ladderForward">사다리 Transform.forward</param>
-        /// <param name="topPoint">사다리 꼭대기 월드 좌표 (hasTop=false 이면 무시)</param>
-        /// <param name="hasTop">topPoint 가 유효한지 여부</param>
-        public void SetNearLadder(bool value, Vector3 ladderForward, Vector3 topPoint, bool hasTop)
-        {
-            _isNearLadder = value;
-
-            if (value)
-            {
-                // 사다리의 정면 방향을 캐싱 (클라이밍 중 방향 고정에 사용)
-                _ladderForward = ladderForward;
-                _ladderTopPoint = topPoint;
-                _hasLadderTop = hasTop;
-            }
-            else
-            {
-                _hasLadderTop = false;
-                // climb-over 중이면 아무것도 건드리지 않음
-                // (꼭대기를 넘어가는 도중 trigger가 꺼져도 모션 유지)
-            }
-
-            // 사다리에서 멀어졌는데 아직 Climbing 상태라면 상태 변경
-            // (climb-over 진행 중에는 상태 변경 건너뜀)
-            if (!value && _currentState == PlayerState.Climbing && !_isClimbingOver)
-            {
-                ChangeState(_isGrounded ? PlayerState.Idle : PlayerState.Fall);
-            }
-        }
 
         #region Animation Events
 

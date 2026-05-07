@@ -99,11 +99,13 @@ namespace Nexush.Player
 
         private void Update()
         {
+            // 시점 회전은 차단 여부와 상관없이 항상 허용 (사용자 요청)
+            LookInput = _lookAction.ReadValue<Vector2>();
+
             if (_isBlocked)
             {
-                // 입력 차단 상태: 모든 값을 기본값으로 고정
+                // 입력 차단 상태: 이동 및 액션 관련 값만 기본값으로 고정
                 MoveInput = Vector2.zero;
-                LookInput = Vector2.zero;
                 IsJumping = false;
                 IsSprinting = false;
                 IsAiming = false;
@@ -113,8 +115,8 @@ namespace Nexush.Player
             }
 
             MoveInput = _moveAction.ReadValue<Vector2>();
-            LookInput = _lookAction.ReadValue<Vector2>();
-
+            // LookInput은 위에서 이미 처리함
+            
             IsJumping = _jumpAction.WasPressedThisFrame();
             IsSprinting = _sprintAction.IsPressed();
             IsAiming = _aimAction != null && _aimAction.IsPressed();
