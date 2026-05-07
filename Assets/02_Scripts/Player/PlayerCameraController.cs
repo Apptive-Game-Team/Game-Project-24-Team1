@@ -38,6 +38,19 @@ namespace Nexush.Player
         [Tooltip("하단 회전 제한 각도입니다.")]
         [SerializeField] private float bottomClamp = -30.0f;
 
+        [Header("카메라 충돌 설정")]
+        [Tooltip("TPS 카메라가 충돌할 레이어 마스크입니다. (벽, 지형 등을 포함하세요)")]
+        [SerializeField] private LayerMask cameraCollisionLayers = ~0;
+
+        [Tooltip("카메라가 Follow 타겟(플레이어)에 최소한으로 유지할 거리입니다.")]
+        [SerializeField] private float cameraMinDistanceFromTarget = 0.5f;
+
+        [Tooltip("카메라가 통과할 수 있는 투명 레이어입니다. (유리, 트리거 등)")]
+        [SerializeField] private LayerMask cameraTransparentLayers = 0;
+
+        [Tooltip("카메라 충돌 감지용 구체(SphereCast) 반지름입니다. \n얇은 벽이 뚫릴 경우 이 값을 줄여보세요. (기본: 0.1)")]
+        [SerializeField] private float cameraRadius = 0.1f;
+
         private PlayerInputHandler _input;
         
         // 회전 상태 변수
@@ -67,6 +80,9 @@ namespace Nexush.Player
             {
                 brain.DefaultBlend = new CinemachineBlendDefinition(CinemachineBlendDefinition.Styles.Cut, 0f);
             }
+
+            // TPS 카메라에 벽 관통 방지 Extension 설정
+            SetupCameraDeoccluder();
 
             SetFPSMode(false);
         }
@@ -126,6 +142,41 @@ namespace Nexush.Player
                     cameraTarget.rotation = Quaternion.Euler(_currentPitch, _currentYaw, 0f);
                 }
             }
+        }
+
+        /// <summary>
+        /// TPS 카메라에 CinemachineDeoccluder Extension을 추가하고 설정합니다.
+        /// 플레이어와 카메라 사이에 장애물이 있을 경우 카메라를 자동으로 앞으로 당깁니다.
+        /// </summary>
+        private void SetupCameraDeoccluder()
+        {
+            if (tpsCamera == null) return;
+
+            // 기존 Deoccluder가 없으면 추가
+            var deoccluder = tpsCamera.GetComponent<CinemachineDeoccluder>();
+            if (deoccluder == null)
+            {
+                deoccluder = tpsCamera.gameObject.AddComponent<CinemachineDeoccluder>();
+            }
+
+            // 충돌 레이어: 카메라가 뚫으면 안 될 레이어 (기본값: 모든 레이어)
+            deoccluder.CollideAgainst = cameraCollisionLayers;
+
+            // 투명 레이어: 카메라가 통과할 수 있는 레이어 (유리, 트리거 등)
+            deoccluder.TransparentLayers = cameraTransparentLayers;
+
+            // 플레이어와 카메라 사이의 최소 거리 유지
+            deoccluder.MinimumDistanceFromTarget = cameraMinDistanceFromTarget;
+
+            // 충돌 감지 구체 반지름 설정
+            // 이 값이 벽의 두께보다 크면 얇은 벽을 그냥 통과해버릴 수 있음
+            // 예: localScale.z = 0.1인 벽을 감지하려면 CameraRadius도 0.1 이하여야 함
+            var avoidance = deoccluder.AvoidObstacles;
+            avoidance.Enabled = true;
+            avoidance.CameraRadius = cameraRadius;
+            deoccluder.AvoidObstacles = avoidance;
+
+            Debug.Log($"[PlayerCameraController] TPS 카메라 충돌 방지(Deoccluder) 설정 완료. CameraRadius={cameraRadius}");
         }
 
         /// <summary>
