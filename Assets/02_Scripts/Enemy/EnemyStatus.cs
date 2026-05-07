@@ -1,11 +1,12 @@
 using UnityEngine;
+using Nexush.Interfaces;
 
 namespace GameProject24.Enemy
 {
     /// <summary>
     /// 적의 상태와 체력, 이동 속도 등 기본 스탯을 관리하는 클래스입니다.
     /// </summary>
-    public class EnemyStatus : MonoBehaviour
+    public class EnemyStatus : MonoBehaviour, IHittable
     {
         /// <summary>
         /// 적의 상태들을 열거형(enum)으로 정의합니다. (bool 여러 개를 대체)
@@ -22,6 +23,9 @@ namespace GameProject24.Enemy
         }
 
         [Header("Current State")]
+        [Tooltip("시작 시 적의 초기 상태를 설정합니다.")]
+        [SerializeField] private State _initialState = State.Idle;
+
         [Tooltip("현재 적의 상태를 나타냅니다.")]
         [SerializeField] private State _currentState;
 
@@ -54,6 +58,9 @@ namespace GameProject24.Enemy
         [Range(0f, 100f)]
         [SerializeField] private float _sightDistance = 10f;
 
+        [Tooltip("적의 근접 탐지 박스 크기입니다. (가로, 높이, 깊이)")]
+        [SerializeField] private Vector3 _closeDetectionBoxSize = new Vector3(1f, 2f, 1f);
+
         [Tooltip("플레이어를 추격하는 총 시간입니다.")]
         [Range(0f, 100f)]
         [SerializeField] private float _chasingTime = 10f;
@@ -69,6 +76,9 @@ namespace GameProject24.Enemy
         /// <summary>
         /// 프로퍼티 (getters)
         /// </summary>
+        /// <summary> 게임 시작 시의 초기 상태를 반환합니다. </summary>
+        public State InitialState => _initialState;
+
         /// <summary> 현재 상태를 반환합니다. </summary>
         public State CurrentState => _currentState;
 
@@ -139,6 +149,9 @@ namespace GameProject24.Enemy
         /// <summary> 적의 시야 거리를 반환합니다. </summary>
         public float SightDistance => _sightDistance;
 
+        /// <summary> 적의 근접 탐지 박스 크기를 반환합니다. </summary>
+        public Vector3 CloseDetectionBoxSize => _closeDetectionBoxSize;
+
         /// <summary> 플레이어 추격 유지 시간을 반환합니다. </summary>
         public float ChasingTime => _chasingTime;
 
@@ -160,6 +173,9 @@ namespace GameProject24.Enemy
             if (_currentHp == 0) {
                 _currentHp = _maxHp;
             }
+
+            _currentState = _initialState;
+            _previousState = _initialState;
         }
 
         /// <summary>
@@ -210,6 +226,26 @@ namespace GameProject24.Enemy
                 // TODO: 피격 애니메이션 재생
             }
         }
+
+        /// <summary>
+        /// [Rule C] IHittable 인터페이스 구현: 마취총 등에 피격 시 호출됩니다.
+        /// </summary>
+        /// <param name="hitInfo">피격 정보 (마취 수치 등)</param>
+        public void OnHit(HitInfo hitInfo)
+        {
+            if (_currentState == State.Dead)
+            {
+                return;
+            }
+
+            // 마취 수치가 있다면 기절 상태로 전환
+            if (hitInfo.amount > 0)
+            {
+                ChangeState(State.Stunned);
+                Debug.Log($"[EnemyStatus] 마취총 피격! 기절 상태로 변경됩니다. (마취 수치: {hitInfo.amount})");
+                // TODO: 기절 애니메이션 재생 및 기절 지속 시간 처리 로직
+            }
+        }
     }
 }
 
@@ -243,11 +279,12 @@ namespace GameProject24.Enemy
 
                 if (iterator.name == "_patrolPointB")
                 {
-                    SerializedProperty currentStateProp = serializedObject.FindProperty("_currentState");
-                    if (currentStateProp != null)
+                    // 이제 초기 상태를 기준으로 검사 (실행 전 인스펙터 기준)
+                    SerializedProperty initialStateProp = serializedObject.FindProperty("_initialState");
+                    if (initialStateProp != null)
                     {
-                        // 현 상태가 Idle이면 _patrolPointB를 인스펙터에서 숨김
-                        if (currentStateProp.enumValueIndex == (int)EnemyStatus.State.Idle)
+                        // 초기 상태가 Idle이면 _patrolPointB를 인스펙터에서 숨김
+                        if (initialStateProp.enumValueIndex == (int)EnemyStatus.State.Idle)
                         {
                             continue;
                         }
