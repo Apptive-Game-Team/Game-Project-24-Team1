@@ -58,6 +58,9 @@ namespace GameProject24.Enemy
         [Range(0f, 100f)]
         [SerializeField] private float _sightDistance = 10f;
 
+        [Tooltip("적의 근접 탐지 박스 크기입니다. (가로, 높이, 깊이)")]
+        [SerializeField] private Vector3 _closeDetectionBoxSize = new Vector3(1f, 2f, 1f);
+
         [Tooltip("플레이어를 추격하는 총 시간입니다.")]
         [Range(0f, 100f)]
         [SerializeField] private float _chasingTime = 10f;
@@ -145,6 +148,9 @@ namespace GameProject24.Enemy
 
         /// <summary> 적의 시야 거리를 반환합니다. </summary>
         public float SightDistance => _sightDistance;
+
+        /// <summary> 적의 근접 탐지 박스 크기를 반환합니다. </summary>
+        public Vector3 CloseDetectionBoxSize => _closeDetectionBoxSize;
 
         /// <summary> 플레이어 추격 유지 시간을 반환합니다. </summary>
         public float ChasingTime => _chasingTime;
