@@ -39,8 +39,9 @@ namespace GameProject24.Enemy
                 return;
             }
 
-            // 사망한 상태면 탐지 로직 생략 (성능 최적화)
-            if (_enemyStatus.CurrentState == EnemyStatus.State.Dead)
+            // 사망하거나 기절한 상태면 탐지 로직 생략
+            if (_enemyStatus.CurrentState == EnemyStatus.State.Dead || 
+                _enemyStatus.CurrentState == EnemyStatus.State.Stunned)
             {
                 _enemyStatus.IsPlayerSpotted = false;
                 return;
