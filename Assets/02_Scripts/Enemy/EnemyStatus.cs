@@ -46,7 +46,7 @@ namespace GameProject24.Enemy
         [Tooltip("플레이어를 추격할 때의 이동 속도입니다.")]
         [SerializeField] private float _chaseSpeed = 6f;
 
-        [Header("Target Info")]
+        [Header("Detection Info")]
         [Tooltip("현재 향하고 있는 목표 오브젝트를 저장합니다.")]
         [SerializeField] private Transform _target;
 
@@ -58,12 +58,9 @@ namespace GameProject24.Enemy
         [Range(0f, 100f)]
         [SerializeField] private float _sightDistance = 10f;
 
-        [Tooltip("적의 근접 탐지 박스 크기입니다. (가로, 높이, 깊이)")]
-        [SerializeField] private Vector3 _closeDetectionBoxSize = new Vector3(1f, 2f, 1f);
-
-        [Tooltip("플레이어를 추격하는 총 시간입니다.")]
-        [Range(0f, 100f)]
-        [SerializeField] private float _chasingTime = 10f;
+        [Tooltip("적의 공격 사거리를 계산하기 위한 반지름 값입니다.")]
+        [Range(0.1f, 10.0f)]
+        [SerializeField] private float _attackRadius = 4.0f;
 
         [Header("Patrol Info")]
         [Tooltip("순찰 경로의 양 끝점입니다.")]
@@ -97,6 +94,9 @@ namespace GameProject24.Enemy
         /// <summary> 추격 시 이동 속도를 반환합니다. </summary>
         public float ChaseSpeed => _chaseSpeed;
 
+        /// <summary> 공격 사거리를 반환합니다. </summary>
+        public float AttackRadius => _attackRadius;
+
         /// <summary> 타겟(현재 향하고 있는 목표)을 반환하거나 설정합니다. </summary>
         public Transform Target 
         { 
@@ -107,6 +107,7 @@ namespace GameProject24.Enemy
         [Header("Runtime Info (ReadOnly)")]
         [Tooltip("현재 프레임에서 플레이어가 시야에 포착되었는지 여부")]
         [SerializeField] private bool _isPlayerSpotted = false;
+        private int _spottedFrameCount = -10;
 
         [Tooltip("LPP가 유효한지(탐지된 적이 있는지) 여부")]
         [SerializeField] private bool _hasLatestPlayerPosition = false;
@@ -139,8 +140,25 @@ namespace GameProject24.Enemy
         /// <summary> 현재 프레임에서 플레이어가 시야에 포착되었는지 여부 </summary>
         public bool IsPlayerSpotted
         {
-            get => _isPlayerSpotted;
-            set => _isPlayerSpotted = value;
+            get 
+            {
+                // 프레임 기반으로 유효성을 검사하여 여러 Sight가 있어도 덮어씌워지지 않도록 처리
+                _isPlayerSpotted = (Time.frameCount - _spottedFrameCount) <= 1;
+                return _isPlayerSpotted;
+            }
+            set
+            {
+                if (value)
+                {
+                    _spottedFrameCount = Time.frameCount;
+                    _isPlayerSpotted = true;
+                }
+                else
+                {
+                    _spottedFrameCount = -10;
+                    _isPlayerSpotted = false;
+                }
+            }
         }
 
         /// <summary> 적의 시야 범위를 반환합니다. </summary>
@@ -148,12 +166,6 @@ namespace GameProject24.Enemy
 
         /// <summary> 적의 시야 거리를 반환합니다. </summary>
         public float SightDistance => _sightDistance;
-
-        /// <summary> 적의 근접 탐지 박스 크기를 반환합니다. </summary>
-        public Vector3 CloseDetectionBoxSize => _closeDetectionBoxSize;
-
-        /// <summary> 플레이어 추격 유지 시간을 반환합니다. </summary>
-        public float ChasingTime => _chasingTime;
 
         /// <summary> 순찰 경로의 시작점(A)을 반환합니다. </summary>
         public Transform PatrolPointA => _patrolPointA;
