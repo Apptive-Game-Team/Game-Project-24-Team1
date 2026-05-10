@@ -44,7 +44,7 @@ namespace Nexush.Player
         public bool IsFiring { get; private set; }
 
         /// <summary>
-        /// 상호작용 입력 여부 (E 키 등)
+        /// 상호작용 입력 여부 (F 키 등)
         /// </summary>
         public bool IsInteracting { get; private set; }
 
