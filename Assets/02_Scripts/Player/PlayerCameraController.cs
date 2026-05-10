@@ -175,8 +175,6 @@ namespace Nexush.Player
             avoidance.Enabled = true;
             avoidance.CameraRadius = cameraRadius;
             deoccluder.AvoidObstacles = avoidance;
-
-            Debug.Log($"[PlayerCameraController] TPS 카메라 충돌 방지(Deoccluder) 설정 완료. CameraRadius={cameraRadius}");
         }
 
         /// <summary>

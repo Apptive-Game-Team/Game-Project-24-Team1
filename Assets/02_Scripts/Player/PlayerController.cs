@@ -42,6 +42,9 @@ namespace Nexush.Player
         [Tooltip("낙하 상태로 판정되기까지의 대기 시간입니다.")]
         [SerializeField] private float fallTimeout = 0.15f;
 
+        [Tooltip("최대 점프 가능한 횟수입니다. (1: 기본 점프, 2: 이단 점프)")]
+        [SerializeField, Range(1, 3)] private int maxJumpCount = 2;
+
         [Header("지면 체크 설정")]
         [Tooltip("지면으로 인식할 레이어 설정입니다.")]
         [SerializeField] private LayerMask groundLayers;
@@ -58,6 +61,8 @@ namespace Nexush.Player
         private PlayerState _currentState;
         private PlayerState _previousState;
         private Vector3 _hitNormal = Vector3.up; // 지면의 기울기(법선) 정보
+        private bool _isSprintingInternal;      // 공중에서 상태 고정을 위한 내부 스프린트 판정 변수
+        private int _currentJumpCount;          // 현재 수행한 점프 횟수
 
         public PlayerState CurrentState => _currentState;
         public bool IsGrounded => _isGrounded;
@@ -161,7 +166,6 @@ namespace Nexush.Player
                 case PlayerState.Idle:
                     if (_animator)
                     {
-                        _animator.SetBool(AnimIDJump, false);
                         _animator.SetBool(AnimIDFreeFall, false);
                         _animator.SetBool(AnimIDClimbing, false);
                         _animator.SetBool(AnimIDClimbOver, false);
@@ -170,7 +174,6 @@ namespace Nexush.Player
                 case PlayerState.Move:
                     if (_animator)
                     {
-                        _animator.SetBool(AnimIDJump, false);
                         _animator.SetBool(AnimIDFreeFall, false);
                         _animator.SetBool(AnimIDClimbing, false);
                         _animator.SetBool(AnimIDClimbOver, false);
@@ -179,9 +182,8 @@ namespace Nexush.Player
                 case PlayerState.Jump:
                     if (_animator)
                     {
-                        _animator.SetBool(AnimIDJump, true);
                         _animator.SetBool(AnimIDClimbing, false);
-                        _animator.SetBool(AnimIDClimbOver, false); // [추가]
+                        _animator.SetBool(AnimIDClimbOver, false);
                     }
                     break;
                 case PlayerState.Fall:
@@ -189,7 +191,7 @@ namespace Nexush.Player
                     {
                         _animator.SetBool(AnimIDFreeFall, true);
                         _animator.SetBool(AnimIDClimbing, false);
-                        _animator.SetBool(AnimIDClimbOver, false); // [추가]
+                        _animator.SetBool(AnimIDClimbOver, false);
                     }
                     break;
                 case PlayerState.Climbing:
@@ -197,7 +199,6 @@ namespace Nexush.Player
                     if (_animator)
                     {
                         _animator.SetBool(AnimIDClimbing, true);
-                        _animator.SetBool(AnimIDJump, false);
                         _animator.SetBool(AnimIDFreeFall, false);
                         _animator.SetBool(AnimIDClimbOver, false);
                     }
@@ -208,7 +209,6 @@ namespace Nexush.Player
                     {
                         _animator.SetBool(AnimIDClimbOver, true);
                         _animator.SetBool(AnimIDClimbing, false);
-                        _animator.SetBool(AnimIDJump, false);
                         _animator.SetBool(AnimIDFreeFall, false);
                     }
                     break;
@@ -222,6 +222,8 @@ namespace Nexush.Player
         {
             // 중력 적용 (착지 상태 유지용)
             if (_verticalVelocity < 0f) _verticalVelocity = -2f;
+
+            _currentJumpCount = 0; // 지면에 닿아있으므로 점프 횟수 초기화
 
             ApplyMovement(deltaTime);
             HandleJumpInput();
@@ -255,6 +257,7 @@ namespace Nexush.Player
         {
             ApplyGravity(deltaTime);
             ApplyMovement(deltaTime); // 공중 제어 포함
+            HandleJumpInput();        // 공중 점프(이단 점프) 입력 체크
 
             // 사다리 타기 체크 (사용자 요청: 절대적으로 트리거 박스로만 진입)
             // [보정] 공중에서는 점프 중이 아닐 때(낙하 중일 때)만 사다리를 잡을 수 있게 하여 '공중 부양' 현상 방지
@@ -315,17 +318,34 @@ namespace Nexush.Player
 
         public void SetVerticalVelocity(float value) => _verticalVelocity = value;
 
+        /// <summary>
+        /// 점프 입력을 처리합니다. (이단 점프 포함)
+        /// </summary>
         private void HandleJumpInput()
         {
+            // 지면에 있을 때 낙하 유예 시간 초기화 (HandleGroundedState에서 호출될 때)
             if (_isGrounded)
             {
-                // 지면에 닿아있으면 낙하 유예 시간 초기화
                 _fallTimeoutDelta = fallTimeout;
+            }
 
-                // 점프 입력 처리 (쿨다운 없이 즉시 실행)
-                if (_input.IsJumping)
+            // 점프 입력 처리 (최대 점프 횟수 내에서만 허용)
+            if (_input.IsJumping && _currentJumpCount < maxJumpCount)
+            {
+                // 점프 속도 계산 (중력과 높이 기반)
+                _verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+                
+                _currentJumpCount++;
+
+                // 애니메이션 트리거 (트랜지션을 통해 재생되도록 Trigger 파라미터 사용)
+                if (_animator)
                 {
-                    _verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+                    _animator.SetTrigger(AnimIDJump);
+                }
+
+                // 상태 변경 (이단 점프 시에도 로직 처리를 위해 Jump 상태로 진입 시도)
+                if (_currentState != PlayerState.Jump)
+                {
                     ChangeState(PlayerState.Jump);
                 }
             }
@@ -351,7 +371,13 @@ namespace Nexush.Player
         private void ApplyMovement(float deltaTime)
         {
             // 1. 목표 속도 결정
-            float targetSpeed = _input.IsSprinting ? sprintSpeed : moveSpeed;
+            // 지면에 있을 때만 스프린트 상태를 갱신하여, 공중에서는 직전 상태를 유지하게 합니다.
+            if (_isGrounded)
+            {
+                _isSprintingInternal = _input.IsSprinting;
+            }
+
+            float targetSpeed = _isSprintingInternal ? sprintSpeed : moveSpeed;
             if (_input.MoveInput == Vector2.zero) targetSpeed = 0f;
 
             // 2. 현재 속도를 목표 속도로 보간
