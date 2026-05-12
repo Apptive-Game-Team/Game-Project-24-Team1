@@ -44,7 +44,7 @@ namespace Nexush.Player
         public bool IsFiring { get; private set; }
 
         /// <summary>
-        /// 상호작용 입력 여부 (E 키 등)
+        /// 상호작용 입력 여부 (F 키 등)
         /// </summary>
         public bool IsInteracting { get; private set; }
 
@@ -55,6 +55,19 @@ namespace Nexush.Player
         private InputAction _aimAction;
         private InputAction _fireAction;
         private InputAction _interactAction;
+
+        /// <summary>
+        /// 입력 차단 플래그.
+        /// true이면 모든 프로퍼티가 기본값(zero/false)을 반환합니다.
+        /// CharacterController나 Collider를 건드리지 않는 안전한 방식입니다.
+        /// </summary>
+        private bool _isBlocked = false;
+
+        /// <summary>모든 입력을 차단합니다.</summary>
+        public void DisableInput() => _isBlocked = true;
+
+        /// <summary>차단된 입력을 다시 활성화합니다.</summary>
+        public void EnableInput() => _isBlocked = false;
 
         private void Awake()
         {
@@ -86,9 +99,24 @@ namespace Nexush.Player
 
         private void Update()
         {
-            MoveInput = _moveAction.ReadValue<Vector2>();
+            // 시점 회전은 차단 여부와 상관없이 항상 허용 (사용자 요청)
             LookInput = _lookAction.ReadValue<Vector2>();
 
+            if (_isBlocked)
+            {
+                // 입력 차단 상태: 이동 및 액션 관련 값만 기본값으로 고정
+                MoveInput = Vector2.zero;
+                IsJumping = false;
+                IsSprinting = false;
+                IsAiming = false;
+                IsFiring = false;
+                IsInteracting = false;
+                return;
+            }
+
+            MoveInput = _moveAction.ReadValue<Vector2>();
+            // LookInput은 위에서 이미 처리함
+            
             IsJumping = _jumpAction.WasPressedThisFrame();
             IsSprinting = _sprintAction.IsPressed();
             IsAiming = _aimAction != null && _aimAction.IsPressed();
