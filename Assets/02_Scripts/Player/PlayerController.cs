@@ -108,8 +108,9 @@ namespace Nexush.Player
                 // 스크립트 기반 이동을 위해 Root Motion 비활성화 (점프 높이 및 이동 속도 유지)
                 _animator.applyRootMotion = false;
 
-                // 물리 엔진의 Skin Width만큼 모델을 아래로 내려서 발을 땅에 붙임
-                _animator.transform.localPosition = new Vector3(0f, modelYOffset, 0f);
+                // X, Z축 고정값(0)을 제거하고 Y축만 modelYOffset으로 변경하여 텔레포트 방지
+                Vector3 currentLocalPos = _animator.transform.localPosition;
+                _animator.transform.localPosition = new Vector3(currentLocalPos.x, modelYOffset, currentLocalPos.z);
             }
 
             _fallTimeoutDelta = fallTimeout;
