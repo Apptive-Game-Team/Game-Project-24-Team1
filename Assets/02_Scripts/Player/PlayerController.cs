@@ -49,6 +49,16 @@ namespace Nexush.Player
         [Tooltip("지면으로 인식할 레이어 설정입니다.")]
         [SerializeField] private LayerMask groundLayers;
 
+        [Header("물(Water) 설정")]
+        [Tooltip("물 판정을 위한 레이어 설정입니다.")]
+        [SerializeField] private LayerMask waterLayer;
+
+        [Tooltip("물 속에서의 이동 속도입니다.")]
+        [SerializeField] private float waterMoveSpeed = 2.0f;
+
+        [Tooltip("물 속에서 받는 수직 저항력(Drag)입니다. (클수록 수직 이동이 둔해짐)")]
+        [SerializeField] private float waterDrag = 3.0f;
+
         [Header("시각적 보정")]
         [Tooltip("캐릭터가 공중에 떠 보일 경우 모델을 아래로 내리는 오프셋입니다. (보통 -0.08 권장)")]
         [SerializeField] private float modelYOffset = -0.08f;
@@ -63,6 +73,7 @@ namespace Nexush.Player
         private Vector3 _hitNormal = Vector3.up; // 지면의 기울기(법선) 정보
         private bool _isSprintingInternal;      // 공중에서 상태 고정을 위한 내부 스프린트 판정 변수
         private int _currentJumpCount;          // 현재 수행한 점프 횟수
+        private bool _isInWater;                // 물 안에 있는지 여부
 
         public PlayerState CurrentState => _currentState;
         public bool IsGrounded => _isGrounded;
@@ -126,6 +137,7 @@ namespace Nexush.Player
             if (_currentState != PlayerState.ClimbOver)
             {
                 CheckGrounded();
+                CheckWater();
                 HandleShootingInput();
             }
 
@@ -222,7 +234,16 @@ namespace Nexush.Player
         private void HandleGroundedState(float deltaTime)
         {
             // 중력 적용 (착지 상태 유지용)
-            if (_verticalVelocity < 0f) _verticalVelocity = -2f;
+            if (_isInWater)
+            {
+                // 물 속에서는 정상적으로 중력과 부력이 싸우도록 ApplyGravity 호출
+                ApplyGravity(deltaTime);
+            }
+            else if (_verticalVelocity < 0f) 
+            {
+                // 지면 착지 유지용 (물 밖일 때만)
+                _verticalVelocity = -2f;
+            }
 
             _currentJumpCount = 0; // 지면에 닿아있으므로 점프 횟수 초기화
 
@@ -317,6 +338,19 @@ namespace Nexush.Player
             }
         }
 
+        /// <summary>
+        /// 캐릭터의 중심점 부근에 물 오브젝트가 겹쳐 있는지 실시간으로 확인합니다.
+        /// (움직이는 물이나 수위 변화에도 정확하게 대응하기 위해 사용)
+        /// </summary>
+        private void CheckWater()
+        {
+            if (_controller == null) return;
+
+            // 캐릭터의 중심점과 반지름을 사용하여 오버랩 체크 (Trigger 포함)
+            Vector3 center = transform.position + _controller.center;
+            _isInWater = Physics.CheckSphere(center, _controller.radius + 0.1f, waterLayer, QueryTriggerInteraction.Collide);
+        }
+
         public void SetVerticalVelocity(float value) => _verticalVelocity = value;
 
         /// <summary>
@@ -330,8 +364,8 @@ namespace Nexush.Player
                 _fallTimeoutDelta = fallTimeout;
             }
 
-            // 점프 입력 처리 (최대 점프 횟수 내에서만 허용)
-            if (_input.IsJumping && _currentJumpCount < maxJumpCount)
+            // 점프 입력 처리 (최대 점프 횟수 내에서만 허용, 물 속이 아닐 때만)
+            if (_input.IsJumping && _currentJumpCount < maxJumpCount && !_isInWater)
             {
                 // 점프 속도 계산 (중력과 높이 기반)
                 _verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
@@ -358,6 +392,12 @@ namespace Nexush.Player
         /// <param name="deltaTime">프레임 증분 시간</param>
         private void ApplyGravity(float deltaTime)
         {
+            // 물 속에 있다면 물의 수직 저항(Drag) 적용
+            if (_isInWater)
+            {
+                _verticalVelocity = Mathf.Lerp(_verticalVelocity, 0f, waterDrag * deltaTime);
+            }
+
             // 터미널 벨로시티 제한 (최대 낙하 속도)
             if (_verticalVelocity > -53f)
             {
@@ -379,6 +419,7 @@ namespace Nexush.Player
             }
 
             float targetSpeed = _isSprintingInternal ? sprintSpeed : moveSpeed;
+            if (_isInWater) targetSpeed = waterMoveSpeed; // 물 속일 때 이동 속도 덮어쓰기
             if (_input.MoveInput == Vector2.zero) targetSpeed = 0f;
 
             // 2. 현재 속도를 목표 속도로 보간
@@ -478,7 +519,17 @@ namespace Nexush.Player
         }
 
 
+
         #region Animation Events
+
+        /// <summary>
+        /// 외부(Buoyancy 스크립트 등)에서 부력을 받아 수직 속도에 적용합니다.
+        /// </summary>
+        public void AddBuoyancy(float force)
+        {
+            // 부력을 수직 속도에 추가합니다. (OnTriggerStay의 FixedUpdate 주기를 고려해 보정)
+            _verticalVelocity += force * Time.fixedDeltaTime;
+        }
 
         /// <summary>
         /// 애니메이션 이벤트에서 호출되는 발소리 이벤트입니다.
