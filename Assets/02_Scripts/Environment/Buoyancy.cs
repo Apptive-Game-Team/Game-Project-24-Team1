@@ -23,26 +23,38 @@ namespace Nexush.Environment
 
         private void OnTriggerStay(Collider other)
         {
-            if (other.CompareTag("Player"))
-            {
-                PlayerController player = other.GetComponent<PlayerController>();
-                if (player != null && _waterCollider != null)
-                {
-                    // 수면의 Y 좌표 계산 (콜라이더의 가장 위쪽 끝 지점)
-                    float waterSurfaceY = _waterCollider.bounds.max.y;
-                    
-                    // 플레이어 중심 위치가 수면보다 얼마나 깊이 들어갔는지 계산
-                    float depth = waterSurfaceY - player.transform.position.y;
+            if (_waterCollider == null) return;
 
-                    if (depth > 0f)
-                    {
-                        // 깊을수록 강한 위쪽 방향의 힘(부력) 계산
-                        // OnTriggerStay는 FixedUpdate 주기이므로 Time.fixedDeltaTime 사용이 권장되지만,
-                        // PlayerController의 Update 주기와 맞추기 위해 Force만 전달하고 
-                        // 내부적으로 Time.deltaTime을 곱하도록 설계하는 것이 좋습니다.
-                        float force = depth * buoyancyPower;
-                        player.AddBuoyancy(force);
-                    }
+            // 수면의 Y 좌표 계산 (콜라이더의 가장 위쪽 끝 지점)
+            float waterSurfaceY = _waterCollider.bounds.max.y;
+            
+            // 오브젝트 중심 위치가 수면보다 얼마나 깊이 들어갔는지 계산
+            float depth = waterSurfaceY - other.transform.position.y;
+
+            if (depth > 0f)
+            {
+                // 깊을수록 강한 위쪽 방향의 힘(부력) 계산
+                float force = depth * buoyancyPower;
+
+                // 1. PlayerController를 가진 플레이어인 경우
+                if (other.TryGetComponent<PlayerController>(out var player))
+                {
+                    player.AddBuoyancy(force);
+                }
+                // 2. 일반 Rigidbody를 가진 오브젝트인 경우
+                else if (other.TryGetComponent<Rigidbody>(out var rb))
+                {
+                    // 질량과 무관하게 오브젝트의 수평 단면적(X * Z 스케일)이 클수록 부력을 더 받도록 설정
+                    float areaScale = other.transform.localScale.x * other.transform.localScale.z;
+
+                    // 중력을 상쇄하는 기본 힘은 유지하고, 물에 잠겼을 때 받는 추가 부력(force)만 넓이에 비례해 증폭
+                    float rbForce = Mathf.Abs(Physics.gravity.y) + (force * areaScale);
+
+                    // Rigidbody에는 FixedUpdate 주기에 맞는 ForceMode.Acceleration 사용
+                    rb.AddForce(Vector3.up * rbForce, ForceMode.Acceleration);
+                    
+                    // 마찰력(Drag)도 유지
+                    rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z), Time.fixedDeltaTime * 1.5f);
                 }
             }
         }

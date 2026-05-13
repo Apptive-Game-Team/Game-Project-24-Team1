@@ -66,6 +66,7 @@ namespace Nexush.Player
         // 상태 변수
         private float _currentSpeed;
         private float _verticalVelocity;
+        private Vector3 _externalVelocity; // 외부 힘에 의한 속도
         private float _fallTimeoutDelta;
         private bool _isGrounded = true;
         private PlayerState _currentState;
@@ -449,6 +450,19 @@ namespace Nexush.Player
             // 4. 최종 이동 적용 (수직 벨로시티 포함)
             Vector3 movement = moveDir * _currentSpeed + Vector3.up * _verticalVelocity;
             
+            // 외부 힘(물 흐름 등) 적용 및 마찰력에 의한 감쇠 처리
+            if (_externalVelocity.sqrMagnitude > 0.001f)
+            {
+                // 상황에 따른 저항(Drag) 적용
+                float drag = _isInWater ? waterDrag : (_isGrounded ? speedChangeRate : 2.0f);
+                _externalVelocity = Vector3.Lerp(_externalVelocity, Vector3.zero, deltaTime * drag);
+                movement += _externalVelocity;
+            }
+            else
+            {
+                _externalVelocity = Vector3.zero;
+            }
+
             // [추가] 경사면 및 모서리 미끄러짐 보정 적용
             ApplySliding(ref movement);
 
@@ -518,10 +532,6 @@ namespace Nexush.Player
             }
         }
 
-
-
-        #region Animation Events
-
         /// <summary>
         /// 외부(Buoyancy 스크립트 등)에서 부력을 받아 수직 속도에 적용합니다.
         /// </summary>
@@ -531,6 +541,19 @@ namespace Nexush.Player
             _verticalVelocity += force * Time.fixedDeltaTime;
         }
 
+        /// <summary>
+        /// 외부(WaterFlow 스크립트 등)에서 물리적 힘을 받아 속도에 추가합니다.
+        /// </summary>
+        public void AddExternalForce(Vector3 force)
+        {
+            // OnTriggerStay의 FixedUpdate 주기와 동일한 방식으로 가속도를 적용합니다.
+            _externalVelocity += force * Time.fixedDeltaTime;
+        }
+
+
+        #region Animation Events
+
+        
         /// <summary>
         /// 애니메이션 이벤트에서 호출되는 발소리 이벤트입니다.
         /// </summary>
