@@ -109,8 +109,8 @@ namespace Nexush.Player
                 _animator.applyRootMotion = false;
 
                 // X, Z축 고정값(0)을 제거하고 Y축만 modelYOffset으로 변경하여 텔레포트 방지
-                Vector3 currentLocalPos = _animator.transform.localPosition;
-                _animator.transform.localPosition = new Vector3(currentLocalPos.x, modelYOffset, currentLocalPos.z);
+                //Vector3 currentLocalPos = _animator.transform.localPosition;
+                //_animator.transform.localPosition = new Vector3(currentLocalPos.x, modelYOffset, currentLocalPos.z);
             }
 
             _fallTimeoutDelta = fallTimeout;
