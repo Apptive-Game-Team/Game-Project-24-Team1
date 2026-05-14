@@ -25,8 +25,30 @@ namespace Nexush.Environment
         {
             if (_waterCollider == null) return;
 
-            // 수면의 Y 좌표 계산 (콜라이더의 가장 위쪽 끝 지점)
+            // 수면의 Y 좌표 계산 (콜라이더가 회전되었을 경우 bounds.max.y는 AABB의 최상단이므로 오차가 발생함)
             float waterSurfaceY = _waterCollider.bounds.max.y;
+            
+            if (_waterCollider is BoxCollider box)
+            {
+                // 플레이어의 현재 위치를 물 오브젝트의 로컬 좌표계로 변환
+                Vector3 localPos = box.transform.InverseTransformPoint(other.transform.position);
+                // 로컬 좌표계에서 Y값을 박스의 최상단(윗면)으로 고정
+                localPos.y = box.center.y + box.size.y * 0.5f;
+                // 다시 월드 좌표로 변환하여 정확한 수면의 Y값을 얻음
+                waterSurfaceY = box.transform.TransformPoint(localPos).y;
+            }
+            else
+            {
+                // BoxCollider가 아닌 경우 (Sphere, Capsule, Mesh 등) Raycast를 사용하여 가장 위쪽 표면을 찾음
+                Vector3 rayOrigin = other.transform.position;
+                rayOrigin.y = _waterCollider.bounds.max.y + 1.0f;
+                Ray ray = new Ray(rayOrigin, Vector3.down);
+                
+                if (_waterCollider.Raycast(ray, out RaycastHit hit, _waterCollider.bounds.size.y + 2.0f))
+                {
+                    waterSurfaceY = hit.point.y;
+                }
+            }
             
             // 오브젝트 중심 위치가 수면보다 얼마나 깊이 들어갔는지 계산
             float depth = waterSurfaceY - other.transform.position.y;
