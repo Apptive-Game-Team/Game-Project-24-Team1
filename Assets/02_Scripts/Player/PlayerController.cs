@@ -31,6 +31,13 @@ namespace Nexush.Player
         [Tooltip("속도 변화의 가속도 계수입니다.")]
         [SerializeField] private float speedChangeRate = 10.0f;
 
+        [Header("밀고 당기기 설정")]
+        [Tooltip("밀고 당길 때의 이동 속도입니다.")]
+        [SerializeField] private float pushPullSpeed = 2.0f;
+
+        [Tooltip("상호작용 가능한 밀당 오브젝트와의 최대 인식 거리입니다.")]
+        [SerializeField] private float pushPullDistance = 0.5f;
+
 
         [Header("점프 및 중력")]
         [Tooltip("점프 높이입니다.")]
@@ -66,6 +73,7 @@ namespace Nexush.Player
         // 상태 변수
         private float _currentSpeed;
         private float _verticalVelocity;
+        private Vector3 _externalVelocity; // 외부 힘에 의한 속도
         private float _fallTimeoutDelta;
         private bool _isGrounded = true;
         private PlayerState _currentState;
@@ -74,6 +82,9 @@ namespace Nexush.Player
         private bool _isSprintingInternal;      // 공중에서 상태 고정을 위한 내부 스프린트 판정 변수
         private int _currentJumpCount;          // 현재 수행한 점프 횟수
         private bool _isInWater;                // 물 안에 있는지 여부
+        
+        private Nexush.Interactables.PushPullInteractable _grabbedObject; // 현재 잡고 있는 밀당 오브젝트
+        private float _initialGrabDistance; // 잡았을 때의 초기 거리
 
         public PlayerState CurrentState => _currentState;
         public bool IsGrounded => _isGrounded;
@@ -139,6 +150,7 @@ namespace Nexush.Player
                 CheckGrounded();
                 CheckWater();
                 HandleShootingInput();
+                HandlePushPull();
             }
 
             // 현재 상태에 따른 로직 실행
@@ -317,6 +329,62 @@ namespace Nexush.Player
             }
         }
 
+        private void HandlePushPull()
+        {
+            if (_input.IsInteractingHeld && _isGrounded)
+            {
+                if (_grabbedObject == null)
+                {
+                    // 전방 1.0 유닛 높이에서 구체(SphereCast)를 쏴서 물체를 더 관대하게 감지
+                    Vector3 rayOrigin = transform.position + Vector3.up * 1.0f; 
+                    if (Physics.SphereCast(rayOrigin, 0.5f, transform.forward, out RaycastHit hit, pushPullDistance))
+                    {
+                        var interactable = hit.collider.GetComponent<Nexush.Interactables.PushPullInteractable>();
+                        if (interactable != null && interactable.enabled)
+                        {
+                            _grabbedObject = interactable;
+                            _grabbedObject.StartGrab(transform);
+                            _initialGrabDistance = Vector3.Distance(transform.position, _grabbedObject.transform.position);
+                            
+                            // 플레이어와 물체 간의 충돌을 무시하여 미는 동안 플레이어가 막히지 않게 함
+                            if (_grabbedObject.objectCollider != null)
+                            {
+                                Physics.IgnoreCollision(_controller, _grabbedObject.objectCollider, true);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // 오브젝트가 벽에 막히거나 거리가 벌어지면 그랩 자동 해제
+                    float currentDistance = Vector3.Distance(transform.position, _grabbedObject.transform.position);
+                    if (Mathf.Abs(currentDistance - _initialGrabDistance) > 0.25f || currentDistance > pushPullDistance + 1.5f)
+                    {
+                        ReleaseGrabbedObject();
+                    }
+                }
+            }
+            else
+            {
+                if (_grabbedObject != null)
+                {
+                    ReleaseGrabbedObject();
+                }
+            }
+        }
+
+        private void ReleaseGrabbedObject()
+        {
+            if (_grabbedObject == null) return;
+
+            if (_grabbedObject.objectCollider != null)
+            {
+                Physics.IgnoreCollision(_controller, _grabbedObject.objectCollider, false);
+            }
+            _grabbedObject.EndGrab();
+            _grabbedObject = null;
+        }
+
         /// <summary>
         /// 플레이어 하단의 구체 체크를 통해 지면에 닿아있는지 확인합니다.
         /// </summary>
@@ -419,15 +487,34 @@ namespace Nexush.Player
             }
 
             float targetSpeed = _isSprintingInternal ? sprintSpeed : moveSpeed;
+            if (_grabbedObject != null) targetSpeed = pushPullSpeed; // 물체 밀당 중이면 속도 고정
             if (_isInWater) targetSpeed = waterMoveSpeed; // 물 속일 때 이동 속도 덮어쓰기
-            if (_input.MoveInput == Vector2.zero) targetSpeed = 0f;
+            
+            // 입력 유무에 따른 속도 초기화 (제약 조건 반영)
+            if (_grabbedObject != null && _grabbedObject.movementType == Interactables.PushPullMovementType.ForwardBackwardOnly)
+            {
+                if (Mathf.Abs(_input.MoveInput.y) < 0.01f) targetSpeed = 0f;
+            }
+            else
+            {
+                if (_input.MoveInput == Vector2.zero) targetSpeed = 0f;
+            }
 
             // 2. 현재 속도를 목표 속도로 보간
             _currentSpeed = Mathf.Lerp(_currentSpeed, targetSpeed, deltaTime * speedChangeRate);
 
             // 3. 이동 방향 계산 및 캐릭터 회전
             Vector3 moveDir = Vector3.zero;
-            if (_input.MoveInput != Vector2.zero)
+            
+            if (_grabbedObject != null && _grabbedObject.movementType == Interactables.PushPullMovementType.ForwardBackwardOnly)
+            {
+                // 앞뒤 입력(W, S)만 허용. 캐릭터 정면(오브젝트 방향) 기준으로 앞뒤 이동
+                if (Mathf.Abs(_input.MoveInput.y) > 0.01f)
+                {
+                    moveDir = transform.forward * Mathf.Sign(_input.MoveInput.y);
+                }
+            }
+            else if (_input.MoveInput != Vector2.zero)
             {
                 // 입력 방향 (X, Z 평면)
                 Vector3 inputDirection = new Vector3(_input.MoveInput.x, 0.0f, _input.MoveInput.y).normalized;
@@ -439,20 +526,49 @@ namespace Nexush.Player
                     targetRotation += Camera.main.transform.eulerAngles.y;
                 }
 
-                // 캐릭터 부드럽게 회전 (이동 방향 바라보기)
-                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0.0f, targetRotation, 0.0f), deltaTime * 10f);
+                // 캐릭터 부드럽게 회전 (이동 방향 바라보기) - 밀당 중일 때는 회전 고정
+                if (_grabbedObject == null)
+                {
+                    transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0.0f, targetRotation, 0.0f), deltaTime * 10f);
+                }
                 
                 // 최종 이동 방향 벡터 계산
                 moveDir = Quaternion.Euler(0.0f, targetRotation, 0.0f) * Vector3.forward;
+
+                if (_grabbedObject != null)
+                {
+                    // 밀당 가능 여부 체크
+                    Vector3 toObject = _grabbedObject.transform.position - transform.position;
+                    toObject.y = 0;
+                    if (!_grabbedObject.CanMoveInDirection(moveDir, toObject))
+                    {
+                        moveDir = Vector3.zero; // 설정상 이동 불가
+                    }
+                }
             }
 
             // 4. 최종 이동 적용 (수직 벨로시티 포함)
             Vector3 movement = moveDir * _currentSpeed + Vector3.up * _verticalVelocity;
             
+            // 외부 힘(물 흐름 등) 적용 및 마찰력에 의한 감쇠 처리
+            if (_externalVelocity.sqrMagnitude > 0.001f)
+            {
+                // 상황에 따른 저항(Drag) 적용
+                float drag = _isInWater ? waterDrag : (_isGrounded ? speedChangeRate : 2.0f);
+                _externalVelocity = Vector3.Lerp(_externalVelocity, Vector3.zero, deltaTime * drag);
+                movement += _externalVelocity;
+            }
+            else
+            {
+                _externalVelocity = Vector3.zero;
+            }
+
             // [추가] 경사면 및 모서리 미끄러짐 보정 적용
             ApplySliding(ref movement);
 
             _controller.Move(movement * deltaTime);
+            
+            // 오브젝트 이동 연동은 PushPullInteractable의 FixedUpdate에서 자동으로 처리됩니다.
 
             // 5. 애니메이션 파라미터 업데이트
             if (_animator)
@@ -518,10 +634,6 @@ namespace Nexush.Player
             }
         }
 
-
-
-        #region Animation Events
-
         /// <summary>
         /// 외부(Buoyancy 스크립트 등)에서 부력을 받아 수직 속도에 적용합니다.
         /// </summary>
@@ -531,6 +643,19 @@ namespace Nexush.Player
             _verticalVelocity += force * Time.fixedDeltaTime;
         }
 
+        /// <summary>
+        /// 외부(WaterFlow 스크립트 등)에서 물리적 힘을 받아 속도에 추가합니다.
+        /// </summary>
+        public void AddExternalForce(Vector3 force)
+        {
+            // OnTriggerStay의 FixedUpdate 주기와 동일한 방식으로 가속도를 적용합니다.
+            _externalVelocity += force * Time.fixedDeltaTime;
+        }
+
+
+        #region Animation Events
+
+        
         /// <summary>
         /// 애니메이션 이벤트에서 호출되는 발소리 이벤트입니다.
         /// </summary>

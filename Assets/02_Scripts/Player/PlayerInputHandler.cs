@@ -48,6 +48,11 @@ namespace Nexush.Player
         /// </summary>
         public bool IsInteracting { get; private set; }
 
+        /// <summary>
+        /// 상호작용 키 누르고 있는 상태 여부
+        /// </summary>
+        public bool IsInteractingHeld { get; private set; }
+
         private InputAction _moveAction;
         private InputAction _lookAction;
         private InputAction _jumpAction;
@@ -122,6 +127,7 @@ namespace Nexush.Player
             IsAiming = _aimAction != null && _aimAction.IsPressed();
             IsFiring = _fireAction != null && _fireAction.IsPressed();
             IsInteracting = _interactAction != null && _interactAction.WasPressedThisFrame();
+            IsInteractingHeld = _interactAction != null && _interactAction.IsPressed();
         }
     }
 }
