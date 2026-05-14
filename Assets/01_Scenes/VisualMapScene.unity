@@ -20,7 +20,7 @@ RenderSettings:
   m_FogDensity: 0.01
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 0.32306868, g: 0.35212943, b: 0.41509432, a: 1}
+  m_AmbientSkyColor: {r: 0.41117835, g: 0.45021954, b: 0.5283019, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
@@ -5644,7 +5644,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &244465642
 Transform:
@@ -14848,7 +14848,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &632996054
 Transform:
@@ -16411,7 +16411,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &687190342
 Transform:
@@ -27839,6 +27839,63 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 856388728}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1001 &871518269
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -28.14
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 8.064
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 48.44
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 180
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8788226320615084947, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_Name
+      value: fluorescent_mushrooms
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
 --- !u!1 &872752936
 GameObject:
   m_ObjectHideFlags: 0
@@ -28304,7 +28361,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &899896732
 Transform:
@@ -28997,6 +29054,63 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 916169354}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1001 &916820807
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 21.78
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 8.064
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 45.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 180
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8788226320615084947, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_Name
+      value: fluorescent_mushrooms (3)
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
 --- !u!1 &938398832
 GameObject:
   m_ObjectHideFlags: 0
@@ -31306,7 +31420,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &1013877292
 Transform:
@@ -33358,6 +33472,63 @@ Transform:
   - {fileID: 652105899}
   m_Father: {fileID: 1156508429}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1078823374
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 5.89
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 8.064
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 53.371
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 180
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8788226320615084947, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_Name
+      value: fluorescent_mushrooms (2)
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
 --- !u!1 &1086759030
 GameObject:
   m_ObjectHideFlags: 0
@@ -41941,6 +42112,63 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1154041174}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1001 &1155376294
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -9.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 8.064
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 43.794
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 180
+      objectReference: {fileID: 0}
+    - target: {fileID: 8268008489435023657, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8788226320615084947, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
+      propertyPath: m_Name
+      value: fluorescent_mushrooms (1)
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: d3a44c7253f68104bbd23d6d03c5779f, type: 3}
 --- !u!1 &1156508428
 GameObject:
   m_ObjectHideFlags: 0
@@ -60132,7 +60360,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &1821139414
 Transform:
@@ -68982,3 +69210,7 @@ SceneRoots:
   - {fileID: 1572213449}
   - {fileID: 2009377397}
   - {fileID: 311442183}
+  - {fileID: 871518269}
+  - {fileID: 1155376294}
+  - {fileID: 1078823374}
+  - {fileID: 916820807}
