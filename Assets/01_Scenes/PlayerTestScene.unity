@@ -2443,6 +2443,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 3233797465856601435, guid: 7fce6b961b26e7d44bfca0dd5d59aba9, type: 3}
+      propertyPath: pushPullDistance
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3233797465856601435, guid: 7fce6b961b26e7d44bfca0dd5d59aba9, type: 3}
       propertyPath: waterLayer.m_Bits
       value: 16
       objectReference: {fileID: 0}
