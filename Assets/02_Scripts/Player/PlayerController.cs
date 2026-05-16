@@ -17,9 +17,19 @@ namespace MushOut.Player
     [RequireComponent(typeof(PlayerEnvironmentDetector))]
     [RequireComponent(typeof(PlayerAnimationDriver))]
     [RequireComponent(typeof(PlayerInteractor))]
+    [RequireComponent(typeof(PlayerEnemyCollisionHandler))]
     public class PlayerController : MonoBehaviour
     {
         private PlayerState _currentState = PlayerState.Idle;
+
+        [Header("Jump Settings")]
+        [Tooltip("최대 점프 가능한 횟수입니다. (1: 기본 점프, 2: 이단 점프)")]
+        [SerializeField, Range(1, 3)] private int maxJumpCount = 2;
+        private int _currentJumpCount;
+
+        [Tooltip("낙하 상태로 판정되기까지의 대기 시간입니다.")]
+        [SerializeField] private float fallTimeout = 0.15f;
+        private float _fallTimeoutDelta;
 
         private PlayerInputHandler _input;
         private PlayerMotor _motor;
@@ -67,17 +77,22 @@ namespace MushOut.Player
             }
 
             // 사다리 타기 진입 체크 (PlayerInputHandler에서 Up 입력이 있을 때)
+            // [보정] 공중에서는 점프 중이 아닐 때(낙하 중일 때)만 사다리를 잡을 수 있게 하여 '공중 부양' 현상 방지
             if (_climbHandler != null && _climbHandler.IsNearLadder && _input.MoveInput.y > 0.1f)
             {
-                ChangeState(PlayerState.Climbing);
-                return;
+                if (_detector.IsGrounded || _motor.VerticalVelocity <= 0f)
+                {
+                    ChangeState(PlayerState.Climbing);
+                    return;
+                }
             }
 
             HandleStateTransitions();
+            HandleJumpInput();
 
             if (_currentState != PlayerState.Climbing && _currentState != PlayerState.ClimbOver)
             {
-                _motor.ApplyGravity(Time.deltaTime, _detector.IsInWater);
+                _motor.ApplyGravity(Time.deltaTime, _detector.IsInWater, _detector.IsGrounded);
                 _motor.ApplyMovement(Time.deltaTime, _input.MoveInput, _input.IsSprinting, _detector.IsInWater, _detector.IsGrounded, _interactor.GrabbedObject, _detector.HitNormal, _detector.groundLayers);
             }
 
@@ -88,13 +103,7 @@ namespace MushOut.Player
         {
             if (_detector.IsGrounded)
             {
-                if (_input.IsJumping && !_detector.IsInWater)
-                {
-                    ChangeState(PlayerState.Jump);
-                    _motor.ExecuteJump();
-                    _animator.TriggerJump();
-                    return;
-                }
+                _fallTimeoutDelta = fallTimeout;
 
                 if (_input.MoveInput != Vector2.zero)
                 {
@@ -107,9 +116,51 @@ namespace MushOut.Player
             }
             else
             {
-                if (_motor.VerticalVelocity < 0f && !_detector.IsInWater)
+                // 걸어서 절벽에서 떨어지는 경우, 첫 번째 점프를 소모한 것으로 간주
+                if (_currentJumpCount == 0)
+                {
+                    _currentJumpCount = 1;
+                }
+
+                // 낙하 상태로의 전환 유예 (Fall Timeout)
+                if (_fallTimeoutDelta > 0f)
+                {
+                    _fallTimeoutDelta -= Time.deltaTime;
+                }
+                else if (_motor.VerticalVelocity < 0f && !_detector.IsInWater)
                 {
                     ChangeState(PlayerState.Fall);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 점프 입력을 처리합니다. (이단 점프 포함)
+        /// </summary>
+        private void HandleJumpInput()
+        {
+            // 지면에 닿아있을 때 점프 횟수 초기화
+            // 점프 직후 프레임에서 땅 판정이 남아있는 것을 방지하기 위해 수직 속도가 0 이하일 때만 초기화
+            if (_detector.IsGrounded && _motor.VerticalVelocity <= 0f)
+            {
+                _currentJumpCount = 0;
+            }
+
+            // 점프 입력 처리 (최대 점프 횟수 내에서만 허용, 물 속이 아닐 때만)
+            if (_input.IsJumping && _currentJumpCount < maxJumpCount && !_detector.IsInWater)
+            {
+                // 점프 속도 계산 (중력과 높이 기반)
+                _motor.ExecuteJump();
+
+                _currentJumpCount++;
+
+                // 애니메이션 트리거 (트랜지션을 통해 재생되도록 Trigger 파라미터 사용)
+                _animator.TriggerJump();
+
+                // 상태 변경 (이단 점프 시에도 로직 처리를 위해 Jump 상태로 진입 시도)
+                if (_currentState != PlayerState.Jump)
+                {
+                    ChangeState(PlayerState.Jump);
                 }
             }
         }

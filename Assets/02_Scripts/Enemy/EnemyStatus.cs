@@ -107,7 +107,7 @@ namespace MushOut.Enemy
         [Header("Runtime Info (ReadOnly)")]
         [Tooltip("현재 프레임에서 플레이어가 시야에 포착되었는지 여부")]
         [SerializeField] private bool _isPlayerSpotted = false;
-        private int _spottedFrameCount = -10;
+        private float _spottedTime = -10f;
 
         [Tooltip("LPP가 유효한지(탐지된 적이 있는지) 여부")]
         [SerializeField] private bool _hasLatestPlayerPosition = false;
@@ -142,20 +142,20 @@ namespace MushOut.Enemy
         {
             get 
             {
-                // 프레임 기반으로 유효성을 검사하여 여러 Sight가 있어도 덮어씌워지지 않도록 처리
-                _isPlayerSpotted = (Time.frameCount - _spottedFrameCount) <= 1;
+                // SightRoutine이 0.15초마다 갱신하므로, 여유를 두어 0.2초 이내에 갱신되었으면 포착한 것으로 유지
+                _isPlayerSpotted = (Time.time - _spottedTime) <= 0.2f;
                 return _isPlayerSpotted;
             }
             set
             {
                 if (value)
                 {
-                    _spottedFrameCount = Time.frameCount;
+                    _spottedTime = Time.time;
                     _isPlayerSpotted = true;
                 }
                 else
                 {
-                    _spottedFrameCount = -10;
+                    _spottedTime = -10f;
                     _isPlayerSpotted = false;
                 }
             }

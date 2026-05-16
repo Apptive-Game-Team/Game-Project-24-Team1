@@ -8,7 +8,11 @@ namespace MushOut.Environment
     {
         [Header("Buoyancy Settings")]
         [Tooltip("기본 부력 계수 (값이 클수록 물 밖으로 띄워 올리는 힘이 강해집니다)")]
-        [SerializeField] private float buoyancyPower = 11.0f;
+        [SerializeField] private float buoyancyPower = 4.0f;
+
+        [Tooltip("물에 잠기는 비율 (0 = 수면 위로 완전히 뜸, 1 = 물에 완전히 잠김). 기본값은 0.7(70% 잠김)입니다.")]
+        [Range(0f, 1f)]
+        [SerializeField] private float submergeRatio = 0.7f;
 
         private Collider _waterCollider;
 
@@ -50,52 +54,102 @@ namespace MushOut.Environment
                 }
             }
             
-            // 부력을 계산할 기준점 (오브젝트는 피벗, 플레이어는 중심)
-            Vector3 targetPos = other.transform.position;
-
-            // 플레이어인지 확인
             bool isPlayer = other.TryGetComponent<PlayerController>(out var player);
+            PlayerMotor playerMotor = isPlayer ? other.GetComponent<PlayerMotor>() : null;
+            Rigidbody rb = !isPlayer ? other.GetComponent<Rigidbody>() : null;
+
+            float objHeight = 0f;
+            float bottomY = other.transform.position.y; // 기본적으로 피벗 위치를 하단으로 가정
+
             if (isPlayer)
             {
-                // 플레이어는 피벗(transform.position)이 발끝이므로, 중심점(Center)을 더해 가슴/배 높이에서 계산되도록 보정
                 var cc = other.GetComponent<CharacterController>();
                 if (cc != null)
                 {
-                    targetPos.y += cc.center.y;
+                    objHeight = cc.height;
+                    // 플레이어의 pivot은 항상 발끝(하단)에 위치합니다.
+                    bottomY = other.transform.position.y;
                 }
             }
-
-            // 기준점이 수면보다 얼마나 깊이 들어갔는지 계산
-            float depth = waterSurfaceY - targetPos.y;
-
-            if (depth > 0f)
+            else if (rb != null)
             {
-                // 수면 근처(0 ~ 0.5m)에서는 힘을 부드럽게 줄여 수면 위로 튕겨오르는 현상 방지
-                // 깊이가 0.5m 이상이면 1(최대 부력) 유지
-                float depthFactor = Mathf.Clamp01(depth * 2.0f);
-                float force = buoyancyPower * depthFactor;
+                // 일반 오브젝트는 Bounds를 통해 정확한 높이와 하단 좌표를 구합니다.
+                objHeight = other.bounds.size.y;
+                bottomY = other.bounds.min.y;
+            }
 
-                // 1. PlayerController를 가진 플레이어인 경우
-                if (isPlayer)
+            // 목표 하단(바닥) Y 좌표: 전체 높이의 지정된 비율(submergeRatio)만큼 수면 아래에 있도록 설정
+            float targetBottomY = waterSurfaceY - (objHeight * submergeRatio);
+
+            // 현재 하단 좌표가 목표 좌표보다 아래에 있는지 확인 (수면 아래로 깊이 들어감)
+            if (bottomY < targetBottomY)
+            {
+                // 얼마나 더 올라가야 하는지 계산
+                float diff = targetBottomY - bottomY;
+
+                // 목표 높이까지 올라가는 상승 속도 (최대값은 buoyancyPower로 제한)
+                // 거리가 가까워질수록 diff가 작아져서 상승 속도도 자연스럽게 줄어듦
+                float targetRiseVelocity = Mathf.Min(diff / Time.fixedDeltaTime, buoyancyPower);
+                
+                // 물 속에서 위로 밀어올리는 가속도 (부력 파워에 비례)
+                float upwardAcceleration = buoyancyPower * 5f;
+
+                if (isPlayer && playerMotor != null)
                 {
-                    // 플레이어는 독자적인 중력값(보통 -15)을 사용하므로 기본 중력 상쇄값을 포함해 전달
-                    player.AddBuoyancy((15.0f + force) * depthFactor);
-                }
-                // 2. 일반 Rigidbody를 가진 오브젝트인 경우
-                else if (other.TryGetComponent<Rigidbody>(out var rb))
-                {
-                    // 질량과 무관하게 오브젝트의 수평 단면적(X * Z 스케일)이 클수록 부력을 더 받도록 설정
-                    float areaScale = other.transform.localScale.x * other.transform.localScale.z;
-
-                    // 중력을 상쇄하는 힘과 부력을 수면 근처에서 서서히 줄여서 중력과 균형을 이루게 함
-                    float rbForce = Mathf.Abs(Physics.gravity.y) * depthFactor + (force * areaScale);
-
-                    // Rigidbody에는 FixedUpdate 주기에 맞는 ForceMode.Acceleration 사용
-                    rb.AddForce(Vector3.up * rbForce, ForceMode.Acceleration);
+                    float currentVy = playerMotor.VerticalVelocity;
                     
-                    // 수면에 가까워질수록 마찰력(Drag)을 강하게 주어 진자운동(튀는 현상)을 감쇠시킴
-                    float damping = Mathf.Lerp(4.0f, 1.5f, 1f - depthFactor); // 수면 근처(depthFactor=0)일수록 강한 저항(4.0)
-                    rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z), Time.fixedDeltaTime * damping);
+                    if (currentVy < targetRiseVelocity)
+                    {
+                        // 1. 낙하 중(-속도)이면: 서서히 0으로 감속 (뚝 멈추는 현상 방지)
+                        // 2. 0이 되면: 서서히 targetRiseVelocity까지 가속 (자연스럽게 떠오름)
+                        playerMotor.VerticalVelocity = Mathf.MoveTowards(currentVy, targetRiseVelocity, upwardAcceleration * Time.fixedDeltaTime);
+                    }
+                    else
+                    {
+                        // 상승 속도가 너무 빠르면 목표 속도로 제한하여 수면 밖으로 튀어나가지 않게 함
+                        playerMotor.VerticalVelocity = targetRiseVelocity;
+                    }
+
+                    // PlayerMotor의 Update에서 적용되는 중력을 상쇄
+                    player.AddBuoyancy(15.0f);
+                }
+                else if (rb != null)
+                {
+                    float currentVy = rb.linearVelocity.y;
+                    
+                    if (currentVy < targetRiseVelocity)
+                    {
+                        currentVy = Mathf.MoveTowards(currentVy, targetRiseVelocity, upwardAcceleration * Time.fixedDeltaTime);
+                    }
+                    else
+                    {
+                        currentVy = targetRiseVelocity;
+                    }
+
+                    rb.linearVelocity = new Vector3(rb.linearVelocity.x, currentVy, rb.linearVelocity.z);
+                    // 중력에 의해 떨어지지 않도록 이번 프레임의 중력을 완전히 상쇄
+                    rb.AddForce(-Physics.gravity, ForceMode.Acceleration);
+                }
+            }
+            // 이미 설정한 비율 라인에 도달했거나 그보다 조금 높이 떠 있는 상태 (여유 범위 0.05f)
+            else if (bottomY <= targetBottomY + 0.05f)
+            {
+                if (isPlayer && playerMotor != null)
+                {
+                    // 정확히 그 위치에 고정시키기 위해 수직 속도를 0으로 만듦
+                    playerMotor.VerticalVelocity = 0f;
+                    player.AddBuoyancy(15.0f);
+                }
+                else if (rb != null)
+                {
+                    // 낙하 중이면 뚝 멈추지 않도록 MoveTowards로 서서히 0으로 감속
+                    // 이미 0이거나 상승 중이면 그 속도를 유지하여 부드럽게 수면에 안착
+                    float currentVy = rb.linearVelocity.y;
+                    float brakeAcceleration = buoyancyPower * 5f;
+                    float newVy = Mathf.MoveTowards(currentVy, 0f, brakeAcceleration * Time.fixedDeltaTime);
+                    rb.linearVelocity = new Vector3(rb.linearVelocity.x, newVy, rb.linearVelocity.z);
+                    // 중력 상쇄하여 수면에 고정
+                    rb.AddForce(-Physics.gravity, ForceMode.Acceleration);
                 }
             }
         }

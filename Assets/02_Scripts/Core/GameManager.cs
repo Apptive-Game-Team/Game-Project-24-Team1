@@ -64,6 +64,24 @@ namespace MushOut.Core
 
         /// <summary> 씬 내의 전역 플레이어 Transform 캐싱 </summary>
         public Transform PlayerTransform { get; private set; }
+
+        private bool _crashedByEnemy = false;
+        
+        /// <summary> 적과 충돌하여 게임 오버되는 상태를 나타냅니다. </summary>
+        public bool CrashedByEnemy
+        {
+            get => _crashedByEnemy;
+            set
+            {
+                if (_crashedByEnemy == value) return;
+                _crashedByEnemy = value;
+
+                if (_crashedByEnemy && CurrentState != GameState.GameOver)
+                {
+                    ChangeState(GameState.GameOver);
+                }
+            }
+        }
         #endregion
 
         private void Awake()

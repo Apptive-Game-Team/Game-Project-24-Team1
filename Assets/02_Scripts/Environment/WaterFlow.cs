@@ -57,6 +57,9 @@ namespace MushOut.Environment
 
         private void OnDrawGizmosSelected()
         {
+            // flowDirection이 영벡터(0,0,0)이면 화살표를 표시하지 않음
+            if (flowDirection == Vector3.zero) return;
+
             // 에디터에서 물 흐름 방향을 시각적으로 확인하기 위한 기즈모 (노란색 선)
             Gizmos.color = Color.yellow;
             Vector3 drawPos = transform.position;
@@ -71,10 +74,10 @@ namespace MushOut.Environment
             Vector3 worldDirection = transform.TransformDirection(flowDirection).normalized;
             Vector3 endPos = drawPos + (worldDirection * 2.0f);
             Gizmos.DrawLine(drawPos, endPos);
-            
+
             // 화살표 모양 표시
             Vector3 right = Quaternion.LookRotation(worldDirection) * Quaternion.Euler(0, 180 + 20, 0) * new Vector3(0, 0, 1);
-            Vector3 left = Quaternion.LookRotation(worldDirection) * Quaternion.Euler(0, 180 - 20, 0) * new Vector3(0, 0, 1);
+            Vector3 left  = Quaternion.LookRotation(worldDirection) * Quaternion.Euler(0, 180 - 20, 0) * new Vector3(0, 0, 1);
             Gizmos.DrawRay(endPos, right * 0.5f);
             Gizmos.DrawRay(endPos, left * 0.5f);
         }

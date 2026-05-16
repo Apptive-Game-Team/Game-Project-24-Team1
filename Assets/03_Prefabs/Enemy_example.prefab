@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2906620502833330933}
   - component: {fileID: 2292303525787857111}
   - component: {fileID: 4658764530207978395}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: head (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -117,7 +117,7 @@ GameObject:
   - component: {fileID: 6080676081619330991}
   - component: {fileID: 5935283600435486084}
   - component: {fileID: 3944126341701393509}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -207,7 +207,7 @@ GameObject:
   - component: {fileID: 6731674310368016003}
   - component: {fileID: 4598358151872305603}
   - component: {fileID: 4649206371965355437}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: face
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -303,7 +303,7 @@ GameObject:
   - component: {fileID: 9007812919988028930}
   - component: {fileID: 5759622970758101351}
   - component: {fileID: 1200257610485895278}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Enemy_example
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -423,8 +423,7 @@ MonoBehaviour:
   _target: {fileID: 0}
   _fieldOfView: 45
   _sightDistance: 10
-  _closeDetectionBoxSize: {x: 4, y: 3, z: 2}
-  _attackRange: 2
+  _attackRadius: 4
   _patrolPointA: {fileID: 0}
   _patrolPointB: {fileID: 0}
   _stopPoints: []
@@ -494,7 +493,7 @@ GameObject:
   - component: {fileID: 7465334787424383439}
   - component: {fileID: 8241067004071440788}
   - component: {fileID: 4999467048160356384}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
