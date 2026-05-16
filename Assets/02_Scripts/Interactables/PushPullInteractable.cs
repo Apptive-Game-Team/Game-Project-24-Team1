@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Nexush.Interactables
+namespace MushOut.Interactables
 {
     public enum PushPullMovementType
     {

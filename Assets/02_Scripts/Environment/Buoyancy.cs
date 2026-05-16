@@ -1,14 +1,14 @@
 using UnityEngine;
-using Nexush.Player;
+using MushOut.Player;
 
-namespace Nexush.Environment
+namespace MushOut.Environment
 {
     [RequireComponent(typeof(Collider))]
     public class Buoyancy : MonoBehaviour
     {
         [Header("Buoyancy Settings")]
         [Tooltip("기본 부력 계수 (값이 클수록 물 밖으로 띄워 올리는 힘이 강해집니다)")]
-        [SerializeField] private float buoyancyPower = 7.0f;
+        [SerializeField] private float buoyancyPower = 11.0f;
 
         private Collider _waterCollider;
 
@@ -50,18 +50,36 @@ namespace Nexush.Environment
                 }
             }
             
-            // 오브젝트 중심 위치가 수면보다 얼마나 깊이 들어갔는지 계산
-            float depth = waterSurfaceY - other.transform.position.y;
+            // 부력을 계산할 기준점 (오브젝트는 피벗, 플레이어는 중심)
+            Vector3 targetPos = other.transform.position;
+
+            // 플레이어인지 확인
+            bool isPlayer = other.TryGetComponent<PlayerController>(out var player);
+            if (isPlayer)
+            {
+                // 플레이어는 피벗(transform.position)이 발끝이므로, 중심점(Center)을 더해 가슴/배 높이에서 계산되도록 보정
+                var cc = other.GetComponent<CharacterController>();
+                if (cc != null)
+                {
+                    targetPos.y += cc.center.y;
+                }
+            }
+
+            // 기준점이 수면보다 얼마나 깊이 들어갔는지 계산
+            float depth = waterSurfaceY - targetPos.y;
 
             if (depth > 0f)
             {
-                // 깊을수록 강한 위쪽 방향의 힘(부력) 계산
-                float force = depth * buoyancyPower;
+                // 수면 근처(0 ~ 0.5m)에서는 힘을 부드럽게 줄여 수면 위로 튕겨오르는 현상 방지
+                // 깊이가 0.5m 이상이면 1(최대 부력) 유지
+                float depthFactor = Mathf.Clamp01(depth * 2.0f);
+                float force = buoyancyPower * depthFactor;
 
                 // 1. PlayerController를 가진 플레이어인 경우
-                if (other.TryGetComponent<PlayerController>(out var player))
+                if (isPlayer)
                 {
-                    player.AddBuoyancy(force);
+                    // 플레이어는 독자적인 중력값(보통 -15)을 사용하므로 기본 중력 상쇄값을 포함해 전달
+                    player.AddBuoyancy((15.0f + force) * depthFactor);
                 }
                 // 2. 일반 Rigidbody를 가진 오브젝트인 경우
                 else if (other.TryGetComponent<Rigidbody>(out var rb))
@@ -69,14 +87,15 @@ namespace Nexush.Environment
                     // 질량과 무관하게 오브젝트의 수평 단면적(X * Z 스케일)이 클수록 부력을 더 받도록 설정
                     float areaScale = other.transform.localScale.x * other.transform.localScale.z;
 
-                    // 중력을 상쇄하는 기본 힘은 유지하고, 물에 잠겼을 때 받는 추가 부력(force)만 넓이에 비례해 증폭
-                    float rbForce = Mathf.Abs(Physics.gravity.y) + (force * areaScale);
+                    // 중력을 상쇄하는 힘과 부력을 수면 근처에서 서서히 줄여서 중력과 균형을 이루게 함
+                    float rbForce = Mathf.Abs(Physics.gravity.y) * depthFactor + (force * areaScale);
 
                     // Rigidbody에는 FixedUpdate 주기에 맞는 ForceMode.Acceleration 사용
                     rb.AddForce(Vector3.up * rbForce, ForceMode.Acceleration);
                     
-                    // 마찰력(Drag)도 유지
-                    rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z), Time.fixedDeltaTime * 1.5f);
+                    // 수면에 가까워질수록 마찰력(Drag)을 강하게 주어 진자운동(튀는 현상)을 감쇠시킴
+                    float damping = Mathf.Lerp(4.0f, 1.5f, 1f - depthFactor); // 수면 근처(depthFactor=0)일수록 강한 저항(4.0)
+                    rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z), Time.fixedDeltaTime * damping);
                 }
             }
         }

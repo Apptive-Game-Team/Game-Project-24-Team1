@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace GameProject24.Enemy
+namespace MushOut.Enemy
 {
     /// <summary>
     /// 에너미가 Patrolling 상태일 때 정해진 지점(A, B)을 순찰하고 멈춰서 두리번거리는 로직입니다.

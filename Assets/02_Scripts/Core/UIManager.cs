@@ -1,7 +1,7 @@
 using UnityEngine;
-using Nexush.Core;
+using MushOut.Core;
 
-namespace Nexush.Core
+namespace MushOut.Core
 {
     /// <summary>
     /// UI의 생성과 전역 UI 이벤트를 관리하는 싱글톤 매니저입니다.

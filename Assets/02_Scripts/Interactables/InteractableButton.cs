@@ -1,8 +1,8 @@
 using UnityEngine;
 using UnityEngine.Events;
-using Nexush.Core;
+using MushOut.Interaction;
 
-namespace Nexush.Interactables
+namespace MushOut.Interactables
 {
     public class InteractableButton : MonoBehaviour, IInteractable
     {

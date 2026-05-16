@@ -1,13 +1,16 @@
 using UnityEngine;
 
-public class disableOnRunning : MonoBehaviour
+namespace MushOut.Player
 {
-    private void Start()
+    public class disableOnRunning : MonoBehaviour
     {
-        // 해당 오브젝트의 모든 하위 오브젝트를 비활성화합니다.
-        foreach (Transform child in transform)
+        private void Start()
         {
-            child.gameObject.SetActive(false);
+            // 해당 오브젝트의 모든 하위 오브젝트를 비활성화합니다.
+            foreach (Transform child in transform)
+            {
+                child.gameObject.SetActive(false);
+            }
         }
     }
 }

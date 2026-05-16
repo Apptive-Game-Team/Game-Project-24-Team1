@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Nexush.Interfaces
+namespace MushOut.Interfaces
 {
     /// <summary>
     /// [Rule C] 피격 정보를 담는 구조체
