@@ -1,7 +1,7 @@
 using UnityEngine;
 using System;
 
-namespace Nexush.Core
+namespace MushOut.Core
 {
     /// <summary>
     /// 게임의 전체적인 상태(시작, 일시정지, 종료 등)를 관리하는 전역 싱글톤 매니저입니다.
@@ -61,6 +61,27 @@ namespace Nexush.Core
                 Debug.Log($"[GameManager] State Changed: {_currentState}");
             }
         }
+
+        /// <summary> 씬 내의 전역 플레이어 Transform 캐싱 </summary>
+        public Transform PlayerTransform { get; private set; }
+
+        private bool _crashedByEnemy = false;
+        
+        /// <summary> 적과 충돌하여 게임 오버되는 상태를 나타냅니다. </summary>
+        public bool CrashedByEnemy
+        {
+            get => _crashedByEnemy;
+            set
+            {
+                if (_crashedByEnemy == value) return;
+                _crashedByEnemy = value;
+
+                if (_crashedByEnemy && CurrentState != GameState.GameOver)
+                {
+                    ChangeState(GameState.GameOver);
+                }
+            }
+        }
         #endregion
 
         private void Awake()
@@ -82,6 +103,11 @@ namespace Nexush.Core
         {
             // 초기 상태 설정
             ChangeState(GameState.Ready);
+
+            // 전역 플레이어 찾아서 캐싱 (Enemy 등에서 무거운 Find를 매번 하지 않도록)
+            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj == null) playerObj = GameObject.Find("Player");
+            if (playerObj != null) PlayerTransform = playerObj.transform;
         }
 
         /// <summary>

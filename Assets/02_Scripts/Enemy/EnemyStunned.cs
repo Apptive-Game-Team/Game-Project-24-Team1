@@ -2,17 +2,18 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace GameProject24.Enemy
+namespace MushOut.Enemy
 {
     /// <summary>
     /// 에너미가 Stunned(기절) 상태일 때 작동하는 로직입니다.
     /// 이동을 멈추고 빨간색으로 변한 뒤, 일정 시간 후 원래대로 복귀합니다.
     /// </summary>
-    [RequireComponent(typeof(EnemyStatus), typeof(NavMeshAgent))]
+    [RequireComponent(typeof(EnemyController), typeof(NavMeshAgent))]
     public class EnemyStunned : MonoBehaviour
     {
-        private EnemyStatus _enemyStatus;
+        private EnemyController _enemyController;
         private NavMeshAgent _agent;
+        private Rigidbody _rigidbody;
 
         [Header("Stunned Settings")]
         [Tooltip("기절 지속 시간(초)입니다.")]
@@ -29,18 +30,25 @@ namespace GameProject24.Enemy
 
         private void Awake()
         {
-            _enemyStatus = GetComponent<EnemyStatus>();
+            _enemyController = GetComponent<EnemyController>();
             _agent = GetComponent<NavMeshAgent>();
+            _rigidbody = GetComponent<Rigidbody>();
 
             // 자신과 자식 오브젝트의 모든 렌더러 캐싱
             _renderers = GetComponentsInChildren<Renderer>();
             _originalColors = new Color[_renderers.Length];
+
+            // 기본 상태: Rigidbody는 Kinematic으로 NavMeshAgent에게 이동 제어권을 부여
+            if (_rigidbody != null)
+            {
+                _rigidbody.isKinematic = true;
+            }
         }
 
         private void Update()
         {
             // Stunned 상태가 됐을 때 코루틴 1회 시작
-            if (_enemyStatus.CurrentState == EnemyStatus.State.Stunned && !_isRunning)
+            if (_enemyController.CurrentState == EnemyController.State.Stunned && !_isRunning)
             {
                 StartCoroutine(StunnedRoutine());
             }
@@ -54,8 +62,14 @@ namespace GameProject24.Enemy
         {
             _isRunning = true;
 
-            // 1. 이동 정지
+            // 1. NavMeshAgent 비활성화 후 Rigidbody 물리 제어권 부여
+            //    (NavMeshAgent와 Rigidbody가 동시에 활성화되면 이동 충돌 발생)
             _agent.isStopped = true;
+            _agent.enabled = false;
+            if (_rigidbody != null)
+            {
+                _rigidbody.isKinematic = false;
+            }
 
             // 2. 원래 색상 저장 후 빨간색으로 변경
             for (int i = 0; i < _renderers.Length; i++)
@@ -73,12 +87,19 @@ namespace GameProject24.Enemy
                 _renderers[i].material.color = _originalColors[i];
             }
 
-            // 5. 이동 재개
+            // 5. Rigidbody Kinematic 복구 후 NavMeshAgent 재활성화
+            if (_rigidbody != null)
+            {
+                _rigidbody.linearVelocity = Vector3.zero;
+                _rigidbody.angularVelocity = Vector3.zero;
+                _rigidbody.isKinematic = true;
+            }
+            _agent.enabled = true;
             _agent.isStopped = false;
 
             // 6. 초기 상태로 복귀
             _isRunning = false;
-            _enemyStatus.ChangeState(_enemyStatus.InitialState);
+            _enemyController.ChangeState(_enemyController.InitialState);
         }
 
         private void OnDisable()

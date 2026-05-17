@@ -1,21 +1,21 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace GameProject24.Enemy
+namespace MushOut.Enemy
 {
     /// <summary>
     /// 에너미가 Idle 상태일 때 제자리에 대기하도록 제어하는 스크립트입니다.
     /// </summary>
-    [RequireComponent(typeof(EnemyStatus), typeof(NavMeshAgent))]
+    [RequireComponent(typeof(EnemyController), typeof(NavMeshAgent))]
     public class EnemyIdle : MonoBehaviour
     {
-        private EnemyStatus _enemyStatus;
+        private EnemyController _enemyController;
         private NavMeshAgent _agent;
         private Quaternion _initialRotation;
 
         private void Awake()
         {
-            _enemyStatus = GetComponent<EnemyStatus>();
+            _enemyController = GetComponent<EnemyController>();
             _agent = GetComponent<NavMeshAgent>();
             _initialRotation = transform.rotation;
         }
@@ -23,18 +23,18 @@ namespace GameProject24.Enemy
         private void Update()
         {
             // 컴포넌트가 없거나 NavMesh 위에 없으면 안전하게 리턴
-            if (_enemyStatus == null || _agent == null || !_agent.isActiveAndEnabled || !_agent.isOnNavMesh)
+            if (_enemyController == null || _agent == null || !_agent.isActiveAndEnabled || !_agent.isOnNavMesh)
             {
                 return;
             }
 
             // 현재 상태가 Idle이 아니면 아무것도 하지 않음
-            if (_enemyStatus.CurrentState != EnemyStatus.State.Idle)
+            if (_enemyController.CurrentState != EnemyController.State.Idle)
             {
                 return;
             }
 
-            Transform pointA = _enemyStatus.PatrolPointA;
+            Transform pointA = _enemyController.PatrolPointA;
 
             // PatrolPointA가 지정되어 있지 않거나, 이미 도달(충돌 범위 내)했다면 대기
             if (pointA == null || Vector3.Distance(transform.position, pointA.position) <= _agent.stoppingDistance + 0.1f)
@@ -63,7 +63,7 @@ namespace GameProject24.Enemy
             {
                 // PatrolPointA에 아직 도달하지 않았다면 해당 위치로 이동
                 _agent.isStopped = false;
-                _agent.speed = _enemyStatus.MoveSpeed;
+                _agent.speed = _enemyController.MoveSpeed;
                 _agent.SetDestination(pointA.position);
             }
         }

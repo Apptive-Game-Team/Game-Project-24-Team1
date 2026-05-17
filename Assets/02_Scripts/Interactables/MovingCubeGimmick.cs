@@ -1,7 +1,7 @@
 using UnityEngine;
-using Nexush.Data;
+using MushOut.Interaction;
 
-namespace Nexush.Interactables
+namespace MushOut.Interactables
 {
     [RequireComponent(typeof(Rigidbody))]
     public class MovingCubeGimmick : MonoBehaviour

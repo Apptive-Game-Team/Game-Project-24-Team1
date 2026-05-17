@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace Nexush.Player
+namespace MushOut.Player
 {
     /// <summary>
     /// 플레이어의 입력을 처리하고 다른 컴포넌트가 참조할 수 있도록 상태를 보관하는 클래스입니다.
@@ -47,6 +47,11 @@ namespace Nexush.Player
         /// 상호작용 입력 여부 (F 키 등)
         /// </summary>
         public bool IsInteracting { get; private set; }
+
+        /// <summary>
+        /// 상호작용 키 누르고 있는 상태 여부
+        /// </summary>
+        public bool IsInteractingHeld { get; private set; }
 
         private InputAction _moveAction;
         private InputAction _lookAction;
@@ -122,6 +127,7 @@ namespace Nexush.Player
             IsAiming = _aimAction != null && _aimAction.IsPressed();
             IsFiring = _fireAction != null && _fireAction.IsPressed();
             IsInteracting = _interactAction != null && _interactAction.WasPressedThisFrame();
+            IsInteractingHeld = _interactAction != null && _interactAction.IsPressed();
         }
     }
 }

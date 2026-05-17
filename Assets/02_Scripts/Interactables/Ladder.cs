@@ -1,7 +1,7 @@
 using UnityEngine;
-using Nexush.Player;
+using MushOut.Player;
 
-namespace Nexush.Interactables
+namespace MushOut.Interactables
 {
     /// <summary>
     /// 사다리 영역을 정의하는 스크립트입니다.

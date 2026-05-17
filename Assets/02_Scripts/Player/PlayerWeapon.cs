@@ -1,10 +1,10 @@
 using System;
 using System.Collections;
 using UnityEngine;
-using Nexush.Interfaces;
-using Nexush.Combat;
+using MushOut.Interfaces;
+using MushOut.Combat;
 
-namespace Nexush.Player
+namespace MushOut.Player
 {
     /// <summary>
     /// [Rule D] 싱글톤을 사용하지 않는 이중 레이캐스트 사격 시스템 컴포넌트입니다.
@@ -30,6 +30,9 @@ namespace Nexush.Player
         [Tooltip("물리적으로 충돌한 객체 중, 실제로 피격 처리를 허용할 타겟의 태그입니다.")]
         [SerializeField] private string targetTag = "Enemy";
 
+        [Tooltip("다트 투사체가 실제로 충돌 판정을 할 레이어입니다. Enemy 레이어만 포함하도록 설정하세요. (지형 포함 시 땅에 막힙니다)")]
+        [SerializeField] private LayerMask dartHitLayer;
+
         /// <summary>
         /// [Rule A] 관찰자 패턴: 사격이 발생했을 때 사운드나 VFX 시스템에 알리기 위한 이벤트입니다.
         /// </summary>
@@ -42,15 +45,25 @@ namespace Nexush.Player
 
         private float _lastFireTime;
         private Camera _mainCam;
+        private PlayerInputHandler _inputHandler;
 
         private void Awake()
         {
             // [Rule D] 싱글톤 대신 Camera.main을 통해 메인 카메라를 참조합니다.
             _mainCam = Camera.main;
+            _inputHandler = GetComponent<PlayerInputHandler>();
 
             if (muzzleTransform == null)
             {
                 Debug.LogError($"[{name}] Muzzle Transform이 설정되지 않았습니다! 총구 위치를 할당해주세요.");
+            }
+        }
+
+        private void Update()
+        {
+            if (_inputHandler != null && _inputHandler.IsFiring)
+            {
+                FireWeapon();
             }
         }
 
@@ -59,8 +72,15 @@ namespace Nexush.Player
         /// </summary>
         public void FireWeapon()
         {
-            if (weaponData == null) return;
-            if (Time.time < _lastFireTime + weaponData.fireRate) return;
+            if (weaponData == null || muzzleTransform == null || _mainCam == null)
+            {
+                return;
+            }
+
+            if (Time.time < _lastFireTime + weaponData.fireRate)
+            {
+                return;
+            }
 
             ExecuteDoubleRaycast();
 
@@ -129,12 +149,17 @@ namespace Nexush.Player
                 float moveStep = projectileSpeed * Time.deltaTime;
 
                 // [핵심] 이동하기 전에, 내 현재 위치에서 이동할 위치 사이에 충돌체가 있는지 레이캐스트로 검사!
-                if (Physics.Raycast(currentPos, direction, out RaycastHit hit, moveStep, weaponData.targetLayer))
+                // dartHitLayer: Enemy 레이어만 포함 (지형/벽 레이어 제외하여 지면에 막히는 현상 방지)
+                if (Physics.Raycast(currentPos, direction, out RaycastHit hit, moveStep, dartHitLayer))
                 {
                     // 무언가에 부딪혔다면! (벽이든, 적이든)
+                    Debug.Log($"[PlayerWeapon] 레이캐스트 히트: {hit.collider.name} | 태그: {hit.collider.tag} | targetTag: {targetTag}");
+
                     if (hit.collider.CompareTag(targetTag))
                     {
-                        if (hit.collider.TryGetComponent<IHittable>(out var hittable))
+                        IHittable hittable = hit.collider.GetComponentInParent<IHittable>();
+                        Debug.Log($"[PlayerWeapon] 태그 일치! IHittable 탐색 결과: {(hittable != null ? hittable.GetType().Name : "null")}");
+                        if (hittable != null)
                         {
                             HitInfo hitInfo = new HitInfo
                             {
@@ -142,6 +167,7 @@ namespace Nexush.Player
                                 hitPoint = hit.point,
                                 normal = hit.normal
                             };
+                            Debug.Log($"[PlayerWeapon] OnHit 호출. tranquilizerAmount: {weaponData.tranquilizerAmount}");
 
                             // 인터페이스 메서드 호출 (실제 마취 수치 적용)
                             hittable.OnHit(hitInfo);
