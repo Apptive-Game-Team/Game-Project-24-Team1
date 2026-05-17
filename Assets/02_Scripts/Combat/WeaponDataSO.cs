@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Nexush.Combat
+namespace MushOut.Combat
 {
     /// <summary>
     /// [Rule B] Scriptable Object 기반의 데이터 주도 설계

@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace GameProject24.Enemy
+namespace MushOut.Enemy
 {
     /// <summary>
     /// 에너미가 Stunned(기절) 상태일 때 작동하는 로직입니다.

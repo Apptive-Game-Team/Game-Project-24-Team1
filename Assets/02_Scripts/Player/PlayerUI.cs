@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Serialization;
 
-namespace Nexush.Player
+namespace MushOut.Player
 {
     /// <summary>
     /// 플레이어 화면에 표시되는 UI 요소(조준점 등)를 관리하는 클래스입니다.

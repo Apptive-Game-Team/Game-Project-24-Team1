@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Nexush.Player
+namespace MushOut.Player
 {
     /// <summary>
     /// 플레이어의 사다리 클라이밍 로직을 전담하는 핸들러 클래스입니다.

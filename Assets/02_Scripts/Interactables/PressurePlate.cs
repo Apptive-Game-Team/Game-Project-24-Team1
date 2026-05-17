@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using System.Collections.Generic;
 
-namespace Nexush.Interactables
+namespace MushOut.Interactables
 {
     /// <summary>
     /// 무언가 올라가면 On, 아무것도 없으면 Off가 되는 압력 발판 (물리 트리거 기반)

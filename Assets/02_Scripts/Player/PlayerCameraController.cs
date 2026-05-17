@@ -1,7 +1,7 @@
 using UnityEngine;
 using Unity.Cinemachine;
 
-namespace Nexush.Player
+namespace MushOut.Player
 {
     /// <summary>
     /// 플레이어의 카메라 제어 및 TPS/FPS 모드 전환을 담당하는 클래스입니다.

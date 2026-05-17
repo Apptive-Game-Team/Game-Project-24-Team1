@@ -1,7 +1,7 @@
 using UnityEngine;
-using Nexush.Core;
+using MushOut.Interaction;
 
-namespace Nexush.Player
+namespace MushOut.Player
 {
     public class PlayerInteractor : MonoBehaviour
     {
@@ -14,9 +14,17 @@ namespace Nexush.Player
 
         [SerializeField] private LayerMask interactableLayer;
 
+        [Tooltip("상호작용 가능한 밀당 오브젝트와의 최대 인식 거리입니다.")]
+        [SerializeField] private float pushPullDistance = 0.5f;
+
         private IInteractable currentInteractable;
         private PlayerInputHandler _inputHandler;
         private Camera _mainCam;
+
+        private MushOut.Interactables.PushPullInteractable _grabbedObject;
+        private float _initialGrabDistance;
+        private PlayerEnvironmentDetector _environmentDetector;
+        private CharacterController _characterController;
 
         private void Awake()
         {
@@ -30,6 +38,9 @@ namespace Nexush.Player
             {
                 _inputHandler = GetComponentInParent<PlayerInputHandler>();
             }
+
+            _environmentDetector = GetComponent<PlayerEnvironmentDetector>();
+            _characterController = GetComponent<CharacterController>();
         }
 
         private void Update()
@@ -39,7 +50,68 @@ namespace Nexush.Player
             {
                 currentInteractable.Interact();
             }
+
+            HandlePushPull();
         }
+
+        private void HandlePushPull()
+        {
+            if (_inputHandler == null || _environmentDetector == null) return;
+
+            if (_inputHandler.IsInteractingHeld && _environmentDetector.IsGrounded)
+            {
+                if (_grabbedObject == null)
+                {
+                    // 전방 1.0 유닛 높이에서 구체(SphereCast)를 쏴서 물체를 감지
+                    Vector3 rayOrigin = transform.position + Vector3.up * 1.0f; 
+                    if (Physics.SphereCast(rayOrigin, 0.5f, transform.forward, out RaycastHit hit, pushPullDistance))
+                    {
+                        var interactable = hit.collider.GetComponent<MushOut.Interactables.PushPullInteractable>();
+                        if (interactable != null && interactable.enabled)
+                        {
+                            _grabbedObject = interactable;
+                            _grabbedObject.StartGrab(transform);
+                            _initialGrabDistance = Vector3.Distance(transform.position, _grabbedObject.transform.position);
+                            
+                            if (_grabbedObject.objectCollider != null && _characterController != null)
+                            {
+                                Physics.IgnoreCollision(_characterController, _grabbedObject.objectCollider, true);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // 오브젝트가 벽에 막히거나 거리가 벌어지면 그랩 자동 해제
+                    float currentDistance = Vector3.Distance(transform.position, _grabbedObject.transform.position);
+                    if (Mathf.Abs(currentDistance - _initialGrabDistance) > 0.25f || currentDistance > pushPullDistance + 1.5f)
+                    {
+                        ReleaseGrabbedObject();
+                    }
+                }
+            }
+            else
+            {
+                if (_grabbedObject != null)
+                {
+                    ReleaseGrabbedObject();
+                }
+            }
+        }
+
+        private void ReleaseGrabbedObject()
+        {
+            if (_grabbedObject == null) return;
+
+            if (_grabbedObject.objectCollider != null && _characterController != null)
+            {
+                Physics.IgnoreCollision(_characterController, _grabbedObject.objectCollider, false);
+            }
+            _grabbedObject.EndGrab();
+            _grabbedObject = null;
+        }
+
+        public MushOut.Interactables.PushPullInteractable GrabbedObject => _grabbedObject;
 
         private void FixedUpdate()
         {

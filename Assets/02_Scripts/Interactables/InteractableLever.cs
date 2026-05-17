@@ -1,8 +1,8 @@
 using UnityEngine;
 using UnityEngine.Events;
-using Nexush.Core;
+using MushOut.Interaction;
 
-namespace Nexush.Interactables
+namespace MushOut.Interactables
 {
     /// <summary>
     /// 온/오프 상태를 가지는 상호작용 가능한 레버 오브젝트

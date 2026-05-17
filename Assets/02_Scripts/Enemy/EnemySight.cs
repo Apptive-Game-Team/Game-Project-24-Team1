@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace GameProject24.Enemy
+namespace MushOut.Enemy
 {
     /// <summary>
     /// 에너미의 시야를 담당하는 클래스입니다.
@@ -28,8 +28,16 @@ namespace GameProject24.Enemy
         /// <summary> 상태를 제어하는 EnemyStatus 컴포넌트입니다. </summary>
         private EnemyStatus _enemyStatus;
 
+#if UNITY_EDITOR
         /// <summary> GL 렌더링에 사용할 반투명 머티리얼입니다. </summary>
         private Material _coneMaterial;
+
+        // 원뿔 기하 정점 캐싱용 변수들
+        private Vector3[] _localCirclePoints;
+        private float _cachedDetectionDist = -1f;
+        private float _cachedFov = -1f;
+        private int _cachedSegments = -1;
+#endif
 
         // --- 공유 속성 (코드 중복 방지) ---
         private float CurrentDetectionDist => _enemyStatus.CurrentState == EnemyStatus.State.Chasing ? _enemyStatus.SightDistance + 7.0f : _enemyStatus.SightDistance;
@@ -38,15 +46,19 @@ namespace GameProject24.Enemy
         private void Awake()
         {
             _enemyStatus = GetComponentInParent<EnemyStatus>();
+#if UNITY_EDITOR
             CreateMaterial();
+#endif
         }
 
         private void OnEnable()
         {
+#if UNITY_EDITOR
             if (_coneMaterial == null)
             {
                 CreateMaterial();
             }
+#endif
         }
 
         private void Start()
@@ -55,87 +67,99 @@ namespace GameProject24.Enemy
             {
                 if (_enemyStatus == null) _enemyStatus = GetComponentInParent<EnemyStatus>();
 
-                // 플레이어 캐싱 (태그가 없으면 이름으로 백업 검색)
-                GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-                if (playerObj == null)
+                // 1. 최적화: 매번 씬 전체를 뒤지는 Find() 대신 GameManager의 전역 캐싱 활용
+                if (MushOut.Core.GameManager.Instance != null)
                 {
-                    playerObj = GameObject.Find("Player");
+                    _playerTransform = MushOut.Core.GameManager.Instance.PlayerTransform;
                 }
 
-                if (playerObj != null)
+                // 싱글톤에 등록되지 않은 특수 상황 대비 (Editor 테스트 등)
+                if (_playerTransform == null)
                 {
-                    _playerTransform = playerObj.transform;
+                    GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+                    if (playerObj == null) playerObj = GameObject.Find("Player");
+                    if (playerObj != null) _playerTransform = playerObj.transform;
                 }
+
+                // 2. 최적화: 매 프레임 검사 대신 코루틴을 통해 주기적(0.15초)으로 검사
+                StartCoroutine(SightRoutine());
             }
         }
 
-        private void Update()
+        private System.Collections.IEnumerator SightRoutine()
         {
-            if (!Application.isPlaying) return;
+            // 0.15초 간격으로 시야 판정 (성능 부하 감소)
+            WaitForSeconds waitTime = new WaitForSeconds(0.15f);
 
-            if (_playerTransform == null || _enemyStatus == null)
+            while (true)
             {
-                return;
-            }
+                yield return waitTime;
 
-            // 사망하거나 기절한 상태면 탐지 로직 생략
-            if (_enemyStatus.CurrentState == EnemyStatus.State.Dead || 
-                _enemyStatus.CurrentState == EnemyStatus.State.Stunned)
-            {
-                _enemyStatus.IsPlayerSpotted = false;
-                return;
-            }
-
-            bool canSee = false;
-
-            // 시야 기준점 설정
-            Vector3 origin = transform.position + transform.TransformDirection(_eyeOffset);
-            
-            // 플레이어의 발끝(0.2m)부터 머리(1.8m)까지 10등분하여 촘촘하게 전부 검사
-            int checkResolution = 10;
-            
-            for (int i = 0; i <= checkResolution; i++)
-            {
-                float height = Mathf.Lerp(1.8f, 0.2f, (float)i / checkResolution);
-                Vector3 offset = Vector3.up * height;
-                Vector3 targetPos = _playerTransform.position + offset;
-                Vector3 dirToTarget = targetPos - origin;
-                float distToTarget = dirToTarget.magnitude;
-
-                // 1. 판정 로직
-                if (distToTarget <= CurrentDetectionDist && Vector3.Angle(transform.forward, dirToTarget) <= CurrentFov * 0.5f)
+                if (_playerTransform == null || _enemyStatus == null)
                 {
-                    // 시야각 내에 있으면 Raycast로 장애물 확인
-                    Vector3 rayDir = dirToTarget.normalized;
+                    continue;
+                }
 
-                    if (Physics.Raycast(origin, rayDir, out RaycastHit hit, distToTarget, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+                // 사망하거나 기절한 상태면 탐지 로직 생략
+                if (_enemyStatus.CurrentState == EnemyStatus.State.Dead || 
+                    _enemyStatus.CurrentState == EnemyStatus.State.Stunned)
+                {
+                    _enemyStatus.IsPlayerSpotted = false;
+                    continue;
+                }
+
+                bool canSee = false;
+
+                // 시야 기준점 설정
+                Vector3 origin = transform.position + transform.TransformDirection(_eyeOffset);
+                
+                // 플레이어의 발끝(0.2m)부터 머리(1.8m)까지 10등분하여 촘촘하게 전부 검사
+                int checkResolution = 10;
+                
+                for (int i = 0; i <= checkResolution; i++)
+                {
+                    float height = Mathf.Lerp(1.8f, 0.2f, (float)i / checkResolution);
+                    Vector3 offset = Vector3.up * height;
+                    Vector3 targetPos = _playerTransform.position + offset;
+                    Vector3 dirToTarget = targetPos - origin;
+                    float distToTarget = dirToTarget.magnitude;
+
+                    // 1. 판정 로직
+                    if (distToTarget <= CurrentDetectionDist && Vector3.Angle(transform.forward, dirToTarget) <= CurrentFov * 0.5f)
                     {
-                        if (hit.transform.CompareTag("Player"))
+                        // 시야각 내에 있으면 Raycast로 장애물 확인
+                        Vector3 rayDir = dirToTarget.normalized;
+
+                        if (Physics.Raycast(origin, rayDir, out RaycastHit hit, distToTarget, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
                         {
-                            canSee = true;
-                            break; // 신체 중 하나라도 보이면 즉시 탐지 완료
+                            if (hit.transform.CompareTag("Player"))
+                            {
+                                canSee = true;
+                                break; // 신체 중 하나라도 보이면 즉시 탐지 완료
+                            }
                         }
                     }
                 }
-            }
 
-            // 3. 발각 시 공통 처리 로직
-            if (canSee)
-            {
-                // 시야에 보일 때만 갱신 (여러 개의 Sight 컴포넌트 간의 덮어씌우기 방지)
-                _enemyStatus.IsPlayerSpotted = true;
-                
-                // 플레이어의 현재 위치로 LPP 지속 갱신
-                _enemyStatus.LatestPlayerPosition = _playerTransform.position;
-
-                // Chasing 상태가 아니라면 Chasing으로 전환
-                if (_enemyStatus.CurrentState != EnemyStatus.State.Chasing)
+                // 3. 발각 시 공통 처리 로직
+                if (canSee)
                 {
-                    _enemyStatus.ChangeState(EnemyStatus.State.Chasing);
+                    // 시야에 보일 때만 갱신 (여러 개의 Sight 컴포넌트 간의 덮어씌우기 방지)
+                    _enemyStatus.IsPlayerSpotted = true;
+                    
+                    // 플레이어의 현재 위치로 LPP 지속 갱신
+                    _enemyStatus.LatestPlayerPosition = _playerTransform.position;
+
+                    // Chasing 상태가 아니라면 Chasing으로 전환
+                    if (_enemyStatus.CurrentState != EnemyStatus.State.Chasing)
+                    {
+                        _enemyStatus.ChangeState(EnemyStatus.State.Chasing);
+                    }
                 }
             }
         }
 
+#if UNITY_EDITOR
         private void CreateMaterial()
         {
             Shader shader = Shader.Find("Hidden/Internal-Colored");
@@ -147,6 +171,33 @@ namespace GameProject24.Enemy
             _coneMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
             _coneMaterial.SetInt("_Cull",     (int)UnityEngine.Rendering.CullMode.Off);
             _coneMaterial.SetInt("_ZWrite",   0);
+        }
+
+        private void UpdateCachedPoints()
+        {
+            if (_localCirclePoints == null || _cachedSegments != _segments || 
+                _cachedDetectionDist != CurrentDetectionDist || _cachedFov != CurrentFov)
+            {
+                _cachedSegments = _segments;
+                _cachedDetectionDist = CurrentDetectionDist;
+                _cachedFov = CurrentFov;
+
+                _localCirclePoints = new Vector3[_segments];
+
+                float halfFovRad = _cachedFov * 0.5f * Mathf.Deg2Rad;
+                float baseRadius = _cachedDetectionDist * Mathf.Tan(halfFovRad);
+
+                // 로컬 좌표계 기준의 꼭짓점과 밑면 중심
+                Vector3 localBaseCenter = _eyeOffset + Vector3.forward * _cachedDetectionDist;
+
+                for (int i = 0; i < _segments; i++)
+                {
+                    float angle = 2f * Mathf.PI / _segments * i;
+                    _localCirclePoints[i] = localBaseCenter
+                        + Vector3.right * Mathf.Cos(angle) * baseRadius
+                        + Vector3.up    * Mathf.Sin(angle) * baseRadius;
+                }
+            }
         }
 
         private void OnRenderObject()
@@ -169,27 +220,16 @@ namespace GameProject24.Enemy
 
             Color lineColor = new Color(fillColor.r, fillColor.g, fillColor.b, Mathf.Min(_alpha * 5f, 1f));
 
-            // 원뿔 기하 계산
-            float halfFovRad = CurrentFov * 0.5f * Mathf.Deg2Rad;
-            float baseRadius = CurrentDetectionDist * Mathf.Tan(halfFovRad);
-
-            Vector3 apex       = transform.position + transform.TransformDirection(_eyeOffset);
-            Vector3 baseCenter = apex + transform.forward * CurrentDetectionDist;
-            Vector3 axisRight  = transform.right;
-            Vector3 axisUp     = transform.up;
-
-            // 밑면 원 위의 점들 미리 계산
-            Vector3[] circlePoints = new Vector3[_segments];
-            for (int i = 0; i < _segments; i++)
-            {
-                float angle = 2f * Mathf.PI / _segments * i;
-                circlePoints[i] = baseCenter
-                    + axisRight * Mathf.Cos(angle) * baseRadius
-                    + axisUp    * Mathf.Sin(angle) * baseRadius;
-            }
+            // 정점 정보가 변경되었을 때만 캐시 업데이트 (메모리 재할당 방지 및 CPU 최적화)
+            UpdateCachedPoints();
 
             _coneMaterial.SetPass(0);
             GL.PushMatrix();
+            // 로컬 좌표계 매트릭스 적용
+            GL.MultMatrix(transform.localToWorldMatrix);
+
+            Vector3 localApex = _eyeOffset;
+            Vector3 localBaseCenter = _eyeOffset + Vector3.forward * CurrentDetectionDist;
 
             // ── 채우기: 옆면 + 밑면 삼각형 팬 ───────────────────────────────
             GL.Begin(GL.TRIANGLES);
@@ -197,16 +237,16 @@ namespace GameProject24.Enemy
 
             for (int i = 0; i < _segments; i++)
             {
-                Vector3 p1 = circlePoints[i];
-                Vector3 p2 = circlePoints[(i + 1) % _segments];
+                Vector3 p1 = _localCirclePoints[i];
+                Vector3 p2 = _localCirclePoints[(i + 1) % _segments];
 
                 // 옆면: 꼭짓점 → 밑면 두 점
-                GL.Vertex(apex);
+                GL.Vertex(localApex);
                 GL.Vertex(p1);
                 GL.Vertex(p2);
 
                 // 밑면: 원 중심 → 밑면 두 점
-                GL.Vertex(baseCenter);
+                GL.Vertex(localBaseCenter);
                 GL.Vertex(p2);
                 GL.Vertex(p1);
             }
@@ -219,8 +259,8 @@ namespace GameProject24.Enemy
 
             for (int i = 0; i < _segments; i++)
             {
-                GL.Vertex(circlePoints[i]);
-                GL.Vertex(circlePoints[(i + 1) % _segments]);
+                GL.Vertex(_localCirclePoints[i]);
+                GL.Vertex(_localCirclePoints[(i + 1) % _segments]);
             }
 
             GL.End();
@@ -288,5 +328,6 @@ namespace GameProject24.Enemy
                 DestroyImmediate(_coneMaterial);
             }
         }
+#endif
     }
 }

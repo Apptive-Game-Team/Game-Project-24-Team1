@@ -1,10 +1,10 @@
 using System;
 using System.Collections;
 using UnityEngine;
-using Nexush.Interfaces;
-using Nexush.Combat;
+using MushOut.Interfaces;
+using MushOut.Combat;
 
-namespace Nexush.Player
+namespace MushOut.Player
 {
     /// <summary>
     /// [Rule D] 싱글톤을 사용하지 않는 이중 레이캐스트 사격 시스템 컴포넌트입니다.
@@ -42,15 +42,25 @@ namespace Nexush.Player
 
         private float _lastFireTime;
         private Camera _mainCam;
+        private PlayerInputHandler _inputHandler;
 
         private void Awake()
         {
             // [Rule D] 싱글톤 대신 Camera.main을 통해 메인 카메라를 참조합니다.
             _mainCam = Camera.main;
+            _inputHandler = GetComponent<PlayerInputHandler>();
 
             if (muzzleTransform == null)
             {
                 Debug.LogError($"[{name}] Muzzle Transform이 설정되지 않았습니다! 총구 위치를 할당해주세요.");
+            }
+        }
+
+        private void Update()
+        {
+            if (_inputHandler != null && _inputHandler.IsFiring)
+            {
+                FireWeapon();
             }
         }
 
@@ -59,8 +69,15 @@ namespace Nexush.Player
         /// </summary>
         public void FireWeapon()
         {
-            if (weaponData == null) return;
-            if (Time.time < _lastFireTime + weaponData.fireRate) return;
+            if (weaponData == null || muzzleTransform == null || _mainCam == null)
+            {
+                return;
+            }
+
+            if (Time.time < _lastFireTime + weaponData.fireRate)
+            {
+                return;
+            }
 
             ExecuteDoubleRaycast();
 
