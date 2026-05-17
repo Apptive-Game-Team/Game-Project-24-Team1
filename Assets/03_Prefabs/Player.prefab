@@ -2766,10 +2766,15 @@ GameObject:
   - component: {fileID: 3262684631734152832}
   - component: {fileID: 7232757549871853805}
   - component: {fileID: 3233797465856601435}
+  - component: {fileID: 9081601819218250604}
+  - component: {fileID: 5944527546526785688}
   - component: {fileID: 8097850621285759813}
   - component: {fileID: 8623993992362075459}
   - component: {fileID: 7026247349913764378}
+  - component: {fileID: 4574107030641040280}
   - component: {fileID: 2334817305417235342}
+  - component: {fileID: 7632178547762821018}
+  - component: {fileID: 2822650242395604527}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -2870,17 +2875,43 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31fd045d7c1ed4445a2476ce963ba8af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Nexush.Player.PlayerController
+  maxJumpCount: 2
+  fallTimeout: 0.15
+--- !u!114 &9081601819218250604
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8596124297504245249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15d580d95f5c08e4b9ab535b2bbb1b59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Player.PlayerMotor
   moveSpeed: 5
   sprintSpeed: 8
   speedChangeRate: 10
+  pushPullSpeed: 2
   jumpHeight: 1.2
   gravity: -15
-  fallTimeout: 0.15
-  maxJumpCount: 2
-  groundLayers:
-    serializedVersion: 2
-    m_Bits: 1
-  modelYOffset: -0.08
+  waterMoveSpeed: 2
+  waterDrag: 3
+--- !u!114 &5944527546526785688
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8596124297504245249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7a24f18228404545bf1d17f314656b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Player.PlayerEnemyAggro
+  _aggroRadius: 15
+  _aggroKey: 21
+  _showGizmo: 0
 --- !u!114 &8097850621285759813
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2926,6 +2957,9 @@ MonoBehaviour:
   dartTracerPrefab: {fileID: 566576921725277279, guid: b6e8a3298eb112e4b8fafee34c82b9b2, type: 3}
   projectileSpeed: 60
   targetTag: Enemy
+  dartHitLayer:
+    serializedVersion: 2
+    m_Bits: 128
 --- !u!114 &7026247349913764378
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2943,6 +2977,25 @@ MonoBehaviour:
   interactableLayer:
     serializedVersion: 2
     m_Bits: 1
+  pushPullDistance: 0.5
+--- !u!114 &4574107030641040280
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8596124297504245249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cce7ffc9368709549b28b5cf518c8f17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Player.PlayerEnvironmentDetector
+  groundLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  waterLayer:
+    serializedVersion: 2
+    m_Bits: 16
 --- !u!114 &2334817305417235342
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2957,6 +3010,31 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Nexush.Player.PlayerClimbHandler
   climbSpeed: 3
   climbTopThreshold: 0.6
+--- !u!114 &7632178547762821018
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8596124297504245249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7865dd5143617dc41a55e4477420e8ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Player.PlayerAnimationDriver
+  modelYOffset: -0.08
+--- !u!114 &2822650242395604527
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8596124297504245249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0031974c0b4cb443a040796b1eb0ebf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Player.PlayerEnemyCollisionHandler
 --- !u!1 &9122675455333517926
 GameObject:
   m_ObjectHideFlags: 0
