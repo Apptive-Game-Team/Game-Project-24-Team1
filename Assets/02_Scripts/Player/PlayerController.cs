@@ -37,33 +37,24 @@ namespace MushOut.Player
         private PlayerAnimationDriver _animator;
         private PlayerClimbHandler _climbHandler;
         private PlayerInteractor _interactor;
+        private PlayerWeapon _weapon;
 
         public PlayerState CurrentState => _currentState;
 
         private void Awake()
         {
             _input = GetComponent<PlayerInputHandler>();
-            _animator = GetComponent<Animator>();
-            _weapon = GetComponent<PlayerWeapon>(); // 사격 컴포넌트 캐싱
+            _motor = GetComponent<PlayerMotor>();
+            _detector = GetComponent<PlayerEnvironmentDetector>();
+            _animator = GetComponent<PlayerAnimationDriver>();
+            _interactor = GetComponent<PlayerInteractor>();
+            _weapon = GetComponent<PlayerWeapon>();
 
             if (_weapon == null) Debug.LogError("[PlayerController] PlayerWeapon 컴포넌트를 찾을 수 없습니다! 오브젝트에 추가되어 있나요?");
 
-            if (_animator != null)
-            {
-                // 스크립트 기반 이동을 위해 Root Motion 비활성화 (점프 높이 및 이동 속도 유지)
-                _animator.applyRootMotion = false;
-
-                // X, Z축 고정값(0)을 제거하고 Y축만 modelYOffset으로 변경하여 텔레포트 방지
-                //Vector3 currentLocalPos = _animator.transform.localPosition;
-                //_animator.transform.localPosition = new Vector3(currentLocalPos.x, modelYOffset, currentLocalPos.z);
-            }
-
             _fallTimeoutDelta = fallTimeout;
 
-            if (groundLayers.value == 0)
-            {
-                _climbHandler.Initialize(this, _input, _motor.GetController(), _animator.GetComponent<Animator>());
-            }
+            _climbHandler?.Initialize(this, _input, _motor.GetController(), _animator?.GetComponent<Animator>());
         }
 
         private void Update()

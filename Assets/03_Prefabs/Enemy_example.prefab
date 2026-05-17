@@ -304,6 +304,7 @@ GameObject:
   - component: {fileID: 2953930259849315234}
   - component: {fileID: 9087214760287573966}
   - component: {fileID: -6055821478973805767}
+  - component: {fileID: 7221621172585509696}
   m_Layer: 7
   m_Name: Enemy_example
   m_TagString: Enemy
@@ -499,6 +500,26 @@ MonoBehaviour:
   movementType: 0
   isGrabbed: 0
   objectCollider: {fileID: 0}
+--- !u!114 &7221621172585509696
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6710546229405711075}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be6c87730c758e6479219e409f986433, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Enemy.EnemyAttacking
+  _rushDistance: 10
+  _rushSpeed: 15
+  _castRadius: 0.4
+  _obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 1024
+  _stateAfterRush: 2
+  _preRushDelay: 2
 --- !u!1 &7693907856138118159
 GameObject:
   m_ObjectHideFlags: 0

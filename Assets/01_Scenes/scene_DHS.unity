@@ -555,11 +555,6 @@ Transform:
   - {fileID: 1236333968}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &140472705 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6710546229405711075, guid: cf69bf537b16d6347a602e98e259c24e, type: 3}
-  m_PrefabInstance: {fileID: 283505427}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &149783746
 GameObject:
   m_ObjectHideFlags: 0
@@ -1039,36 +1034,13 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 6710546229405711075, guid: cf69bf537b16d6347a602e98e259c24e, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 283505439}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cf69bf537b16d6347a602e98e259c24e, type: 3}
 --- !u!4 &283505428 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1585001260516836913, guid: cf69bf537b16d6347a602e98e259c24e, type: 3}
   m_PrefabInstance: {fileID: 283505427}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &283505439
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 140472705}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: be6c87730c758e6479219e409f986433, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Enemy.EnemyAttacking
-  _rushDistance: 10
-  _rushSpeed: 15
-  _castRadius: 0.4
-  _obstacleLayer:
-    serializedVersion: 2
-    m_Bits: 1024
-  _stateAfterRush: 2
-  _preRushDelay: 2
 --- !u!1 &290726330
 GameObject:
   m_ObjectHideFlags: 0
