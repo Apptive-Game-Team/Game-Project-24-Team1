@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace Nexush.Player
+namespace MushOut.Player
 {
     /// <summary>
     /// 플레이어의 입력을 처리하고 다른 컴포넌트가 참조할 수 있도록 상태를 보관하는 클래스입니다.

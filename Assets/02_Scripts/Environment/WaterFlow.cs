@@ -1,7 +1,7 @@
 using UnityEngine;
-using Nexush.Player;
+using MushOut.Player;
 
-namespace Nexush.Environment
+namespace MushOut.Environment
 {
     /// <summary>
     /// 물이 흐르는 방향으로 들어온 오브젝트(플레이어, Rigidbody)를 밀어내는 스크립트입니다.
@@ -44,8 +44,8 @@ namespace Nexush.Environment
             // 2. 일반 Rigidbody를 가진 오브젝트인 경우
             else if (other.TryGetComponent<Rigidbody>(out var rb))
             {
-                // 질량(Mass) 스펙트럼 제한 (0 ~ 1.0): 0(에 가까울수록) 100% 힘, 1.0 이상이면 0% 힘
-                float massMultiplier = Mathf.InverseLerp(1.0f, 0.0f, rb.mass);
+                // 질량(Mass) 스펙트럼 제한 (0 ~ 1.0): 0(에 가까울수록) 100% 힘, 1.01 이상이면 0% 힘
+                float massMultiplier = Mathf.InverseLerp(1.01f, 0.0f, rb.mass);
 
                 if (massMultiplier > 0f)
                 {

@@ -1,7 +1,7 @@
 using UnityEngine;
-using Nexush.Interfaces;
+using MushOut.Interfaces;
 
-namespace GameProject24.Enemy
+namespace MushOut.Enemy
 {
     /// <summary>
     /// 적의 상태와 체력, 이동 속도 등 기본 스탯을 관리하는 클래스입니다.
@@ -262,7 +262,7 @@ namespace GameProject24.Enemy
 }
 
 #if UNITY_EDITOR
-namespace GameProject24.Enemy
+namespace MushOut.Enemy
 {
     using UnityEditor;
 
