@@ -25,8 +25,8 @@ namespace MushOut.Enemy
         /// <summary> 플레이어의 Transform을 캐싱합니다. </summary>
         private Transform _playerTransform;
         
-        /// <summary> 상태를 제어하는 EnemyStatus 컴포넌트입니다. </summary>
-        private EnemyStatus _enemyStatus;
+        /// <summary> 상태를 제어하는 EnemyController 컴포넌트입니다. </summary>
+        private EnemyController _enemyController;
 
 #if UNITY_EDITOR
         /// <summary> GL 렌더링에 사용할 반투명 머티리얼입니다. </summary>
@@ -40,12 +40,12 @@ namespace MushOut.Enemy
 #endif
 
         // --- 공유 속성 (코드 중복 방지) ---
-        private float CurrentDetectionDist => _enemyStatus.CurrentState == EnemyStatus.State.Chasing ? _enemyStatus.SightDistance + 7.0f : _enemyStatus.SightDistance;
-        private float CurrentFov => _enemyStatus.CurrentState == EnemyStatus.State.Chasing ? 150.0f : _enemyStatus.FieldOfView;
+        private float CurrentDetectionDist => _enemyController.CurrentState == EnemyController.State.Chasing ? _enemyController.SightDistance + 7.0f : _enemyController.SightDistance;
+        private float CurrentFov => _enemyController.CurrentState == EnemyController.State.Chasing ? 150.0f : _enemyController.FieldOfView;
 
         private void Awake()
         {
-            _enemyStatus = GetComponentInParent<EnemyStatus>();
+            _enemyController = GetComponentInParent<EnemyController>();
 #if UNITY_EDITOR
             CreateMaterial();
 #endif
@@ -65,7 +65,7 @@ namespace MushOut.Enemy
         {
             if (Application.isPlaying)
             {
-                if (_enemyStatus == null) _enemyStatus = GetComponentInParent<EnemyStatus>();
+                if (_enemyController == null) _enemyController = GetComponentInParent<EnemyController>();
 
                 // 1. 최적화: 매번 씬 전체를 뒤지는 Find() 대신 GameManager의 전역 캐싱 활용
                 if (MushOut.Core.GameManager.Instance != null)
@@ -89,22 +89,22 @@ namespace MushOut.Enemy
         private System.Collections.IEnumerator SightRoutine()
         {
             // 0.15초 간격으로 시야 판정 (성능 부하 감소)
-            WaitForSeconds waitTime = new WaitForSeconds(0.15f);
+            WaitForSeconds waitTime = new WaitForSeconds(0.1f);
 
             while (true)
             {
                 yield return waitTime;
 
-                if (_playerTransform == null || _enemyStatus == null)
+                if (_playerTransform == null || _enemyController == null)
                 {
                     continue;
                 }
 
                 // 사망하거나 기절한 상태면 탐지 로직 생략
-                if (_enemyStatus.CurrentState == EnemyStatus.State.Dead || 
-                    _enemyStatus.CurrentState == EnemyStatus.State.Stunned)
+                if (_enemyController.CurrentState == EnemyController.State.Dead || 
+                    _enemyController.CurrentState == EnemyController.State.Stunned)
                 {
-                    _enemyStatus.IsPlayerSpotted = false;
+                    _enemyController.IsPlayerSpotted = false;
                     continue;
                 }
 
@@ -145,15 +145,15 @@ namespace MushOut.Enemy
                 if (canSee)
                 {
                     // 시야에 보일 때만 갱신 (여러 개의 Sight 컴포넌트 간의 덮어씌우기 방지)
-                    _enemyStatus.IsPlayerSpotted = true;
+                    _enemyController.IsPlayerSpotted = true;
                     
                     // 플레이어의 현재 위치로 LPP 지속 갱신
-                    _enemyStatus.LatestPlayerPosition = _playerTransform.position;
+                    _enemyController.LatestPlayerPosition = _playerTransform.position;
 
                     // Chasing 상태가 아니라면 Chasing으로 전환
-                    if (_enemyStatus.CurrentState != EnemyStatus.State.Chasing)
+                    if (_enemyController.CurrentState != EnemyController.State.Chasing)
                     {
-                        _enemyStatus.ChangeState(EnemyStatus.State.Chasing);
+                        _enemyController.ChangeState(EnemyController.State.Chasing);
                     }
                 }
             }
@@ -202,16 +202,16 @@ namespace MushOut.Enemy
 
         private void OnRenderObject()
         {
-            if (_enemyStatus == null || _coneMaterial == null) return;
+            if (_enemyController == null || _coneMaterial == null) return;
 
             // 사망하거나 기절한 상태면 탐지 범위 기즈모를 숨김
-            if (_enemyStatus.CurrentState == EnemyStatus.State.Dead || 
-                _enemyStatus.CurrentState == EnemyStatus.State.Stunned)
+            if (_enemyController.CurrentState == EnemyController.State.Dead || 
+                _enemyController.CurrentState == EnemyController.State.Stunned)
             {
                 return;
             }
 
-            bool isSpotted  = _enemyStatus.IsPlayerSpotted;
+            bool isSpotted  = _enemyController.IsPlayerSpotted;
 
             // 탐지 여부에 따라 색상 결정
             Color fillColor = isSpotted
@@ -269,11 +269,11 @@ namespace MushOut.Enemy
 
         private void OnDrawGizmosSelected()
         {
-            if (_enemyStatus == null)
+            if (_enemyController == null)
             {
-                _enemyStatus = GetComponentInParent<EnemyStatus>();
+                _enemyController = GetComponentInParent<EnemyController>();
             }
-            if (_enemyStatus == null) return;
+            if (_enemyController == null) return;
 
             Vector3 origin = transform.position + transform.TransformDirection(_eyeOffset);
 

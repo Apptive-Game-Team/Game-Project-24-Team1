@@ -8,11 +8,11 @@ namespace MushOut.Enemy
     /// 플레이어의 마지막 목격 위치(LPP)를 추적하며, 놓쳤을 경우 일정 시간 동안 주변을 수색합니다.
     /// </summary>
     [RequireComponent(typeof(NavMeshAgent))]
-    [RequireComponent(typeof(EnemyStatus))]
+    [RequireComponent(typeof(EnemyController))]
     public class EnemyChasing : MonoBehaviour
     {
         private NavMeshAgent _agent;
-        private EnemyStatus _enemyStatus;
+        private EnemyController _enemyController;
 
         [Header("Search Logic")]
         [Tooltip("마지막 발견 위치 도착 후 수색을 진행할 시간")]
@@ -29,7 +29,7 @@ namespace MushOut.Enemy
         private void Awake()
         {
             _agent = GetComponent<NavMeshAgent>();
-            _enemyStatus = GetComponent<EnemyStatus>();
+            _enemyController = GetComponent<EnemyController>();
         }
 
         private void Update()
@@ -37,15 +37,15 @@ namespace MushOut.Enemy
             // ==========================================
             // 메인 로직 루프 (Update - 매 프레임 실행)
             // ==========================================
-            if (_enemyStatus.CurrentState != EnemyStatus.State.Chasing)
+            if (_enemyController.CurrentState != EnemyController.State.Chasing)
             {
                 _searchTimer = 0f;
                 _entryDelayTimer = 0f;
                 return;
             }
 
-            // 추격 진입 시 2초 동안 플레이어를 바라보며 대기
-            if (_entryDelayTimer < 2.0f)
+            // 추격 진입 시 0.1초 동안 플레이어를 바라보며 대기
+            if (_entryDelayTimer < 0.1f)
             {
                 _entryDelayTimer += Time.deltaTime;
                 _agent.speed = 0f;
@@ -55,9 +55,9 @@ namespace MushOut.Enemy
                     _agent.ResetPath();
                 }
 
-                if (_enemyStatus.LatestPlayerPosition.HasValue)
+                if (_enemyController.LatestPlayerPosition.HasValue)
                 {
-                    Vector3 dir = (_enemyStatus.LatestPlayerPosition.Value - transform.position).normalized;
+                    Vector3 dir = (_enemyController.LatestPlayerPosition.Value - transform.position).normalized;
                     dir.y = 0;
                     if (dir.sqrMagnitude > 0.001f)
                     {
@@ -69,55 +69,75 @@ namespace MushOut.Enemy
             }
 
             // 1. 상황 판단 및 목표/속도 설정
-            if (_enemyStatus.IsPlayerSpotted)
+            if (_enemyController.IsPlayerSpotted)
             {
                 // [시야에 있음 : 추격]
                 _searchTimer = 0f;
 
-                if (_enemyStatus.LatestPlayerPosition.HasValue)
+                if (_enemyController.LatestPlayerPosition.HasValue)
                 {
-                    float distToLpp = Vector3.Distance(transform.position, _enemyStatus.LatestPlayerPosition.Value);
-                    // 콜라이더 반경 때문에 1.0f 미만으로 좁혀지지 않을 수 있으므로, 명시적인 AttackRange를 사용합니다.
-                    if (distToLpp <= _enemyStatus.AttackRadius)
+                    float distToLpp = Vector3.Distance(transform.position, _enemyController.LatestPlayerPosition.Value);
+                    if (distToLpp <= _enemyController.AttackRadius)
                     {
-                        _speed = 0f;
+                        _enemyController.ChangeState(EnemyController.State.Attacking);
                     }
                     else
                     {
-                        _targetPoint = _enemyStatus.LatestPlayerPosition.Value;
-                        _speed = _enemyStatus.ChaseSpeed;
+                        _targetPoint = _enemyController.LatestPlayerPosition.Value;
+                        _speed = _enemyController.ChaseSpeed;
                     }
                 }
             }
             else
             {
-                // [시야에서 놓침 : 수색]
+                // [시야에서 놓침 : 1단계 - 마지막 목격 위치(LPP)로 이동, 2단계 - 랜덤 수색]
                 _searchTimer += Time.deltaTime;
 
                 if (_searchTimer >= _searchTime)
                 {
-                    _enemyStatus.ChangeState(_enemyStatus.InitialState);
+                    _enemyController.ChangeState(_enemyController.InitialState);
                     return;
                 }
 
-                // 현재 위치에서 targetPoint까지 도착했다면
-                float distToTarget = Vector3.Distance(transform.position, _targetPoint);
-                if (distToTarget <= _agent.stoppingDistance + 0.5f || (_agent.hasPath && !_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance))
+                if (_enemyController.LatestPlayerPosition.HasValue)
                 {
-                    // [새로운 수색 지점 탐색]
-                    _speed = _enemyStatus.MoveSpeed; // 수색할 때는 걷는 속도로 변경
+                    // [1단계] LPP가 있으면 먼저 그 위치로 ChaseSpeed로 이동
+                    float distToLpp = Vector3.Distance(transform.position, _enemyController.LatestPlayerPosition.Value);
+                    bool arrivedAtLpp = distToLpp <= _agent.stoppingDistance + 0.5f ||
+                                       (_agent.hasPath && !_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance);
 
-                    float randomAngle = Random.Range(-_searchFov * 0.5f, _searchFov * 0.5f);
-                    Vector3 randomDir = Quaternion.Euler(0, randomAngle, 0) * transform.forward;
-                    Vector3 randomPos = transform.position + randomDir * 5f;
-
-                    if (NavMesh.SamplePosition(randomPos, out NavMeshHit hit, 5f, NavMesh.AllAreas))
+                    if (arrivedAtLpp)
                     {
-                        _targetPoint = hit.position;
+                        // LPP 도달 완료: 클리어 후 다음 프레임부터 2단계 수색으로 전환
+                        _enemyController.LatestPlayerPosition = null;
                     }
                     else
                     {
-                        _targetPoint = randomPos;
+                        // 아직 미도달: LPP를 목표로 설정하고 빠르게 이동
+                        _targetPoint = _enemyController.LatestPlayerPosition.Value;
+                        _speed = _enemyController.ChaseSpeed;
+                    }
+                }
+                else
+                {
+                    // [2단계] LPP 없음(도착 완료) : 주변 랜덤 수색
+                    float distToTarget = Vector3.Distance(transform.position, _targetPoint);
+                    bool arrivedAtTarget = distToTarget <= _agent.stoppingDistance + 0.5f ||
+                                          (_agent.hasPath && !_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance);
+
+                    if (arrivedAtTarget)
+                    {
+                        // 현재 수색 목표 도달: 새로운 랜덤 수색 지점 탐색
+                        _speed = _enemyController.MoveSpeed;
+
+                        float randomAngle = Random.Range(-_searchFov * 0.5f, _searchFov * 0.5f);
+                        Vector3 randomDir = Quaternion.Euler(0, randomAngle, 0) * transform.forward;
+                        Vector3 randomPos = transform.position + randomDir * 5f;
+
+                        if (NavMesh.SamplePosition(randomPos, out NavMeshHit hit, 5f, NavMesh.AllAreas))
+                        {
+                            _targetPoint = hit.position;
+                        }
                     }
                 }
             }

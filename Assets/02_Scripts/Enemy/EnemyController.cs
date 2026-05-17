@@ -1,12 +1,13 @@
 using UnityEngine;
 using MushOut.Interfaces;
+using MushOut.Interactables;
 
 namespace MushOut.Enemy
 {
     /// <summary>
     /// 적의 상태와 체력, 이동 속도 등 기본 스탯을 관리하는 클래스입니다.
     /// </summary>
-    public class EnemyStatus : MonoBehaviour, IHittable
+    public class EnemyController : MonoBehaviour, IHittable
     {
         /// <summary>
         /// 적의 상태들을 열거형(enum)으로 정의합니다. (bool 여러 개를 대체)
@@ -70,6 +71,9 @@ namespace MushOut.Enemy
         [Tooltip("순찰 중 멈춰설 지점들입니다.")]
         [SerializeField] private Transform[] _stopPoints;
 
+        /// <summary> Stunned 상태일 때만 활성화할 PushPull 상호작용 컴포넌트 </summary>
+        private PushPullInteractable _pushPullInteractable;
+
         /// <summary>
         /// 프로퍼티 (getters)
         /// </summary>
@@ -107,7 +111,10 @@ namespace MushOut.Enemy
         [Header("Runtime Info (ReadOnly)")]
         [Tooltip("현재 프레임에서 플레이어가 시야에 포착되었는지 여부")]
         [SerializeField] private bool _isPlayerSpotted = false;
-        private int _spottedFrameCount = -10;
+        private float _spottedTime = -10f;
+
+        /// <summary> 공격 중 다른 상태 전환을 막는 잠금 플래그 </summary>
+        private bool _isStateLocked = false;
 
         [Tooltip("LPP가 유효한지(탐지된 적이 있는지) 여부")]
         [SerializeField] private bool _hasLatestPlayerPosition = false;
@@ -142,20 +149,20 @@ namespace MushOut.Enemy
         {
             get 
             {
-                // 프레임 기반으로 유효성을 검사하여 여러 Sight가 있어도 덮어씌워지지 않도록 처리
-                _isPlayerSpotted = (Time.frameCount - _spottedFrameCount) <= 1;
+                // SightRoutine이 0.15초마다 갱신하므로, 여유를 두어 0.2초 이내에 갱신되었으면 포착한 것으로 유지
+                _isPlayerSpotted = (Time.time - _spottedTime) <= 0.2f;
                 return _isPlayerSpotted;
             }
             set
             {
                 if (value)
                 {
-                    _spottedFrameCount = Time.frameCount;
+                    _spottedTime = Time.time;
                     _isPlayerSpotted = true;
                 }
                 else
                 {
-                    _spottedFrameCount = -10;
+                    _spottedTime = -10f;
                     _isPlayerSpotted = false;
                 }
             }
@@ -188,6 +195,13 @@ namespace MushOut.Enemy
 
             _currentState = _initialState;
             _previousState = _initialState;
+
+            // PushPullInteractable 캐싱 및 초기 비활성화 (Stunned 상태에서만 활성화)
+            _pushPullInteractable = GetComponentInChildren<PushPullInteractable>(true);
+            if (_pushPullInteractable != null)
+            {
+                _pushPullInteractable.enabled = false;
+            }
         }
 
         /// <summary>
@@ -208,10 +222,34 @@ namespace MushOut.Enemy
                 return;
             }
 
+            // 상태 잠금 중: Stunned와 Dead는 항상 허용, 나머지는 차단
+            if (_isStateLocked && newState != State.Stunned && newState != State.Dead)
+            {
+                return;
+            }
+
+            // 잠금 상태에서 Stunned/Dead로 강제 전환될 경우 잠금 자동 해제
+            if (_isStateLocked)
+            {
+                _isStateLocked = false;
+            }
+
             // 새로운 상태로 변경하기 전, 현재 상태를 백업
             _previousState = _currentState;
             _currentState = newState;
+
+            // PushPullInteractable: Stunned 상태일 때만 활성화
+            if (_pushPullInteractable != null)
+            {
+                _pushPullInteractable.enabled = (newState == State.Stunned);
+            }
         }
+
+        /// <summary> 공격 중 상태 전환을 잠급니다. Stunned/Dead는 항상 허용됩니다. </summary>
+        public void LockState() => _isStateLocked = true;
+
+        /// <summary> 상태 전환 잠금을 해제합니다. </summary>
+        public void UnlockState() => _isStateLocked = false;
 
         /// <summary>
         /// 외부에서 데미지를 입었을 때 호출할 함수입니다.
@@ -254,7 +292,7 @@ namespace MushOut.Enemy
             if (hitInfo.amount > 0)
             {
                 ChangeState(State.Stunned);
-                Debug.Log($"[EnemyStatus] 마취총 피격! 기절 상태로 변경됩니다. (마취 수치: {hitInfo.amount})");
+                Debug.Log($"[EnemyController] 마취총 피격! 기절 상태로 변경됩니다. (마취 수치: {hitInfo.amount})");
                 // TODO: 기절 애니메이션 재생 및 기절 지속 시간 처리 로직
             }
         }
@@ -266,8 +304,8 @@ namespace MushOut.Enemy
 {
     using UnityEditor;
 
-    [CustomEditor(typeof(EnemyStatus))]
-    public class EnemyStatusEditor : Editor
+    [CustomEditor(typeof(EnemyController))]
+    public class EnemyControllerEditor : Editor
     {
         public override void OnInspectorGUI()
         {
@@ -296,7 +334,7 @@ namespace MushOut.Enemy
                     if (initialStateProp != null)
                     {
                         // 초기 상태가 Idle이면 _patrolPointB를 인스펙터에서 숨김
-                        if (initialStateProp.enumValueIndex == (int)EnemyStatus.State.Idle)
+                        if (initialStateProp.enumValueIndex == (int)EnemyController.State.Idle)
                         {
                             continue;
                         }

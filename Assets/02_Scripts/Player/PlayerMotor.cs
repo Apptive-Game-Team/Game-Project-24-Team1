@@ -44,11 +44,18 @@ namespace MushOut.Player
             _controller = GetComponent<CharacterController>();
         }
 
-        public void ApplyGravity(float deltaTime, bool isInWater)
+        public void ApplyGravity(float deltaTime, bool isInWater, bool isGrounded)
         {
             if (isInWater)
             {
+                // 물 속에서는 수직 저항(Drag) 적용
                 VerticalVelocity = Mathf.Lerp(VerticalVelocity, 0f, waterDrag * deltaTime);
+            }
+            else if (isGrounded && VerticalVelocity < 0f)
+            {
+                // 지면 착지 유지용: CharacterController를 지면에 고정시키는 소량의 하방 속도
+                // 이 값이 없으면 지면을 걷는 동안 중력이 계속 누적되어 절벽에서 즉시 추락하는 현상 발생
+                VerticalVelocity = -2f;
             }
 
             if (VerticalVelocity > -53f)
