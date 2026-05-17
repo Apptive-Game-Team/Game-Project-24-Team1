@@ -7,10 +7,10 @@ namespace MushOut.Enemy
     /// <summary>
     /// 에너미가 Patrolling 상태일 때 정해진 지점(A, B)을 순찰하고 멈춰서 두리번거리는 로직입니다.
     /// </summary>
-    [RequireComponent(typeof(EnemyStatus), typeof(NavMeshAgent))]
+    [RequireComponent(typeof(EnemyController), typeof(NavMeshAgent))]
     public class EnemyPatrolling : MonoBehaviour
     {
-        private EnemyStatus _enemyStatus;
+        private EnemyController _enemyController;
         private NavMeshAgent _agent;
 
         private bool _isLookingAround = false;
@@ -18,18 +18,18 @@ namespace MushOut.Enemy
 
         private void Awake()
         {
-            _enemyStatus = GetComponent<EnemyStatus>();
+            _enemyController = GetComponent<EnemyController>();
             _agent = GetComponent<NavMeshAgent>();
         }
 
         private void Update()
         {
             // 필수 컴포넌트나 내비메시가 정상 상태가 아니면 대기
-            if (_enemyStatus == null || _agent == null || !_agent.isActiveAndEnabled || !_agent.isOnNavMesh)
+            if (_enemyController == null || _agent == null || !_agent.isActiveAndEnabled || !_agent.isOnNavMesh)
                 return;
 
             // 현 상태가 Patrolling이 아닐 경우
-            if (_enemyStatus.CurrentState != EnemyStatus.State.Patrolling)
+            if (_enemyController.CurrentState != EnemyController.State.Patrolling)
             {
                 // 두리번거리던 도중 다른 상태(Chasing 등)로 바뀌면 코루틴 즉시 강제 종료 및 설정 복구
                 if (_isLookingAround)
@@ -58,20 +58,20 @@ namespace MushOut.Enemy
         private void HandlePatrol()
         {
             // 현재 타겟이 없거나 A, B 둘 다 아니면 A를 기본 목적지로 설정
-            if (_enemyStatus.Target != _enemyStatus.PatrolPointA && _enemyStatus.Target != _enemyStatus.PatrolPointB)
+            if (_enemyController.Target != _enemyController.PatrolPointA && _enemyController.Target != _enemyController.PatrolPointB)
             {
-                if (_enemyStatus.PatrolPointA != null)
+                if (_enemyController.PatrolPointA != null)
                 {
-                    _enemyStatus.Target = _enemyStatus.PatrolPointA;
+                    _enemyController.Target = _enemyController.PatrolPointA;
                 }
             }
 
-            if (_enemyStatus.Target != null)
+            if (_enemyController.Target != null)
             {
                 // EnemyStatus에 설정된 순찰 속도(MoveSpeed) 반영
-                _agent.speed = _enemyStatus.MoveSpeed;
+                _agent.speed = _enemyController.MoveSpeed;
                 _agent.isStopped = false;
-                _agent.SetDestination(_enemyStatus.Target.position);
+                _agent.SetDestination(_enemyController.Target.position);
 
                 // 목적지에 도착했는지 확인
                 if (!_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance)
@@ -79,13 +79,13 @@ namespace MushOut.Enemy
                     if (!_agent.hasPath || _agent.velocity.sqrMagnitude == 0f)
                     {
                         // A에 도착했다면 B로, B에 도착했다면 A로 타겟 교체
-                        if (_enemyStatus.Target == _enemyStatus.PatrolPointA)
+                        if (_enemyController.Target == _enemyController.PatrolPointA)
                         {
-                            _enemyStatus.Target = _enemyStatus.PatrolPointB;
+                            _enemyController.Target = _enemyController.PatrolPointB;
                         }
                         else
                         {
-                            _enemyStatus.Target = _enemyStatus.PatrolPointA;
+                            _enemyController.Target = _enemyController.PatrolPointA;
                         }
 
                         // 다음 왕복 시 스탑 포인트에서 다시 멈출 수 있도록 방문 기록 초기화
@@ -100,9 +100,9 @@ namespace MushOut.Enemy
         /// </summary>
         private void CheckStopPoints()
         {
-            if (_enemyStatus.StopPoints == null) return;
+            if (_enemyController.StopPoints == null) return;
 
-            foreach (var sp in _enemyStatus.StopPoints)
+            foreach (var sp in _enemyController.StopPoints)
             {
                 if (sp != null && sp != _lastStopPoint)
                 {
@@ -121,12 +121,12 @@ namespace MushOut.Enemy
         /// </summary>
         private void OnTriggerEnter(Collider other)
         {
-            if (_enemyStatus == null || _enemyStatus.CurrentState != EnemyStatus.State.Patrolling || _isLookingAround)
+            if (_enemyController == null || _enemyController.CurrentState != EnemyController.State.Patrolling || _isLookingAround)
                 return;
 
-            if (_enemyStatus.StopPoints == null) return;
+            if (_enemyController.StopPoints == null) return;
 
-            foreach (var sp in _enemyStatus.StopPoints)
+            foreach (var sp in _enemyController.StopPoints)
             {
                 // 충돌한 오브젝트가 StopPoints 배열에 포함된 오브젝트인지 확인
                 if (sp != null && other.transform == sp && sp != _lastStopPoint)

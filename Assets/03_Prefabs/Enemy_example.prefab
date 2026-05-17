@@ -296,13 +296,14 @@ GameObject:
   m_Component:
   - component: {fileID: 1585001260516836913}
   - component: {fileID: 8497814169208649674}
-  - component: {fileID: 5158057938490100240}
   - component: {fileID: 6167791050884186134}
-  - component: {fileID: 2549525712944358614}
   - component: {fileID: 6332460762839914713}
   - component: {fileID: 9007812919988028930}
   - component: {fileID: 5759622970758101351}
   - component: {fileID: 1200257610485895278}
+  - component: {fileID: 2953930259849315234}
+  - component: {fileID: 9087214760287573966}
+  - component: {fileID: -6055821478973805767}
   m_Layer: 7
   m_Name: Enemy_example
   m_TagString: Enemy
@@ -352,33 +353,6 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 1, z: 0}
---- !u!54 &5158057938490100240
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6710546229405711075}
-  serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
 --- !u!195 &6167791050884186134
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -401,35 +375,6 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!114 &2549525712944358614
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6710546229405711075}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 014211f9969027e4296c6343c55c9006, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GameProject24.Enemy.EnemyStatus
-  _initialState: 0
-  _currentState: 0
-  _previousState: 0
-  _maxHp: 100
-  _currentHp: 100
-  _moveSpeed: 5
-  _chaseSpeed: 10
-  _target: {fileID: 0}
-  _fieldOfView: 45
-  _sightDistance: 10
-  _attackRadius: 4
-  _patrolPointA: {fileID: 0}
-  _patrolPointB: {fileID: 0}
-  _stopPoints: []
-  _isPlayerSpotted: 0
-  _hasLatestPlayerPosition: 0
-  _latestPlayerPosition: {x: 0, y: 0, z: 0}
 --- !u!114 &6332460762839914713
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -481,6 +426,79 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameProject24.Enemy.EnemyStunned
   _stunnedDuration: 5
+--- !u!114 &2953930259849315234
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6710546229405711075}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b9d2a2a6918fb445809607fe7e940f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Enemy.EnemyController
+  _initialState: 0
+  _currentState: 0
+  _previousState: 0
+  _maxHp: 100
+  _currentHp: 0
+  _moveSpeed: 3
+  _chaseSpeed: 6
+  _target: {fileID: 0}
+  _fieldOfView: 60
+  _sightDistance: 10
+  _attackRadius: 4
+  _patrolPointA: {fileID: 0}
+  _patrolPointB: {fileID: 0}
+  _stopPoints: []
+  _isPlayerSpotted: 0
+  _hasLatestPlayerPosition: 0
+  _latestPlayerPosition: {x: 0, y: 0, z: 0}
+--- !u!54 &9087214760287573966
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6710546229405711075}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 112
+  m_CollisionDetection: 0
+--- !u!114 &-6055821478973805767
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6710546229405711075}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d0469509cdd8da40adb044bbd7f7d09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Interactables.PushPullInteractable
+  Pushable: 0
+  Pullable: 1
+  movementType: 0
+  isGrabbed: 0
+  objectCollider: {fileID: 0}
 --- !u!1 &7693907856138118159
 GameObject:
   m_ObjectHideFlags: 0
