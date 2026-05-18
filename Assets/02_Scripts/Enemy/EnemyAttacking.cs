@@ -63,6 +63,14 @@ namespace MushOut.Enemy
         {
             _isRunning = true;
 
+            // 0. Attacking 진입 직후 이전 상태(Chasing 등)에서 남아있던 이동 명령 취소
+            if (_agent != null && _agent.isActiveAndEnabled && _agent.isOnNavMesh)
+            {
+                _agent.isStopped = true;
+                _agent.velocity = Vector3.zero;
+                _agent.ResetPath();
+            }
+
             // 1. 상태 잠금: 돌진이 끝날 때까지 외부 상태 전환 차단 (Stunned/Dead 제외)
             _enemyController.LockState();
 
