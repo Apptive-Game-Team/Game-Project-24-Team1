@@ -1,13 +1,35 @@
+using MushOut.Core;
 using UnityEngine;
 
 namespace MushOut.Player
 {
     /// <summary>
-    /// 플레이어와 적(Enemy)의 충돌을 감지하여 GameManager에 게임 오버 이벤트를 전달하는 컴포넌트입니다.
-    /// PlayerController로부터 게임 이벤트 관련 책임을 분리하여 단일 책임 원칙을 따릅니다.
+    /// 플레이어가 적에게 닿았는지 확인해서 GameManager에 게임오버를 알려주는 컴포넌트입니다.
+    /// 다시시도할 때 처음 시작 위치로 돌아갈 수 있도록 플레이어의 시작 위치도 기억합니다.
     /// </summary>
     public class PlayerEnemyCollisionHandler : MonoBehaviour
     {
+        [SerializeField] private float enemyCheckRadius = 0.75f;
+
+        private const int MaxOverlapResults = 16;
+        private static readonly Collider[] OverlapResults = new Collider[MaxOverlapResults];
+
+        private static bool _hasInitialSpawn;
+        private static Vector3 _initialSpawnPosition;
+        private static Quaternion _initialSpawnRotation;
+
+        private void Awake()
+        {
+            _initialSpawnPosition = transform.position;
+            _initialSpawnRotation = transform.rotation;
+            _hasInitialSpawn = true;
+        }
+
+        private void Update()
+        {
+            CheckEnemyOverlap();
+        }
+
         private void OnControllerColliderHit(ControllerColliderHit hit)
         {
             CheckEnemyCollision(hit.gameObject);
@@ -23,31 +45,54 @@ namespace MushOut.Player
             CheckEnemyCollision(other.gameObject);
         }
 
-        /// <summary>
-        /// 충돌한 오브젝트가 적인지 확인하고, 적이라면 GameManager에 충돌 사실을 알립니다.
-        /// </summary>
-        /// <param name="otherObj">충돌한 GameObject</param>
-        private void CheckEnemyCollision(GameObject otherObj)
+        public static bool TryGetInitialSpawn(out Vector3 position, out Quaternion rotation)
         {
-            // 플레이어 자신의 태그와 레이어가 일치하는지 먼저 확인
-            if (gameObject.CompareTag("Player") && gameObject.layer == LayerMask.NameToLayer("Player"))
+            position = _initialSpawnPosition;
+            rotation = _initialSpawnRotation;
+            return _hasInitialSpawn;
+        }
+
+        private void CheckEnemyOverlap()
+        {
+            if (GameManager.Instance == null || GameManager.Instance.CrashedByEnemy)
+                return;
+
+            int count = Physics.OverlapSphereNonAlloc(
+                transform.position,
+                enemyCheckRadius,
+                OverlapResults,
+                Physics.DefaultRaycastLayers,
+                QueryTriggerInteraction.Collide);
+
+            for (int i = 0; i < count; i++)
             {
-                // 상대방 오브젝트가 enemy 태그인지 확인
-                if (otherObj.CompareTag("Enemy"))
+                Collider hit = OverlapResults[i];
+                if (hit != null && hit.gameObject != gameObject)
                 {
-                    int layer = otherObj.layer;
-                    // 상대방 오브젝트가 enemy 또는 enemyheavy 레이어인지 확인
-                    if (layer == LayerMask.NameToLayer("Enemy") || layer == LayerMask.NameToLayer("EnemyHeavy"))
-                    {
-                        if (MushOut.Core.GameManager.Instance != null &&
-                            !MushOut.Core.GameManager.Instance.CrashedByEnemy)
-                        {
-                            Debug.Log($"[PlayerEnemyCollisionHandler] 적과 충돌! GameManager의 CrashedByEnemy를 true로 설정합니다. (적: {otherObj.name})");
-                            MushOut.Core.GameManager.Instance.CrashedByEnemy = true;
-                        }
-                    }
+                    CheckEnemyCollision(hit.gameObject);
                 }
             }
+        }
+
+        private void CheckEnemyCollision(GameObject otherObject)
+        {
+            if (otherObject == null || !IsPlayerObject() || !IsEnemyObject(otherObject))
+                return;
+
+            Debug.Log($"[PlayerEnemyCollisionHandler] Enemy collision detected: {otherObject.name} (tag={otherObject.tag}, layer={LayerMask.LayerToName(otherObject.layer)})");
+            GameManager.Instance.CrashedByEnemy = true;
+        }
+
+        private bool IsPlayerObject()
+        {
+            return CompareTag("Player") && gameObject.layer == LayerMask.NameToLayer("Player");
+        }
+
+        private static bool IsEnemyObject(GameObject otherObject)
+        {
+            int layer = otherObject.layer;
+            return otherObject.CompareTag("Enemy")
+                && (layer == LayerMask.NameToLayer("Enemy") || layer == LayerMask.NameToLayer("EnemyHeavy"));
         }
     }
 }
