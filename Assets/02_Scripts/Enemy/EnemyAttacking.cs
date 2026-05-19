@@ -166,7 +166,10 @@ namespace MushOut.Enemy
             if (_rigidbody != null)
             {
                 _rigidbody.useGravity = false;   // 돌진 중 중력 차단
-                _rigidbody.linearVelocity = Vector3.zero; // 잔류 속도 초기화
+                if (!_rigidbody.isKinematic)
+                {
+                    _rigidbody.linearVelocity = Vector3.zero; // 잔류 속도 초기화
+                }
             }
 
             // 5. 돌진 루프: SphereCast로 전방 장애물 감지 (OnCollisionEnter 미사용 - 바닥 오감지 방지)
@@ -186,13 +189,14 @@ namespace MushOut.Enemy
 
                 float moveStep = _rushSpeed * Time.deltaTime;
 
+                bool hitObstacle = false;
                 // SphereCast로 이동 전 전방 장애물 검사
                 // obstacleLayer에 설정된 레이어만 충돌로 간주 (Player/Enemy 레이어 제외 권장)
                 if (_obstacleLayer.value != 0 &&
                     Physics.SphereCast(transform.position, _castRadius, rushDir, out RaycastHit hit, moveStep + 0.05f, _obstacleLayer))
                 {
                     collidedDuringRush = true;
-                    break;
+                    hitObstacle = true;
                 }
 
                 // 수평 이동 (Y축은 돌진 시작 시 고정값 rushY로 유지 - 누적 낙하 방지)
@@ -208,6 +212,12 @@ namespace MushOut.Enemy
                     transform.position = newPos;
                 }
 
+                if (hitObstacle)
+                {
+                    // 벽을 감지했더라도 한 프레임 더 이동시켜 겹치도록(조금 늦게 멈추도록) 한 뒤 루프 종료
+                    break;
+                }
+
                 yield return null;
             }
 
@@ -215,7 +225,10 @@ namespace MushOut.Enemy
             if (_rigidbody != null)
             {
                 _rigidbody.useGravity = true;
-                _rigidbody.linearVelocity = Vector3.zero;
+                if (!_rigidbody.isKinematic)
+                {
+                    _rigidbody.linearVelocity = Vector3.zero;
+                }
             }
             _agent.enabled = true;
             _agent.isStopped = false;

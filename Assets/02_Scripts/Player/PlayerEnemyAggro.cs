@@ -20,12 +20,29 @@ namespace MushOut.Player
         [Tooltip("Gizmo로 반경을 표시할지 여부 (에디터 전용)")]
         [SerializeField] private bool _showGizmo = true;
 
+        private PlayerController _playerController;
+
+        private void Awake()
+        {
+            _playerController = GetComponent<PlayerController>();
+        }
+
         private void Update()
         {
             if (Keyboard.current == null) return;
 
             if (Keyboard.current[_aggroKey].wasPressedThisFrame)
             {
+                if (_playerController != null)
+                {
+                    if (_playerController.aggrofungus <= 0)
+                    {
+                        Debug.Log("[PlayerEnemyAggro] 광분 포자가 부족합니다!"); // TODO: 특정 애니메이션이나 텍스트 출력
+                        return;
+                    }
+                    _playerController.aggrofungus--;
+                }
+
                 TriggerNearbyEnemies();
             }
         }
