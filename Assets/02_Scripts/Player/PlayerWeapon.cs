@@ -46,12 +46,14 @@ namespace MushOut.Player
         private float _lastFireTime;
         private Camera _mainCam;
         private PlayerInputHandler _inputHandler;
+        private PlayerController _playerController;
 
         private void Awake()
         {
             // [Rule D] 싱글톤 대신 Camera.main을 통해 메인 카메라를 참조합니다.
             _mainCam = Camera.main;
             _inputHandler = GetComponent<PlayerInputHandler>();
+            _playerController = GetComponent<PlayerController>();
 
             if (muzzleTransform == null)
             {
@@ -80,6 +82,16 @@ namespace MushOut.Player
             if (Time.time < _lastFireTime + weaponData.fireRate)
             {
                 return;
+            }
+
+            if (_playerController != null)
+            {
+                if (_playerController.sleepfungus <= 0)
+                {
+                    Debug.Log("[PlayerWeapon] 수면 포자가 부족합니다!"); // TODO: 특정 애니메이션이나 텍스트 출력
+                    return;
+                }
+                _playerController.sleepfungus--;
             }
 
             ExecuteDoubleRaycast();
