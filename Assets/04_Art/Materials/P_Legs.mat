@@ -30,7 +30,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Ambient_Strength: 0.5
+    - _Ambient_Strength: 1
     m_Colors: []
   m_BuildTextureStacks: []
   m_AllowLocking: 1

@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 6192e56354456cb4cbcb1d86b6a4bec1
+guid: d415ccf7dfb631d49ac2ba2436617b3a
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -7,13 +7,8 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: Glass.002
-    second: {fileID: 2100000, guid: 0ebc14195db38e848aec0467e865fa59, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Material_0.003
-    second: {fileID: 2100000, guid: 02bc27067e48b2e4bb86c7aca9f5400c, type: 2}
+      name: F_Mushroom_Material
+    second: {fileID: 2100000, guid: 6f05c3ef0bacaa04f806e516061a41fb, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -43,7 +38,7 @@ ModelImporter:
     isReadable: 0
   meshes:
     lODScreenPercentages: []
-    globalScale: 3
+    globalScale: 1
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
@@ -101,7 +96,7 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    globalScale: 3
+    globalScale: 1
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0
