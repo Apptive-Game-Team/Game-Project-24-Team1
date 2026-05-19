@@ -22,10 +22,6 @@ namespace MushOut.Player
     {
         private PlayerState _currentState = PlayerState.Idle;
 
-        [Header("Fungus Settings")]
-        public int sleepfungus = 3;
-        public int aggrofungus = 3;
-
         [Header("Jump Settings")]
         [Tooltip("최대 점프 가능한 횟수입니다. (1: 기본 점프, 2: 이단 점프)")]
         [SerializeField, Range(1, 3)] private int maxJumpCount = 2;

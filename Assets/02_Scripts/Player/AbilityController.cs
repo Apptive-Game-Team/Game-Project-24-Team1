@@ -21,6 +21,12 @@ namespace MushOut.Player
         [Tooltip("현재 활성화된 특수 행동 상태입니다.")]
         [SerializeField] private AbilityState _currentState = AbilityState.Dash;
 
+        [Header("Ability Resources")]
+        public int dashcount = 3;
+        public int sleepfungus = 3;
+        public int aggrofungus = 3;
+        public int bombfungus = 3;
+
         /// <summary>
         /// 외부에서 현재 능력을 확인할 수 있는 프로퍼티입니다.
         /// </summary>
