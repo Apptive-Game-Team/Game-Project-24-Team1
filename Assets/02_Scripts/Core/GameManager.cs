@@ -91,6 +91,7 @@ namespace MushOut.Core
             {
                 _instance = this;
                 DontDestroyOnLoad(gameObject);
+                EnsureGameOverManager();
             }
             else if (_instance != this)
             {
@@ -102,7 +103,10 @@ namespace MushOut.Core
         private void Start()
         {
             // 초기 상태 설정
-            ChangeState(GameState.Ready);
+            if (CurrentState == GameState.None)
+            {
+                ChangeState(GameState.Ready);
+            }
 
             // 전역 플레이어 찾아서 캐싱 (Enemy 등에서 무거운 Find를 매번 하지 않도록)
             GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
@@ -116,7 +120,25 @@ namespace MushOut.Core
         /// <param name="newState">새로운 게임 상태</param>
         public void ChangeState(GameState newState)
         {
+            if (newState == GameState.GameOver)
+            {
+                EnsureGameOverManager();
+            }
+
             CurrentState = newState;
+
+            if (newState == GameState.GameOver)
+            {
+                GetComponent<GameOverManager>()?.BeginGameOver();
+            }
+        }
+
+        private void EnsureGameOverManager()
+        {
+            if (GetComponent<GameOverManager>() == null)
+            {
+                gameObject.AddComponent<GameOverManager>();
+            }
         }
 
         /// <summary>
