@@ -1,14 +1,9 @@
 fileFormatVersion: 2
-guid: 1197a55343b95504e975e09ed3934532
+guid: 22e3561bc575c8e48be9412df1f99066
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects:
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Torch_Material
-    second: {fileID: 2100000, guid: 4ee901ea09358ff4fb8d62416716fdff, type: 2}
+  externalObjects: {}
   materials:
     materialImportMode: 2
     materialName: 0

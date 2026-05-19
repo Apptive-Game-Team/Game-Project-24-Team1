@@ -512,14 +512,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be6c87730c758e6479219e409f986433, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MushOut.Enemy.EnemyAttacking
-  _rushDistance: 10
-  _rushSpeed: 15
+  _rushDistance: 15
+  _rushSpeed: 30
   _castRadius: 0.4
   _obstacleLayer:
     serializedVersion: 2
     m_Bits: 1024
   _stateAfterRush: 2
   _preRushDelay: 2
+  _lookRotateSpeed: 180
 --- !u!1 &7693907856138118159
 GameObject:
   m_ObjectHideFlags: 0

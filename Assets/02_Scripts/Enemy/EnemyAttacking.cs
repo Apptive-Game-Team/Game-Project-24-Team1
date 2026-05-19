@@ -35,6 +35,9 @@ namespace MushOut.Enemy
         [Tooltip("Attacking 상태 진입 후 돌진 전 대기 시간 (초). 예고 모션 등에 활용.")]
         [SerializeField] private float _preRushDelay = 2.0f;
 
+        [Tooltip("대기 중 플레이어를 향해 회전하는 최대 각도 속도 (도/초). 360으로 설정하면 즉시 회전.")]
+        [SerializeField] private float _lookRotateSpeed = 180f;
+
         private EnemyController _enemyController;
         private NavMeshAgent _agent;
         private Rigidbody _rigidbody;
@@ -60,13 +63,48 @@ namespace MushOut.Enemy
         {
             _isRunning = true;
 
+            // 0. Attacking 진입 직후 이전 상태(Chasing 등)에서 남아있던 이동 명령 취소
+            if (_agent != null && _agent.isActiveAndEnabled && _agent.isOnNavMesh)
+            {
+                _agent.isStopped = true;
+                _agent.velocity = Vector3.zero;
+                _agent.ResetPath();
+            }
+
             // 1. 상태 잠금: 돌진이 끝날 때까지 외부 상태 전환 차단 (Stunned/Dead 제외)
             _enemyController.LockState();
 
-            // 1-1. 돌진 전 대기 (예고 모션 / 준비 시간)
+            // 1-1. 돌진 전 대기: 매 프레임 플레이어를 바라보며 준비 동작
             if (_preRushDelay > 0f)
             {
-                yield return new WaitForSeconds(_preRushDelay);
+                float elapsed = 0f;
+                while (elapsed < _preRushDelay)
+                {
+                    // 외부 강제 전환 감지 시 루프 즉시 탈출
+                    if (_enemyController.CurrentState != EnemyController.State.Attacking) break;
+
+                    // 플레이어 방향으로 즉시 회전 (수평만)
+                    Transform playerTransform = MushOut.Core.GameManager.Instance?.PlayerTransform
+                        ?? GameObject.FindWithTag("Player")?.transform;
+
+                    if (playerTransform != null)
+                    {
+                        Vector3 toPlayer = playerTransform.position - transform.position;
+                        toPlayer.y = 0f;
+                        if (toPlayer.sqrMagnitude > 0.001f)
+                        {
+                            Quaternion targetRot = Quaternion.LookRotation(toPlayer);
+                            transform.rotation = Quaternion.RotateTowards(
+                                transform.rotation,
+                                targetRot,
+                                _lookRotateSpeed * Time.deltaTime
+                            );
+                        }
+                    }
+
+                    elapsed += Time.deltaTime;
+                    yield return null;
+                }
             }
 
             // 대기 중 외부에서 Stunned/Dead로 강제 전환된 경우 즉시 정리
@@ -121,12 +159,22 @@ namespace MushOut.Enemy
                 transform.rotation = Quaternion.LookRotation(rushDir);
             }
 
-            // 4. 돌진 준비: NavMeshAgent 비활성화 (Rigidbody는 Kinematic 유지, MovePosition으로 이동)
+            // 4. 돌진 준비: NavMeshAgent 비활성화, 중력 차단 (비활성화 후 낙하 방지)
             _agent.isStopped = true;
             _agent.enabled = false;
 
+            if (_rigidbody != null)
+            {
+                _rigidbody.useGravity = false;   // 돌진 중 중력 차단
+                if (!_rigidbody.isKinematic)
+                {
+                    _rigidbody.linearVelocity = Vector3.zero; // 잔류 속도 초기화
+                }
+            }
+
             // 5. 돌진 루프: SphereCast로 전방 장애물 감지 (OnCollisionEnter 미사용 - 바닥 오감지 방지)
             Vector3 startPos = transform.position;
+            float rushY = startPos.y;           // Y축 기준점 고정 (매 프레임 참조 시 누적 오차 방지)
             bool collidedDuringRush = false;
 
             while (true)
@@ -141,18 +189,19 @@ namespace MushOut.Enemy
 
                 float moveStep = _rushSpeed * Time.deltaTime;
 
+                bool hitObstacle = false;
                 // SphereCast로 이동 전 전방 장애물 검사
                 // obstacleLayer에 설정된 레이어만 충돌로 간주 (Player/Enemy 레이어 제외 권장)
                 if (_obstacleLayer.value != 0 &&
                     Physics.SphereCast(transform.position, _castRadius, rushDir, out RaycastHit hit, moveStep + 0.05f, _obstacleLayer))
                 {
                     collidedDuringRush = true;
-                    break;
+                    hitObstacle = true;
                 }
 
-                // 수평 이동 (Y축은 고정하여 낙하 방지)
+                // 수평 이동 (Y축은 돌진 시작 시 고정값 rushY로 유지 - 누적 낙하 방지)
                 Vector3 newPos = transform.position + rushDir * moveStep;
-                newPos.y = transform.position.y;
+                newPos.y = rushY;
 
                 if (_rigidbody != null)
                 {
@@ -163,10 +212,24 @@ namespace MushOut.Enemy
                     transform.position = newPos;
                 }
 
+                if (hitObstacle)
+                {
+                    // 벽을 감지했더라도 한 프레임 더 이동시켜 겹치도록(조금 늦게 멈추도록) 한 뒤 루프 종료
+                    break;
+                }
+
                 yield return null;
             }
 
-            // 6. NavMeshAgent 복구
+            // 6. NavMeshAgent 복구, 중력 원상 복원
+            if (_rigidbody != null)
+            {
+                _rigidbody.useGravity = true;
+                if (!_rigidbody.isKinematic)
+                {
+                    _rigidbody.linearVelocity = Vector3.zero;
+                }
+            }
             _agent.enabled = true;
             _agent.isStopped = false;
 

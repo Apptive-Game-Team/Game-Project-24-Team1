@@ -17,7 +17,7 @@ namespace MushOut.Enemy
 
         [Header("Stunned Settings")]
         [Tooltip("기절 지속 시간(초)입니다.")]
-        [Range(1f, 30f)]
+        [Range(1f, 30000f)]
         [SerializeField] private float _stunnedDuration = 10f;
 
         private bool _isRunning = false;
