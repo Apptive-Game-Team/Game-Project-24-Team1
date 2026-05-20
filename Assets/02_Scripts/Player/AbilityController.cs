@@ -15,6 +15,9 @@ namespace MushOut.Player
         Bomb        // 4번: 폭탄
     }
 
+    /// <summary>
+    /// 플레이어의 능력 상태와 자원을 관리하는 클래스입니다.
+    /// </summary>
     public class AbilityController : MonoBehaviour
     {
         [Header("Ability State")]
@@ -22,49 +25,200 @@ namespace MushOut.Player
         [SerializeField] private AbilityState _currentState = AbilityState.Dash;
 
         [Header("Ability Resources")]
-        public int dashcount = 3;
-        public int sleepfungus = 3;
-        public int aggrofungus = 3;
-        public int bombfungus = 3;
+        [Tooltip("대시 사용 가능 횟수입니다.")]
+        [SerializeField] private int _dashCount = 3;
+        
+        [Tooltip("수면 포자 보유 개수입니다.")]
+        [SerializeField] private int _sleepFungus = 3;
+        
+        [Tooltip("광분 포자 보유 개수입니다.")]
+        [SerializeField] private int _aggroFungus = 3;
+        
+        [Tooltip("폭탄 포자 보유 개수입니다.")]
+        [SerializeField] private int _bombFungus = 3;
+
+        [Header("Ability Unlocked")]
+        [Tooltip("대시 능력 해금 여부입니다.")]
+        [SerializeField] private bool _dashUnlocked = false;
+        
+        [Tooltip("마비 능력 해금 여부입니다.")]
+        [SerializeField] private bool _paralyzeUnlocked = false;
+        
+        [Tooltip("광분 능력 해금 여부입니다.")]
+        [SerializeField] private bool _madUnlocked = false;
+        
+        [Tooltip("폭탄 능력 해금 여부입니다.")]
+        [SerializeField] private bool _bombUnlocked = false;
 
         /// <summary>
         /// 외부에서 현재 능력을 확인할 수 있는 프로퍼티입니다.
         /// </summary>
         public AbilityState CurrentState => _currentState;
 
+        /// <summary>
+        /// 대시 사용 가능 횟수에 접근하는 프로퍼티입니다.
+        /// </summary>
+        public int DashCount 
+        {
+            get => _dashCount;
+            set => _dashCount = value;
+        }
+
+        /// <summary>
+        /// 수면 포자 보유 개수에 접근하는 프로퍼티입니다.
+        /// </summary>
+        public int SleepFungus 
+        {
+            get => _sleepFungus;
+            set => _sleepFungus = value;
+        }
+
+        /// <summary>
+        /// 광분 포자 보유 개수에 접근하는 프로퍼티입니다.
+        /// </summary>
+        public int AggroFungus 
+        {
+            get => _aggroFungus;
+            set => _aggroFungus = value;
+        }
+
+        /// <summary>
+        /// 폭탄 포자 보유 개수에 접근하는 프로퍼티입니다.
+        /// </summary>
+        public int BombFungus 
+        {
+            get => _bombFungus;
+            set => _bombFungus = value;
+        }
+
+        /// <summary>
+        /// 대시 능력 해금 여부를 확인하는 프로퍼티입니다.
+        /// </summary>
+        public bool DashUnlocked => _dashUnlocked;
+
+        /// <summary>
+        /// 마비 능력 해금 여부를 확인하는 프로퍼티입니다.
+        /// </summary>
+        public bool ParalyzeUnlocked => _paralyzeUnlocked;
+
+        /// <summary>
+        /// 광분 능력 해금 여부를 확인하는 프로퍼티입니다.
+        /// </summary>
+        public bool MadUnlocked => _madUnlocked;
+
+        /// <summary>
+        /// 폭탄 능력 해금 여부를 확인하는 프로퍼티입니다.
+        /// </summary>
+        public bool BombUnlocked => _bombUnlocked;
+
+        private PlayerInputHandler _input;
+
+        private void Awake()
+        {
+            _input = GetComponent<PlayerInputHandler>();
+        }
+
         private void Update()
         {
-            // Input System 키보드 확인
-            if (Keyboard.current == null) return;
+            if (_input == null) return;
 
-            // 숫자키 1~4 입력에 따른 상태 전환
-            if (Keyboard.current[Key.Digit1].wasPressedThisFrame)
+            // PlayerInputHandler를 통한 상태 전환
+            if (_input.IsAbility1 && _dashUnlocked)
             {
                 ChangeState(AbilityState.Dash);
+                UseDash();
             }
-            else if (Keyboard.current[Key.Digit2].wasPressedThisFrame)
+            else if (_input.IsAbility2 && _paralyzeUnlocked)
             {
                 ChangeState(AbilityState.Paralyze);
+                UseParalyze();
             }
-            else if (Keyboard.current[Key.Digit3].wasPressedThisFrame)
+            else if (_input.IsAbility3 && _madUnlocked)
             {
                 ChangeState(AbilityState.Mad);
+                UseMad();
             }
-            else if (Keyboard.current[Key.Digit4].wasPressedThisFrame)
+            else if (_input.IsAbility4 && _bombUnlocked)
             {
                 ChangeState(AbilityState.Bomb);
+                UseBomb();
             }
         }
 
         /// <summary>
         /// 상태를 변경하고 로그를 출력합니다.
         /// </summary>
+        /// <param name="newState">새로 변경할 능력 상태</param>
         public void ChangeState(AbilityState newState)
         {
             if (_currentState == newState) return;
 
             _currentState = newState;
             Debug.Log($"[AbilityController] 현재 능력이 변경되었습니다: {_currentState}");
+        }
+
+        /// <summary>
+        /// 대시 능력을 해금합니다.
+        /// </summary>
+        public void UnlockDash() 
+        {
+            _dashUnlocked = true;
+        }
+
+        /// <summary>
+        /// 대시 능력을 사용합니다. (자원 소모)
+        /// </summary>
+        public void UseDash() 
+        {
+            _dashCount -= 1;
+        }
+
+        /// <summary>
+        /// 마비 능력을 해금합니다.
+        /// </summary>
+        public void UnlockParalyze() 
+        {
+            _paralyzeUnlocked = true;
+        }
+
+        /// <summary>
+        /// 마비 능력을 사용합니다. (자원 소모)
+        /// </summary>
+        public void UseParalyze() 
+        {
+            _sleepFungus -= 1;
+        }
+
+        /// <summary>
+        /// 광분 능력을 해금합니다.
+        /// </summary>
+        public void UnlockMad() 
+        {
+            _madUnlocked = true;
+        }
+
+        /// <summary>
+        /// 광분 능력을 사용합니다. (자원 소모)
+        /// </summary>
+        public void UseMad() 
+        {
+            _aggroFungus -= 1;
+        }
+
+        /// <summary>
+        /// 폭탄 능력을 해금합니다.
+        /// </summary>
+        public void UnlockBomb() 
+        {
+            _bombUnlocked = true;
+        }
+
+        /// <summary>
+        /// 폭탄 능력을 사용합니다. (자원 소모)
+        /// </summary>
+        public void UseBomb() 
+        {
+            _bombFungus -= 1;
         }
     }
 }

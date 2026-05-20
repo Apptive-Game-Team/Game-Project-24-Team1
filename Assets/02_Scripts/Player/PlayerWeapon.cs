@@ -86,12 +86,12 @@ namespace MushOut.Player
 
             if (_abilityController != null)
             {
-                if (_abilityController.sleepfungus <= 0)
+                if (_abilityController.SleepFungus <= 0)
                 {
                     Debug.Log("[PlayerWeapon] 수면 포자가 부족합니다!"); // TODO: 특정 애니메이션이나 텍스트 출력
                     return;
                 }
-                _abilityController.sleepfungus--;
+                _abilityController.SleepFungus--;
             }
 
             ExecuteDoubleRaycast();

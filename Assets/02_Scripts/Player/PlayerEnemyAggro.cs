@@ -35,12 +35,12 @@ namespace MushOut.Player
             {
                 if (_abilityController != null)
                 {
-                    if (_abilityController.aggrofungus <= 0)
+                    if (_abilityController.AggroFungus <= 0)
                     {
                         Debug.Log("[PlayerEnemyAggro] 광분 포자가 부족합니다!"); // TODO: 특정 애니메이션이나 텍스트 출력
                         return;
                     }
-                    _abilityController.aggrofungus--;
+                    _abilityController.AggroFungus--;
                 }
 
                 TriggerNearbyEnemies();
