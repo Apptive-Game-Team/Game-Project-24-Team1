@@ -53,6 +53,26 @@ namespace MushOut.Player
         /// </summary>
         public bool IsInteractingHeld { get; private set; }
 
+        /// <summary>
+        /// 1번 능력(대시) 입력 여부
+        /// </summary>
+        public bool IsAbility1 { get; private set; }
+
+        /// <summary>
+        /// 2번 능력(마비) 입력 여부
+        /// </summary>
+        public bool IsAbility2 { get; private set; }
+
+        /// <summary>
+        /// 3번 능력(광분) 입력 여부
+        /// </summary>
+        public bool IsAbility3 { get; private set; }
+
+        /// <summary>
+        /// 4번 능력(폭탄) 입력 여부
+        /// </summary>
+        public bool IsAbility4 { get; private set; }
+
         private InputAction _moveAction;
         private InputAction _lookAction;
         private InputAction _jumpAction;
@@ -60,6 +80,10 @@ namespace MushOut.Player
         private InputAction _aimAction;
         private InputAction _fireAction;
         private InputAction _interactAction;
+        private InputAction _ability1Action;
+        private InputAction _ability2Action;
+        private InputAction _ability3Action;
+        private InputAction _ability4Action;
 
         /// <summary>
         /// 입력 차단 플래그.
@@ -90,6 +114,10 @@ namespace MushOut.Player
             _aimAction = playerMap.FindAction("Aim");
             _fireAction = playerMap.FindAction("Fire");
             _interactAction = playerMap.FindAction("Interact");
+            _ability1Action = playerMap.FindAction("Ability1");
+            _ability2Action = playerMap.FindAction("Ability2");
+            _ability3Action = playerMap.FindAction("Ability3");
+            _ability4Action = playerMap.FindAction("Ability4");
         }
 
         private void OnEnable()
@@ -116,6 +144,10 @@ namespace MushOut.Player
                 IsAiming = false;
                 IsFiring = false;
                 IsInteracting = false;
+                IsAbility1 = false;
+                IsAbility2 = false;
+                IsAbility3 = false;
+                IsAbility4 = false;
                 return;
             }
 
@@ -128,6 +160,12 @@ namespace MushOut.Player
             IsFiring = _fireAction != null && _fireAction.IsPressed();
             IsInteracting = _interactAction != null && _interactAction.WasPressedThisFrame();
             IsInteractingHeld = _interactAction != null && _interactAction.IsPressed();
+
+            // 능력 입력 (Input Action을 우선시하고, 설정되지 않았을 경우 Keyboard 강제 폴백)
+            IsAbility1 = _ability1Action != null ? _ability1Action.WasPressedThisFrame() : (Keyboard.current != null && Keyboard.current[Key.Digit1].wasPressedThisFrame);
+            IsAbility2 = _ability2Action != null ? _ability2Action.WasPressedThisFrame() : (Keyboard.current != null && Keyboard.current[Key.Digit2].wasPressedThisFrame);
+            IsAbility3 = _ability3Action != null ? _ability3Action.WasPressedThisFrame() : (Keyboard.current != null && Keyboard.current[Key.Digit3].wasPressedThisFrame);
+            IsAbility4 = _ability4Action != null ? _ability4Action.WasPressedThisFrame() : (Keyboard.current != null && Keyboard.current[Key.Digit4].wasPressedThisFrame);
         }
     }
 }
