@@ -1,0 +1,265 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4331795008064228532
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5821694045713710883}
+  - component: {fileID: 3875744986036065}
+  - component: {fileID: 58106780390708395}
+  m_Layer: 0
+  m_Name: AbilityCarousel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &5821694045713710883
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4331795008064228532}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 129449899595916410}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 320, y: 190}
+  m_SizeDelta: {x: 1080, y: 390}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &3875744986036065
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4331795008064228532}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab071a55cad85734daaef0ff92cce865, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.UI.PlayerAbilityUI
+  abilityController: {fileID: 0}
+  dashIcon: {fileID: 0}
+  sleepSporeIcon: {fileID: 0}
+  provocationIcon: {fileID: 0}
+  bombSporeIcon: {fileID: 0}
+  dashSlot:
+    state: 0
+    displayName: 
+    keyLabel: 
+    iconSprite: {fileID: 0}
+    slotRoot: {fileID: 0}
+    rectTransform: {fileID: 0}
+    canvasGroup: {fileID: 0}
+    iconImage: {fileID: 0}
+    beamImage: {fileID: 0}
+    baseGlowImage: {fileID: 0}
+    plateImage: {fileID: 0}
+    selectedIndicator: {fileID: 0}
+    keyText: {fileID: 0}
+    nameText: {fileID: 0}
+    countText: {fileID: 0}
+  paralyzeSlot:
+    state: 1
+    displayName: 
+    keyLabel: 
+    iconSprite: {fileID: 0}
+    slotRoot: {fileID: 0}
+    rectTransform: {fileID: 0}
+    canvasGroup: {fileID: 0}
+    iconImage: {fileID: 0}
+    beamImage: {fileID: 0}
+    baseGlowImage: {fileID: 0}
+    plateImage: {fileID: 0}
+    selectedIndicator: {fileID: 0}
+    keyText: {fileID: 0}
+    nameText: {fileID: 0}
+    countText: {fileID: 0}
+  madSlot:
+    state: 2
+    displayName: 
+    keyLabel: 
+    iconSprite: {fileID: 0}
+    slotRoot: {fileID: 0}
+    rectTransform: {fileID: 0}
+    canvasGroup: {fileID: 0}
+    iconImage: {fileID: 0}
+    beamImage: {fileID: 0}
+    baseGlowImage: {fileID: 0}
+    plateImage: {fileID: 0}
+    selectedIndicator: {fileID: 0}
+    keyText: {fileID: 0}
+    nameText: {fileID: 0}
+    countText: {fileID: 0}
+  bombSlot:
+    state: 3
+    displayName: 
+    keyLabel: 
+    iconSprite: {fileID: 0}
+    slotRoot: {fileID: 0}
+    rectTransform: {fileID: 0}
+    canvasGroup: {fileID: 0}
+    iconImage: {fileID: 0}
+    beamImage: {fileID: 0}
+    baseGlowImage: {fileID: 0}
+    plateImage: {fileID: 0}
+    selectedIndicator: {fileID: 0}
+    keyText: {fileID: 0}
+    nameText: {fileID: 0}
+    countText: {fileID: 0}
+  autoBuildSlots: 1
+  createCanvasIfMissing: 0
+  canvasAnchoredPosition: {x: 320, y: 190}
+  carouselRootSize: {x: 1080, y: 390}
+  slotSize: {x: 285, y: 315}
+  slotColor: {r: 0.07, g: 0.12, b: 0.17, a: 0.86}
+  selectedRingColor: {r: 0.35, g: 0.95, b: 1, a: 1}
+  beamColor: {r: 0.24, g: 0.88, b: 1, a: 0.55}
+  baseGlowColor: {r: 0.15, g: 0.74, b: 1, a: 0.8}
+  emptyTint: {r: 0.65, g: 0.65, b: 0.65, a: 1}
+  usableAlpha: 1
+  emptyAlpha: 0.35
+  useCarouselLayout: 1
+  horizontalSpacing: 285
+  depthYOffset: 39
+  selectedScale: 1.25
+  sideScale: 0.82
+  farScale: 0.56
+  sideRotationY: 48
+  farRotationY: 64
+  sideAlphaMultiplier: 0.75
+  farAlphaMultiplier: 0.45
+  carouselLerpSpeed: 12
+  floatAmplitude: 13.5
+  floatSpeed: 2.4
+  selectedPulseSpeed: 4
+--- !u!114 &58106780390708395
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4331795008064228532}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19363bce2a9fb5344b1722015ef9aafc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.UI.PlayerAbilityIconBinder
+  abilityController: {fileID: 0}
+  weaponIcon: {fileID: 0}
+  keyText: {fileID: 0}
+  nameText: {fileID: 0}
+  countText: {fileID: 0}
+--- !u!1 &8461142568533513622
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 129449899595916410}
+  - component: {fileID: 7260946826412242240}
+  - component: {fileID: 9221059265446629179}
+  - component: {fileID: 3873193402886495277}
+  m_Layer: 0
+  m_Name: AbilityUICanvas
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &129449899595916410
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8461142568533513622}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0, y: 0, z: 0}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5821694045713710883}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0, y: 0}
+--- !u!223 &7260946826412242240
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8461142568533513622}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 0
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 0
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 50
+  m_TargetDisplay: 0
+--- !u!114 &9221059265446629179
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8461142568533513622}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.CanvasScaler
+  m_UiScaleMode: 1
+  m_ReferencePixelsPerUnit: 100
+  m_ScaleFactor: 1
+  m_ReferenceResolution: {x: 1920, y: 1080}
+  m_ScreenMatchMode: 0
+  m_MatchWidthOrHeight: 0.5
+  m_PhysicalUnit: 3
+  m_FallbackScreenDPI: 96
+  m_DefaultSpriteDPI: 96
+  m_DynamicPixelsPerUnit: 1
+  m_PresetInfoIsWorld: 0
+--- !u!114 &3873193402886495277
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8461142568533513622}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GraphicRaycaster
+  m_IgnoreReversedGraphics: 1
+  m_BlockingObjects: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
