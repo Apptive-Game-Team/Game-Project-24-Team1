@@ -2775,6 +2775,7 @@ GameObject:
   - component: {fileID: 2334817305417235342}
   - component: {fileID: 7632178547762821018}
   - component: {fileID: 2822650242395604527}
+  - component: {fileID: 611448862180983401}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -3035,6 +3036,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0031974c0b4cb443a040796b1eb0ebf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MushOut.Player.PlayerEnemyCollisionHandler
+--- !u!114 &611448862180983401
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8596124297504245249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 08e527c009e3d62469907d73fff58b9c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Player.AbilityController
+  _currentState: 0
+  _dashCount: 3
+  _sleepFungus: 3
+  _aggroFungus: 3
+  _bombFungus: 3
+  _dashUnlocked: 1
+  _paralyzeUnlocked: 1
+  _madUnlocked: 1
+  _bombUnlocked: 1
 --- !u!1 &9122675455333517926
 GameObject:
   m_ObjectHideFlags: 0

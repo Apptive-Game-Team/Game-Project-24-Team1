@@ -1,23 +1,20 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 namespace MushOut.Player
 {
     /// <summary>
-    /// 플레이어가 사용할 수 있는 특수 행동(능력)의 상태를 관리하는 컨트롤러입니다.
-    /// 숫자키 1, 2, 3, 4를 눌러 상태를 전환합니다.
+    /// 플레이어가 사용할 수 있는 특수 행동의 상태를 관리합니다.
+    /// 1, 2, 3, 4 입력으로 현재 능력을 전환합니다.
     /// </summary>
     public enum AbilityState
     {
-        Dash,       // 1번: 대시
-        Paralyze,   // 2번: 마비 (수면 포자 등)
-        Mad,        // 3번: 광분 (적을 화나게 만듦)
-        Bomb        // 4번: 폭탄
+        Dash,
+        Paralyze,
+        Mad,
+        Bomb
     }
 
-    /// <summary>
-    /// 플레이어의 능력 상태와 자원을 관리하는 클래스입니다.
-    /// </summary>
     public class AbilityController : MonoBehaviour
     {
         [Header("Ability State")]
@@ -26,129 +23,131 @@ namespace MushOut.Player
 
         [Header("Ability Resources")]
         [Tooltip("대시 사용 가능 횟수입니다.")]
+        [FormerlySerializedAs("dashcount")]
         [SerializeField] private int _dashCount = 3;
-        
+
         [Tooltip("수면 포자 보유 개수입니다.")]
+        [FormerlySerializedAs("sleepfungus")]
         [SerializeField] private int _sleepFungus = 3;
-        
+
         [Tooltip("광분 포자 보유 개수입니다.")]
+        [FormerlySerializedAs("aggrofungus")]
         [SerializeField] private int _aggroFungus = 3;
-        
+
         [Tooltip("폭탄 포자 보유 개수입니다.")]
+        [FormerlySerializedAs("bombfungus")]
         [SerializeField] private int _bombFungus = 3;
 
         [Header("Ability Unlocked")]
         [Tooltip("대시 능력 해금 여부입니다.")]
-        [SerializeField] private bool _dashUnlocked = false;
-        
+        [SerializeField] private bool _dashUnlocked;
+
         [Tooltip("마비 능력 해금 여부입니다.")]
-        [SerializeField] private bool _paralyzeUnlocked = false;
-        
+        [SerializeField] private bool _paralyzeUnlocked;
+
         [Tooltip("광분 능력 해금 여부입니다.")]
-        [SerializeField] private bool _madUnlocked = false;
-        
+        [SerializeField] private bool _madUnlocked;
+
         [Tooltip("폭탄 능력 해금 여부입니다.")]
-        [SerializeField] private bool _bombUnlocked = false;
-
-        /// <summary>
-        /// 외부에서 현재 능력을 확인할 수 있는 프로퍼티입니다.
-        /// </summary>
-        public AbilityState CurrentState => _currentState;
-
-        /// <summary>
-        /// 대시 사용 가능 횟수에 접근하는 프로퍼티입니다.
-        /// </summary>
-        public int DashCount 
-        {
-            get => _dashCount;
-            set => _dashCount = value;
-        }
-
-        /// <summary>
-        /// 수면 포자 보유 개수에 접근하는 프로퍼티입니다.
-        /// </summary>
-        public int SleepFungus 
-        {
-            get => _sleepFungus;
-            set => _sleepFungus = value;
-        }
-
-        /// <summary>
-        /// 광분 포자 보유 개수에 접근하는 프로퍼티입니다.
-        /// </summary>
-        public int AggroFungus 
-        {
-            get => _aggroFungus;
-            set => _aggroFungus = value;
-        }
-
-        /// <summary>
-        /// 폭탄 포자 보유 개수에 접근하는 프로퍼티입니다.
-        /// </summary>
-        public int BombFungus 
-        {
-            get => _bombFungus;
-            set => _bombFungus = value;
-        }
-
-        /// <summary>
-        /// 대시 능력 해금 여부를 확인하는 프로퍼티입니다.
-        /// </summary>
-        public bool DashUnlocked => _dashUnlocked;
-
-        /// <summary>
-        /// 마비 능력 해금 여부를 확인하는 프로퍼티입니다.
-        /// </summary>
-        public bool ParalyzeUnlocked => _paralyzeUnlocked;
-
-        /// <summary>
-        /// 광분 능력 해금 여부를 확인하는 프로퍼티입니다.
-        /// </summary>
-        public bool MadUnlocked => _madUnlocked;
-
-        /// <summary>
-        /// 폭탄 능력 해금 여부를 확인하는 프로퍼티입니다.
-        /// </summary>
-        public bool BombUnlocked => _bombUnlocked;
+        [SerializeField] private bool _bombUnlocked;
 
         private PlayerInputHandler _input;
+
+        public AbilityState CurrentState => _currentState;
+
+        public int DashCount
+        {
+            get => _dashCount;
+            set => _dashCount = Mathf.Max(0, value);
+        }
+
+        public int SleepFungus
+        {
+            get => _sleepFungus;
+            set => _sleepFungus = Mathf.Max(0, value);
+        }
+
+        public int AggroFungus
+        {
+            get => _aggroFungus;
+            set => _aggroFungus = Mathf.Max(0, value);
+        }
+
+        public int BombFungus
+        {
+            get => _bombFungus;
+            set => _bombFungus = Mathf.Max(0, value);
+        }
+
+        public bool DashUnlocked => _dashUnlocked;
+        public bool ParalyzeUnlocked => _paralyzeUnlocked;
+        public bool MadUnlocked => _madUnlocked;
+        public bool BombUnlocked => _bombUnlocked;
+
+        // 이전 브랜치의 기존 스크립트 호환용 이름입니다.
+        public int dashcount
+        {
+            get => DashCount;
+            set => DashCount = value;
+        }
+
+        public int sleepfungus
+        {
+            get => SleepFungus;
+            set => SleepFungus = value;
+        }
+
+        public int aggrofungus
+        {
+            get => AggroFungus;
+            set => AggroFungus = value;
+        }
+
+        public int bombfungus
+        {
+            get => BombFungus;
+            set => BombFungus = value;
+        }
 
         private void Awake()
         {
             _input = GetComponent<PlayerInputHandler>();
+            if (_input == null)
+            {
+                Debug.LogWarning("[AbilityController] PlayerInputHandler를 찾을 수 없습니다.");
+            }
         }
 
         private void Update()
         {
             if (_input == null) return;
 
-            // PlayerInputHandler를 통한 상태 전환
-            if (_input.IsAbility1 && _dashUnlocked)
+            if (_input.IsAbility1)
             {
-                ChangeState(AbilityState.Dash);
-                UseDash();
+                TryChangeState(AbilityState.Dash);
             }
-            else if (_input.IsAbility2 && _paralyzeUnlocked)
+            else if (_input.IsAbility2)
             {
-                ChangeState(AbilityState.Paralyze);
-                UseParalyze();
+                TryChangeState(AbilityState.Paralyze);
             }
-            else if (_input.IsAbility3 && _madUnlocked)
+            else if (_input.IsAbility3)
             {
-                ChangeState(AbilityState.Mad);
-                UseMad();
+                TryChangeState(AbilityState.Mad);
             }
-            else if (_input.IsAbility4 && _bombUnlocked)
+            else if (_input.IsAbility4)
             {
-                ChangeState(AbilityState.Bomb);
-                UseBomb();
+                TryChangeState(AbilityState.Bomb);
             }
         }
 
-        /// <summary>
-        /// 상태를 변경하고 로그를 출력합니다.
-        /// </summary>
-        /// <param name="newState">새로 변경할 능력 상태</param>
+        public bool TryChangeState(AbilityState newState)
+        {
+            if (!IsUnlocked(newState)) return false;
+
+            ChangeState(newState);
+            return true;
+        }
+
         public void ChangeState(AbilityState newState)
         {
             if (_currentState == newState) return;
@@ -157,68 +156,102 @@ namespace MushOut.Player
             Debug.Log($"[AbilityController] 현재 능력이 변경되었습니다: {_currentState}");
         }
 
-        /// <summary>
-        /// 대시 능력을 해금합니다.
-        /// </summary>
-        public void UnlockDash() 
+        public bool IsUnlocked(AbilityState state)
+        {
+            switch (state)
+            {
+                case AbilityState.Dash:
+                    return _dashUnlocked;
+                case AbilityState.Paralyze:
+                    return _paralyzeUnlocked;
+                case AbilityState.Mad:
+                    return _madUnlocked;
+                case AbilityState.Bomb:
+                    return _bombUnlocked;
+                default:
+                    return false;
+            }
+        }
+
+        public int GetResourceCount(AbilityState state)
+        {
+            switch (state)
+            {
+                case AbilityState.Dash:
+                    return _dashCount;
+                case AbilityState.Paralyze:
+                    return _sleepFungus;
+                case AbilityState.Mad:
+                    return _aggroFungus;
+                case AbilityState.Bomb:
+                    return _bombFungus;
+                default:
+                    return 0;
+            }
+        }
+
+        public bool HasResource(AbilityState state)
+        {
+            return GetResourceCount(state) > 0;
+        }
+
+        public void UnlockDash()
         {
             _dashUnlocked = true;
         }
 
-        /// <summary>
-        /// 대시 능력을 사용합니다. (자원 소모)
-        /// </summary>
-        public void UseDash() 
-        {
-            _dashCount -= 1;
-        }
-
-        /// <summary>
-        /// 마비 능력을 해금합니다.
-        /// </summary>
-        public void UnlockParalyze() 
+        public void UnlockParalyze()
         {
             _paralyzeUnlocked = true;
         }
 
-        /// <summary>
-        /// 마비 능력을 사용합니다. (자원 소모)
-        /// </summary>
-        public void UseParalyze() 
-        {
-            _sleepFungus -= 1;
-        }
-
-        /// <summary>
-        /// 광분 능력을 해금합니다.
-        /// </summary>
-        public void UnlockMad() 
+        public void UnlockMad()
         {
             _madUnlocked = true;
         }
 
-        /// <summary>
-        /// 광분 능력을 사용합니다. (자원 소모)
-        /// </summary>
-        public void UseMad() 
-        {
-            _aggroFungus -= 1;
-        }
-
-        /// <summary>
-        /// 폭탄 능력을 해금합니다.
-        /// </summary>
-        public void UnlockBomb() 
+        public void UnlockBomb()
         {
             _bombUnlocked = true;
         }
 
-        /// <summary>
-        /// 폭탄 능력을 사용합니다. (자원 소모)
-        /// </summary>
-        public void UseBomb() 
+        public void UseDash()
         {
-            _bombFungus -= 1;
+            DashCount--;
+        }
+
+        public void UseParalyze()
+        {
+            SleepFungus--;
+        }
+
+        public void UseMad()
+        {
+            AggroFungus--;
+        }
+
+        public void UseBomb()
+        {
+            BombFungus--;
+        }
+
+        private void UseAbility(AbilityState state)
+        {
+            switch (state)
+            {
+                case AbilityState.Dash:
+                    DashCount--;
+                    break;
+                case AbilityState.Paralyze:
+                    SleepFungus--;
+                    break;
+                case AbilityState.Mad:
+                    AggroFungus--;
+                    break;
+                case AbilityState.Bomb:
+                    BombFungus--;
+                    break;
+            }
         }
     }
 }
