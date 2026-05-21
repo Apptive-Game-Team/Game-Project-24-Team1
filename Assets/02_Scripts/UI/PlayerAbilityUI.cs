@@ -37,7 +37,7 @@ namespace MushOut.UI
         [SerializeField] private Sprite bombSporeIcon;
 
         [Header("Slots")]
-        [SerializeField] private AbilitySlot dashSlot = new AbilitySlot { state = AbilityState.Dash };
+        [SerializeField] private AbilitySlot dashSlot = new AbilitySlot { state = AbilityState.Nothing };
         [SerializeField] private AbilitySlot paralyzeSlot = new AbilitySlot { state = AbilityState.Paralyze };
         [SerializeField] private AbilitySlot madSlot = new AbilitySlot { state = AbilityState.Mad };
         [SerializeField] private AbilitySlot bombSlot = new AbilitySlot { state = AbilityState.Bomb };
@@ -92,7 +92,7 @@ namespace MushOut.UI
             AssignIconSprites();
             AssignLabels();
             _slots = new[] { dashSlot, paralyzeSlot, madSlot, bombSlot };
-            _lastState = abilityController != null ? abilityController.CurrentState : AbilityState.Dash;
+            _lastState = abilityController != null ? abilityController.CurrentState : AbilityState.Nothing;
             EnsureSlotParent();
 
             if (autoBuildSlots)
@@ -576,7 +576,7 @@ namespace MushOut.UI
         {
             switch (state)
             {
-                case AbilityState.Dash:
+                case AbilityState.Nothing:
                     return 0;
                 case AbilityState.Paralyze:
                     return 1;
@@ -593,7 +593,7 @@ namespace MushOut.UI
         {
             switch (state)
             {
-                case AbilityState.Dash:
+                case AbilityState.Nothing:
                     return dashIcon;
                 case AbilityState.Paralyze:
                     return sleepSporeIcon;
@@ -610,7 +610,7 @@ namespace MushOut.UI
         {
             switch (state)
             {
-                case AbilityState.Dash:
+                case AbilityState.Nothing:
                     return "DASH";
                 case AbilityState.Paralyze:
                     return "SLEEP SPORE";

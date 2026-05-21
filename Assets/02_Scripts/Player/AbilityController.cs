@@ -226,5 +226,45 @@ namespace MushOut.Player
         {
             _bombFungus -= 1;
         }
+
+        /// <summary>
+        /// 해당 능력 상태의 현재 남은 자원 개수를 반환합니다.
+        /// </summary>
+        public int GetResourceCount(AbilityState state)
+        {
+            switch (state)
+            {
+                case AbilityState.Nothing:
+                    return _dashCount;
+                case AbilityState.Paralyze:
+                    return _sleepFungus;
+                case AbilityState.Mad:
+                    return _aggroFungus;
+                case AbilityState.Bomb:
+                    return _bombFungus;
+                default:
+                    return 0;
+            }
+        }
+
+        /// <summary>
+        /// 해당 능력이 해금되었는지 여부를 반환합니다.
+        /// </summary>
+        public bool IsUnlocked(AbilityState state)
+        {
+            switch (state)
+            {
+                case AbilityState.Nothing:
+                    return true;
+                case AbilityState.Paralyze:
+                    return _paralyzeUnlocked;
+                case AbilityState.Mad:
+                    return _madUnlocked;
+                case AbilityState.Bomb:
+                    return _bombUnlocked;
+                default:
+                    return false;
+            }
+        }
     }
 }
