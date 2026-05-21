@@ -18,7 +18,7 @@ namespace MushOut.Interaction
             if (_renderer != null)
             {
                 // 시작할 때 오브젝트가 가지고 있던 원래 머티리얼을 저장합니다.
-                _originalMaterial = _renderer.material;
+                _originalMaterial = _renderer.sharedMaterial;
             }
         }
 
@@ -30,7 +30,7 @@ namespace MushOut.Interaction
         {
             if (_renderer != null && targetMaterial != null)
             {
-                _renderer.material = targetMaterial;
+                _renderer.sharedMaterial = targetMaterial;
             }
             else
             {
@@ -46,7 +46,7 @@ namespace MushOut.Interaction
         {
             if (_renderer != null && newMaterial != null)
             {
-                _renderer.material = newMaterial;
+                _renderer.sharedMaterial = newMaterial;
             }
         }
 
@@ -57,7 +57,7 @@ namespace MushOut.Interaction
         {
             if (_renderer != null && _originalMaterial != null)
             {
-                _renderer.material = _originalMaterial;
+                _renderer.sharedMaterial = _originalMaterial;
             }
         }
     }

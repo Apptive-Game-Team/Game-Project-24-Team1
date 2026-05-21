@@ -16,6 +16,9 @@ namespace MushOut.Player
         [Tooltip("[Rule B] 무기 수치 및 레이어 설정 데이터가 담긴 Scriptable Object입니다.")]
         [SerializeField] private WeaponDataSO weaponData;
 
+        [Tooltip("마취총의 실제 모델(메시) 오브젝트입니다. 마비 상태일 때만 나타납니다.")]
+        [SerializeField] private GameObject _weaponModel;
+
         [Tooltip("마취 침이 실제로 발사되는 총구(Muzzle)의 위치입니다.")]
         [SerializeField] private Transform muzzleTransform;
 
@@ -55,6 +58,19 @@ namespace MushOut.Player
             _inputHandler = GetComponent<PlayerInputHandler>();
             _abilityController = GetComponent<AbilityController>();
 
+            if (muzzleTransform == null && _weaponModel != null)
+            {
+                Transform[] transforms = _weaponModel.GetComponentsInChildren<Transform>(true);
+                foreach (var t in transforms)
+                {
+                    if (t.name == "Muzzle")
+                    {
+                        muzzleTransform = t;
+                        break;
+                    }
+                }
+            }
+
             if (muzzleTransform == null)
             {
                 Debug.LogError($"[{name}] Muzzle Transform이 설정되지 않았습니다! 총구 위치를 할당해주세요.");
@@ -63,6 +79,17 @@ namespace MushOut.Player
 
         private void Update()
         {
+            bool isParalyzeState = _abilityController != null && _abilityController.CurrentState == AbilityState.Paralyze;
+
+            // 현재 능력 상태에 따라 마취총 모델 활성화/비활성화
+            if (_weaponModel != null && _weaponModel.activeSelf != isParalyzeState)
+            {
+                _weaponModel.SetActive(isParalyzeState);
+            }
+
+            // 마비 상태가 아니면 사격 불가
+            if (!isParalyzeState) return;
+
             if (_inputHandler != null && _inputHandler.IsFiring)
             {
                 FireWeapon();
@@ -75,6 +102,12 @@ namespace MushOut.Player
         public void FireWeapon()
         {
             if (weaponData == null || muzzleTransform == null || _mainCam == null)
+            {
+                return;
+            }
+
+            // 마비 상태에서만 발사 가능
+            if (_abilityController != null && _abilityController.CurrentState != AbilityState.Paralyze)
             {
                 return;
             }

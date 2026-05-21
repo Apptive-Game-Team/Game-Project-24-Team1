@@ -69,7 +69,7 @@ namespace MushOut.Player
                 {
                     if (_currentState == PlayerState.Climbing)
                     {
-                        _climbHandler.HandleClimbingState(Time.deltaTime, _motor.gravity, _motor.jumpHeight, _motor.moveSpeed, _detector.IsGrounded);
+                        _climbHandler.HandleClimbingState(Time.deltaTime, _motor.Gravity, _motor.JumpHeight, _motor.MoveSpeed, _detector.IsGrounded);
                     }
                     else if (_currentState == PlayerState.ClimbOver)
                     {
@@ -181,10 +181,9 @@ namespace MushOut.Player
             float targetAnimSpeed = 0f;
             if (_currentState == PlayerState.Move)
             {
-                if (_interactor.GrabbedObject != null) targetAnimSpeed = _motor.pushPullSpeed;
-                else if (_detector.IsInWater) targetAnimSpeed = _motor.waterMoveSpeed;
-                else if (_input.IsSprinting) targetAnimSpeed = _motor.sprintSpeed;
-                else targetAnimSpeed = _motor.moveSpeed;
+                if (_interactor.GrabbedObject != null) targetAnimSpeed = _motor.PushPullSpeed;
+                else if (_detector.IsInWater) targetAnimSpeed = _motor.WaterMoveSpeed;
+                else targetAnimSpeed = _motor.MoveSpeed;
             }
 
             _animator.SetSpeed(targetAnimSpeed, _input.MoveInput.magnitude);
