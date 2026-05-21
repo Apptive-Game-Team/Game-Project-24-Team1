@@ -1865,6 +1865,37 @@ Transform:
   - {fileID: 749559743355798798}
   m_Father: {fileID: 4674986761495999447}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4480102270892149913
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6860834271406022648}
+  m_Layer: 0
+  m_Name: ThrowPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6860834271406022648
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4480102270892149913}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4009469705757067474}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4659430714418603199
 GameObject:
   m_ObjectHideFlags: 0
@@ -2764,17 +2795,20 @@ GameObject:
   - component: {fileID: 4009469705757067474}
   - component: {fileID: 7402615281548064248}
   - component: {fileID: 3262684631734152832}
-  - component: {fileID: 7232757549871853805}
   - component: {fileID: 3233797465856601435}
   - component: {fileID: 9081601819218250604}
-  - component: {fileID: 5944527546526785688}
-  - component: {fileID: 8097850621285759813}
+  - component: {fileID: 746659621082694412}
   - component: {fileID: 8623993992362075459}
+  - component: {fileID: 5944527546526785688}
+  - component: {fileID: 1237080050410457489}
+  - component: {fileID: 3986688147669032}
   - component: {fileID: 7026247349913764378}
   - component: {fileID: 4574107030641040280}
   - component: {fileID: 2334817305417235342}
   - component: {fileID: 7632178547762821018}
   - component: {fileID: 2822650242395604527}
+  - component: {fileID: 8097850621285759813}
+  - component: {fileID: 7232757549871853805}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -2801,6 +2835,7 @@ Transform:
   - {fileID: 5653314316432626019}
   - {fileID: 8861160293418702526}
   - {fileID: 3224085768051954072}
+  - {fileID: 6860834271406022648}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &7402615281548064248
@@ -2850,19 +2885,6 @@ CharacterController:
   m_SkinWidth: 0.05
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 1.05, z: 0}
---- !u!114 &7232757549871853805
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8596124297504245249}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b8fcbe728d97f941976f7c670249e91, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Nexush.Player.PlayerInputHandler
-  inputActions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
 --- !u!114 &3233797465856601435
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2889,15 +2911,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15d580d95f5c08e4b9ab535b2bbb1b59, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MushOut.Player.PlayerMotor
-  moveSpeed: 5
-  sprintSpeed: 8
-  speedChangeRate: 10
-  pushPullSpeed: 2
-  jumpHeight: 1.2
-  gravity: -15
-  waterMoveSpeed: 2
-  waterDrag: 3
---- !u!114 &5944527546526785688
+  _moveSpeed: 10
+  _dashDistance: 6
+  _dashDuration: 0.1
+  _speedChangeRate: 10
+  _pushPullSpeed: 2
+  _jumpHeight: 1.2
+  _gravity: -15
+  _waterMoveSpeed: 2
+  _waterDrag: 3
+--- !u!114 &746659621082694412
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2906,40 +2929,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 8596124297504245249}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f7a24f18228404545bf1d17f314656b3, type: 3}
+  m_Script: {fileID: 11500000, guid: 08e527c009e3d62469907d73fff58b9c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Player.PlayerEnemyAggro
-  _aggroRadius: 15
-  _aggroKey: 21
-  _showGizmo: 0
---- !u!114 &8097850621285759813
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8596124297504245249}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5395f095434674c4aabb579782b94d2f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Nexush.Player.PlayerCameraController
-  cameraTarget: {fileID: 6523461567954638819}
-  tpsCamera: {fileID: 2870930669862767032}
-  fpsCamera: {fileID: 8681119771906813536}
-  playerMeshRoot: {fileID: 9122675455333517926}
-  mouseSensitivity: 0.5
-  lookSmoothTime: 0.02
-  topClamp: 80
-  bottomClamp: -80
-  cameraCollisionLayers:
-    serializedVersion: 2
-    m_Bits: 1
-  cameraMinDistanceFromTarget: 0.3
-  cameraTransparentLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  cameraRadius: 0.2
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Player.AbilityController
+  _currentState: 0
+  _maxDashCount: 3
+  _dashCount: 1
+  _dashChargeTime: 2
+  _sleepFungus: 3
+  _aggroFungus: 3
+  _bombFungus: 3
+  _paralyzeUnlocked: 1
+  _madUnlocked: 1
+  _bombUnlocked: 1
 --- !u!114 &8623993992362075459
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2953,13 +2955,160 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Nexush.Player.PlayerWeapon
   weaponData: {fileID: 11400000, guid: c13e4d27c11176d4fbae8ab65046e51c, type: 2}
+  _weaponModel: {fileID: 8335425943183238924}
   muzzleTransform: {fileID: 1986008900408281008}
   dartTracerPrefab: {fileID: 566576921725277279, guid: b6e8a3298eb112e4b8fafee34c82b9b2, type: 3}
   projectileSpeed: 60
   targetTag: Enemy
   dartHitLayer:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 384
+--- !u!114 &5944527546526785688
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8596124297504245249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7a24f18228404545bf1d17f314656b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Player.PlayerEnemyAggro
+  _aggroRadius: 15
+  _showGizmo: 0
+--- !u!114 &1237080050410457489
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8596124297504245249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d611550c67f6cea4db6ecf1269299140, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Player.PlayerBombAbility
+  _aimMode: 1
+  bombPrefab: {fileID: 5060683366595423038, guid: 6446dc1870ca7614b8855dc5d8ed1395, type: 3}
+  throwPoint: {fileID: 6860834271406022648}
+  defaultThrowDistance: 5
+  scrollSensitivity: 1
+  minThrowDistance: 2
+  maxThrowDistance: 15
+  throwAngle: 30
+  trajectoryResolution: 30
+  trajectoryWidth: 0.03
+--- !u!120 &3986688147669032
+LineRenderer:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8596124297504245249}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 0
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 0}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_Positions:
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 1}
+  m_Parameters:
+    serializedVersion: 3
+    widthMultiplier: 1
+    widthCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0.00963974
+        value: 0.11309433
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    colorGradient:
+      serializedVersion: 2
+      key0: {r: 1, g: 1, b: 1, a: 1}
+      key1: {r: 1, g: 1, b: 1, a: 1}
+      key2: {r: 0, g: 0, b: 0, a: 0}
+      key3: {r: 0, g: 0, b: 0, a: 0}
+      key4: {r: 0, g: 0, b: 0, a: 0}
+      key5: {r: 0, g: 0, b: 0, a: 0}
+      key6: {r: 0, g: 0, b: 0, a: 0}
+      key7: {r: 0, g: 0, b: 0, a: 0}
+      ctime0: 0
+      ctime1: 65535
+      ctime2: 0
+      ctime3: 0
+      ctime4: 0
+      ctime5: 0
+      ctime6: 0
+      ctime7: 0
+      atime0: 0
+      atime1: 65535
+      atime2: 0
+      atime3: 0
+      atime4: 0
+      atime5: 0
+      atime6: 0
+      atime7: 0
+      m_Mode: 0
+      m_ColorSpace: -1
+      m_NumColorKeys: 2
+      m_NumAlphaKeys: 2
+    numCornerVertices: 0
+    numCapVertices: 0
+    alignment: 0
+    textureMode: 0
+    textureScale: {x: 1, y: 1}
+    shadowBias: 0.5
+    generateLightingData: 0
+  m_UseWorldSpace: 1
+  m_Loop: 0
+  m_ApplyActiveColorSpace: 1
 --- !u!114 &7026247349913764378
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3035,6 +3184,48 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0031974c0b4cb443a040796b1eb0ebf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MushOut.Player.PlayerEnemyCollisionHandler
+  enemyCheckRadius: 0.75
+--- !u!114 &8097850621285759813
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8596124297504245249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5395f095434674c4aabb579782b94d2f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Nexush.Player.PlayerCameraController
+  cameraTarget: {fileID: 6523461567954638819}
+  tpsCamera: {fileID: 2870930669862767032}
+  fpsCamera: {fileID: 8681119771906813536}
+  playerMeshRoot: {fileID: 9122675455333517926}
+  mouseSensitivity: 0.3
+  lookSmoothTime: 0.05
+  topClamp: 80
+  bottomClamp: -80
+  cameraCollisionLayers:
+    serializedVersion: 2
+    m_Bits: 1
+  cameraMinDistanceFromTarget: 0.3
+  cameraTransparentLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  cameraRadius: 0.2
+--- !u!114 &7232757549871853805
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8596124297504245249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b8fcbe728d97f941976f7c670249e91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Nexush.Player.PlayerInputHandler
+  inputActions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
 --- !u!1 &9122675455333517926
 GameObject:
   m_ObjectHideFlags: 0

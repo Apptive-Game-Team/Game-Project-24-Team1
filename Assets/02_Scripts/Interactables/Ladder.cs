@@ -10,8 +10,29 @@ namespace MushOut.Interactables
     /// </summary>
     public class Ladder : MonoBehaviour
     {
-        [Tooltip("사다리 꼭대기에 도달했을 때 플레이어가 이동할 목표 지점 Transform입니다.")]
-        [SerializeField] private Transform topPoint;
+        private BoxCollider _boxCollider;
+
+        private void Awake()
+        {
+            _boxCollider = GetComponent<BoxCollider>();
+        }
+
+        public Vector3 GetTopPoint()
+        {
+            if (_boxCollider == null)
+            {
+                _boxCollider = GetComponent<BoxCollider>();
+            }
+
+            if (_boxCollider != null)
+            {
+                // BoxCollider의 로컬 상단 중앙 지점 계산 후 월드 좌표로 변환
+                Vector3 localTop = _boxCollider.center + new Vector3(0f, _boxCollider.size.y * 0.5f, 0f);
+                return transform.TransformPoint(localTop);
+            }
+
+            return transform.position;
+        }
 
         private void OnTriggerEnter(Collider other)
         {
@@ -21,7 +42,7 @@ namespace MushOut.Interactables
                 bool isGrounded = false;
                 if (other.TryGetComponent<PlayerController>(out var player)) isGrounded = player.IsGrounded;
                 
-                climbHandler.SetNearLadder(true, transform.forward, topPoint != null ? topPoint.position : Vector3.zero, topPoint != null, isGrounded);
+                climbHandler.SetNearLadder(true, transform.forward, GetTopPoint(), true, isGrounded);
             }
         }
 
@@ -38,10 +59,10 @@ namespace MushOut.Interactables
 
         private void OnDrawGizmosSelected()
         {
-            if (topPoint == null) return;
+            Vector3 targetTop = GetTopPoint();
             Gizmos.color = Color.cyan;
-            Gizmos.DrawSphere(topPoint.position, 0.15f);
-            Gizmos.DrawLine(transform.position, topPoint.position);
+            Gizmos.DrawSphere(targetTop, 0.15f);
+            Gizmos.DrawLine(transform.position, targetTop);
         }
     }
 }

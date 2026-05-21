@@ -16,6 +16,9 @@ namespace MushOut.Player
         [Tooltip("[Rule B] 무기 수치 및 레이어 설정 데이터가 담긴 Scriptable Object입니다.")]
         [SerializeField] private WeaponDataSO weaponData;
 
+        [Tooltip("마취총의 실제 모델(메시) 오브젝트입니다. 마비 상태일 때만 나타납니다.")]
+        [SerializeField] private GameObject _weaponModel;
+
         [Tooltip("마취 침이 실제로 발사되는 총구(Muzzle)의 위치입니다.")]
         [SerializeField] private Transform muzzleTransform;
 
@@ -46,14 +49,27 @@ namespace MushOut.Player
         private float _lastFireTime;
         private Camera _mainCam;
         private PlayerInputHandler _inputHandler;
-        private PlayerController _playerController;
+        private AbilityController _abilityController;
 
         private void Awake()
         {
             // [Rule D] 싱글톤 대신 Camera.main을 통해 메인 카메라를 참조합니다.
             _mainCam = Camera.main;
             _inputHandler = GetComponent<PlayerInputHandler>();
-            _playerController = GetComponent<PlayerController>();
+            _abilityController = GetComponent<AbilityController>();
+
+            if (muzzleTransform == null && _weaponModel != null)
+            {
+                Transform[] transforms = _weaponModel.GetComponentsInChildren<Transform>(true);
+                foreach (var t in transforms)
+                {
+                    if (t.name == "Muzzle")
+                    {
+                        muzzleTransform = t;
+                        break;
+                    }
+                }
+            }
 
             if (muzzleTransform == null)
             {
@@ -63,6 +79,17 @@ namespace MushOut.Player
 
         private void Update()
         {
+            bool isParalyzeState = _abilityController != null && _abilityController.CurrentState == AbilityState.Paralyze;
+
+            // 현재 능력 상태에 따라 마취총 모델 활성화/비활성화
+            if (_weaponModel != null && _weaponModel.activeSelf != isParalyzeState)
+            {
+                _weaponModel.SetActive(isParalyzeState);
+            }
+
+            // 마비 상태가 아니면 사격 불가
+            if (!isParalyzeState) return;
+
             if (_inputHandler != null && _inputHandler.IsFiring)
             {
                 FireWeapon();
@@ -79,19 +106,25 @@ namespace MushOut.Player
                 return;
             }
 
+            // 마비 상태에서만 발사 가능
+            if (_abilityController != null && _abilityController.CurrentState != AbilityState.Paralyze)
+            {
+                return;
+            }
+
             if (Time.time < _lastFireTime + weaponData.fireRate)
             {
                 return;
             }
 
-            if (_playerController != null)
+            if (_abilityController != null)
             {
-                if (_playerController.sleepfungus <= 0)
+                if (_abilityController.SleepFungus <= 0)
                 {
                     Debug.Log("[PlayerWeapon] 수면 포자가 부족합니다!"); // TODO: 특정 애니메이션이나 텍스트 출력
                     return;
                 }
-                _playerController.sleepfungus--;
+                _abilityController.SleepFungus--;
             }
 
             ExecuteDoubleRaycast();

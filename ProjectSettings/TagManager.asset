@@ -17,8 +17,8 @@ TagManager:
   - Enemy(Heavy)
   - Box
   - Wall
-  - 
-  - 
+  - Bomb
+  - BombExplode
   - 
   - 
   - 

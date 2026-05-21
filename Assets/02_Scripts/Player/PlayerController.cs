@@ -22,10 +22,6 @@ namespace MushOut.Player
     {
         private PlayerState _currentState = PlayerState.Idle;
 
-        [Header("Fungus Settings")]
-        public int sleepfungus = 3;
-        public int aggrofungus = 3;
-
         [Header("Jump Settings")]
         [Tooltip("최대 점프 가능한 횟수입니다. (1: 기본 점프, 2: 이단 점프)")]
         [SerializeField, Range(1, 3)] private int maxJumpCount = 2;
@@ -73,7 +69,7 @@ namespace MushOut.Player
                 {
                     if (_currentState == PlayerState.Climbing)
                     {
-                        _climbHandler.HandleClimbingState(Time.deltaTime, _motor.gravity, _motor.jumpHeight, _motor.moveSpeed, _detector.IsGrounded);
+                        _climbHandler.HandleClimbingState(Time.deltaTime, _motor.Gravity, _motor.JumpHeight, _motor.MoveSpeed, _detector.IsGrounded);
                     }
                     else if (_currentState == PlayerState.ClimbOver)
                     {
@@ -185,10 +181,9 @@ namespace MushOut.Player
             float targetAnimSpeed = 0f;
             if (_currentState == PlayerState.Move)
             {
-                if (_interactor.GrabbedObject != null) targetAnimSpeed = _motor.pushPullSpeed;
-                else if (_detector.IsInWater) targetAnimSpeed = _motor.waterMoveSpeed;
-                else if (_input.IsSprinting) targetAnimSpeed = _motor.sprintSpeed;
-                else targetAnimSpeed = _motor.moveSpeed;
+                if (_interactor.GrabbedObject != null) targetAnimSpeed = _motor.PushPullSpeed;
+                else if (_detector.IsInWater) targetAnimSpeed = _motor.WaterMoveSpeed;
+                else targetAnimSpeed = _motor.MoveSpeed;
             }
 
             _animator.SetSpeed(targetAnimSpeed, _input.MoveInput.magnitude);

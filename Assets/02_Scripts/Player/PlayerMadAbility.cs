@@ -8,43 +8,45 @@ namespace MushOut.Player
     /// 특정 키 입력 시 플레이어 주변 radius 내의 모든 Enemy를 Attacking 상태로 강제 전환합니다.
     /// 테스트/디버그 또는 특수 스킬 트리거 용도로 사용합니다.
     /// </summary>
-    public class PlayerEnemyAggro : MonoBehaviour
+    public class PlayerMadAbility : MonoBehaviour
     {
         [Header("Aggro Settings")]
         [Tooltip("Attacking 상태로 강제 전환할 최대 탐지 반경 (m)")]
         [SerializeField] private float _aggroRadius = 15f;
 
-        [Tooltip("기능을 발동할 키 (New Input System Key 열거형)")]
-        [SerializeField] private Key _aggroKey = Key.G;
-
         [Tooltip("Gizmo로 반경을 표시할지 여부 (에디터 전용)")]
         [SerializeField] private bool _showGizmo = true;
 
-        private PlayerController _playerController;
+        private AbilityController _abilityController;
+        private PlayerInputHandler _input;
+        private bool _wasFiring;
 
         private void Awake()
         {
-            _playerController = GetComponent<PlayerController>();
+            _abilityController = GetComponent<AbilityController>();
+            _input = GetComponent<PlayerInputHandler>();
         }
 
         private void Update()
         {
-            if (Keyboard.current == null) return;
+            if (_abilityController == null || _input == null) return;
 
-            if (Keyboard.current[_aggroKey].wasPressedThisFrame)
+            bool isFiring = _input.IsFiring;
+
+            if (_abilityController.CurrentState == AbilityState.Mad && isFiring && !_wasFiring)
             {
-                if (_playerController != null)
+                if (_abilityController.AggroFungus <= 0)
                 {
-                    if (_playerController.aggrofungus <= 0)
-                    {
-                        Debug.Log("[PlayerEnemyAggro] 광분 포자가 부족합니다!"); // TODO: 특정 애니메이션이나 텍스트 출력
-                        return;
-                    }
-                    _playerController.aggrofungus--;
+                    Debug.Log("[PlayerMadAbility] 광분 포자가 부족합니다!");
                 }
-
-                TriggerNearbyEnemies();
+                else
+                {
+                    _abilityController.UseMad();
+                    TriggerNearbyEnemies();
+                }
             }
+            
+            _wasFiring = isFiring;
         }
 
         /// <summary>
@@ -73,7 +75,7 @@ namespace MushOut.Player
                 triggeredCount++;
             }
 
-            Debug.Log($"[PlayerEnemyAggro] {triggeredCount}개의 적을 Attacking 상태로 전환했습니다. (반경: {_aggroRadius}m)");
+            Debug.Log($"[PlayerMadAbility] {triggeredCount}개의 적을 Attacking 상태로 전환했습니다. (반경: {_aggroRadius}m)");
         }
 
 #if UNITY_EDITOR
