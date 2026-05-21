@@ -126,6 +126,6 @@ NavMeshProjectSettings:
     debug:
       m_Flags: 0
   m_SettingNames:
-  - Enemy_default
+  - Enemy_normal
   - Enemy_tank
   - Enemy_longhead

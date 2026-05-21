@@ -25,8 +25,8 @@ namespace MushOut.Player
             if (_animator != null)
             {
                 _animator.applyRootMotion = false;
-                Vector3 currentLocalPos = _animator.transform.localPosition;
-                _animator.transform.localPosition = new Vector3(currentLocalPos.x, modelYOffset, currentLocalPos.z);
+                // Vector3 currentLocalPos = _animator.transform.localPosition;
+                // _animator.transform.localPosition = new Vector3(currentLocalPos.x, modelYOffset, currentLocalPos.z);
             }
         }
 

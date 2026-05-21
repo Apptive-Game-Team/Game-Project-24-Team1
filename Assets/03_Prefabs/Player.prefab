@@ -2911,9 +2911,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15d580d95f5c08e4b9ab535b2bbb1b59, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MushOut.Player.PlayerMotor
-  _moveSpeed: 5
-  _dashDistance: 3
-  _dashDuration: 0.2
+  _moveSpeed: 10
+  _dashDistance: 6
+  _dashDuration: 0.1
   _speedChangeRate: 10
   _pushPullSpeed: 2
   _jumpHeight: 1.2
@@ -2939,8 +2939,8 @@ MonoBehaviour:
   _sleepFungus: 3
   _aggroFungus: 3
   _bombFungus: 3
-  _paralyzeUnlocked: 0
-  _madUnlocked: 0
+  _paralyzeUnlocked: 1
+  _madUnlocked: 1
   _bombUnlocked: 1
 --- !u!114 &8623993992362075459
 MonoBehaviour:
@@ -2989,7 +2989,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d611550c67f6cea4db6ecf1269299140, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MushOut.Player.PlayerBombAbility
-  _aimMode: 0
+  _aimMode: 1
   bombPrefab: {fileID: 5060683366595423038, guid: 6446dc1870ca7614b8855dc5d8ed1395, type: 3}
   throwPoint: {fileID: 6860834271406022648}
   defaultThrowDistance: 5
