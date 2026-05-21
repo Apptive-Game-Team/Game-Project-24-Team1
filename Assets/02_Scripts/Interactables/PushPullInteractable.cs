@@ -34,6 +34,11 @@ namespace MushOut.Interactables
         [HideInInspector]
         public Collider objectCollider;
 
+        /// <summary>
+        /// 잡았을 당시의 상대적 위치 오프셋을 반환합니다.
+        /// </summary>
+        public Vector3 GrabOffset => _grabOffset;
+
         private void Awake()
         {
             _rigidbody = GetComponent<Rigidbody>();

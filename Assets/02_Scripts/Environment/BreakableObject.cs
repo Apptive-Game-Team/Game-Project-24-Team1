@@ -64,7 +64,7 @@ namespace MushOut.Environment
         /// 각 조각에 폭발력을 적용한 뒤 원본 오브젝트를 비활성화합니다.
         /// </summary>
         /// <param name="contactPoint">충돌 지점 (폭발 진원지)</param>
-        private void Break(Vector3 contactPoint)
+        public void Break(Vector3 contactPoint)
         {
             _isBroken = true;
 

@@ -8820,7 +8820,7 @@ GameObject:
   - component: {fileID: 1625813276}
   - component: {fileID: 1625813275}
   - component: {fileID: 1625813274}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Cube_long (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9380,7 +9380,7 @@ GameObject:
   - component: {fileID: 1898456750}
   - component: {fileID: 1898456749}
   - component: {fileID: 1898456748}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Cube_long (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9835,7 +9835,7 @@ GameObject:
   - component: {fileID: 2103481512}
   - component: {fileID: 2103481511}
   - component: {fileID: 2103481510}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Cube_long (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

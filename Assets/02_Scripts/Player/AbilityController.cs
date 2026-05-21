@@ -9,7 +9,7 @@ namespace MushOut.Player
     /// </summary>
     public enum AbilityState
     {
-        Dash,       // 1번: 대시
+        Nothing,    // 1번: 아무 능력도 선택하지 않음
         Paralyze,   // 2번: 마비 (수면 포자 등)
         Mad,        // 3번: 광분 (적을 화나게 만듦)
         Bomb        // 4번: 폭탄
@@ -20,13 +20,21 @@ namespace MushOut.Player
     /// </summary>
     public class AbilityController : MonoBehaviour
     {
-        [Header("Ability State")]
+        [Header("능력 상태")]
         [Tooltip("현재 활성화된 특수 행동 상태입니다.")]
-        [SerializeField] private AbilityState _currentState = AbilityState.Dash;
+        [SerializeField] private AbilityState _currentState = AbilityState.Nothing;
 
-        [Header("Ability Resources")]
-        [Tooltip("대시 사용 가능 횟수입니다.")]
-        [SerializeField] private int _dashCount = 3;
+        [Header("능력 자원")]
+        [Tooltip("최대 대시 가능 횟수입니다.")]
+        [SerializeField] private int _maxDashCount = 1;
+
+        [Tooltip("현재 대시 가능 횟수입니다.")]
+        [SerializeField] private int _dashCount = 1;
+
+        [Tooltip("대시 충전 소요 시간(초)입니다.")]
+        [SerializeField] private float _dashChargeTime = 3f;
+
+        private float _dashChargeTimer = 0f;
         
         [Tooltip("수면 포자 보유 개수입니다.")]
         [SerializeField] private int _sleepFungus = 3;
@@ -37,10 +45,7 @@ namespace MushOut.Player
         [Tooltip("폭탄 포자 보유 개수입니다.")]
         [SerializeField] private int _bombFungus = 3;
 
-        [Header("Ability Unlocked")]
-        [Tooltip("대시 능력 해금 여부입니다.")]
-        [SerializeField] private bool _dashUnlocked = false;
-        
+        [Header("능력 해금")]
         [Tooltip("마비 능력 해금 여부입니다.")]
         [SerializeField] private bool _paralyzeUnlocked = false;
         
@@ -92,11 +97,6 @@ namespace MushOut.Player
         }
 
         /// <summary>
-        /// 대시 능력 해금 여부를 확인하는 프로퍼티입니다.
-        /// </summary>
-        public bool DashUnlocked => _dashUnlocked;
-
-        /// <summary>
         /// 마비 능력 해금 여부를 확인하는 프로퍼티입니다.
         /// </summary>
         public bool ParalyzeUnlocked => _paralyzeUnlocked;
@@ -120,28 +120,39 @@ namespace MushOut.Player
 
         private void Update()
         {
+            // 대시 충전 로직
+            if (_dashCount < _maxDashCount)
+            {
+                _dashChargeTimer += Time.deltaTime;
+                if (_dashChargeTimer >= _dashChargeTime)
+                {
+                    _dashCount++;
+                    _dashChargeTimer = 0f;
+                }
+            }
+            else
+            {
+                _dashChargeTimer = 0f;
+            }
+
             if (_input == null) return;
 
             // PlayerInputHandler를 통한 상태 전환
-            if (_input.IsAbility1 && _dashUnlocked)
+            if (_input.IsAbility1)
             {
-                ChangeState(AbilityState.Dash);
-                UseDash();
+                ChangeState(AbilityState.Nothing);
             }
             else if (_input.IsAbility2 && _paralyzeUnlocked)
             {
                 ChangeState(AbilityState.Paralyze);
-                UseParalyze();
             }
             else if (_input.IsAbility3 && _madUnlocked)
             {
                 ChangeState(AbilityState.Mad);
-                UseMad();
             }
             else if (_input.IsAbility4 && _bombUnlocked)
             {
                 ChangeState(AbilityState.Bomb);
-                UseBomb();
             }
         }
 
@@ -158,19 +169,14 @@ namespace MushOut.Player
         }
 
         /// <summary>
-        /// 대시 능력을 해금합니다.
-        /// </summary>
-        public void UnlockDash() 
-        {
-            _dashUnlocked = true;
-        }
-
-        /// <summary>
         /// 대시 능력을 사용합니다. (자원 소모)
         /// </summary>
         public void UseDash() 
         {
-            _dashCount -= 1;
+            if (_dashCount > 0)
+            {
+                _dashCount -= 1;
+            }
         }
 
         /// <summary>

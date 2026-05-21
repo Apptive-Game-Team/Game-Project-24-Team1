@@ -82,9 +82,9 @@ namespace MushOut.Player
                 }
                 else
                 {
-                    // 오브젝트가 벽에 막히거나 거리가 벌어지면 그랩 자동 해제
+                    // 오브젝트가 벽에 막혀서 초기 잡았던 거리보다 5 이상 멀어지면 그랩 자동 해제 (크기가 큰 오브젝트 대응)
                     float currentDistance = Vector3.Distance(transform.position, _grabbedObject.transform.position);
-                    if (Mathf.Abs(currentDistance - _initialGrabDistance) > 0.25f || currentDistance > pushPullDistance + 1.5f)
+                    if (currentDistance > _initialGrabDistance + 1.0f)
                     {
                         ReleaseGrabbedObject();
                     }
