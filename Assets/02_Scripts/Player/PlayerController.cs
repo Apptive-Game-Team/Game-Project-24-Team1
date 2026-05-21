@@ -54,6 +54,7 @@ namespace MushOut.Player
 
             _fallTimeoutDelta = fallTimeout;
 
+            _climbHandler = GetComponent<PlayerClimbHandler>();
             _climbHandler?.Initialize(this, _input, _motor.GetController(), _animator?.GetComponent<Animator>());
         }
 
