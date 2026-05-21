@@ -70,7 +70,7 @@ namespace MushOut.Environment
 
             if (_fracturedPrefab == null)
             {
-                Debug.LogWarning($"[BreakableObject] '{gameObject.name}'에 _fracturedPrefab이 할당되지 않았습니다.", this);
+                Destroy(gameObject);
                 return;
             }
 

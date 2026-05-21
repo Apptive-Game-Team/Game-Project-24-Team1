@@ -2989,7 +2989,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d611550c67f6cea4db6ecf1269299140, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MushOut.Player.PlayerBombAbility
-  _aimMode: 1
+  _aimMode: 0
   bombPrefab: {fileID: 5060683366595423038, guid: 6446dc1870ca7614b8855dc5d8ed1395, type: 3}
   throwPoint: {fileID: 6860834271406022648}
   defaultThrowDistance: 5
@@ -2998,7 +2998,7 @@ MonoBehaviour:
   maxThrowDistance: 15
   throwAngle: 30
   trajectoryResolution: 30
-  trajectoryWidth: 0.001
+  trajectoryWidth: 0.03
 --- !u!120 &3986688147669032
 LineRenderer:
   serializedVersion: 3
@@ -3201,8 +3201,8 @@ MonoBehaviour:
   tpsCamera: {fileID: 2870930669862767032}
   fpsCamera: {fileID: 8681119771906813536}
   playerMeshRoot: {fileID: 9122675455333517926}
-  mouseSensitivity: 0.5
-  lookSmoothTime: 0.02
+  mouseSensitivity: 0.3
+  lookSmoothTime: 0.05
   topClamp: 80
   bottomClamp: -80
   cameraCollisionLayers:
