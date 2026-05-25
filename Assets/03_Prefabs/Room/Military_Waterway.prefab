@@ -5944,7 +5944,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1870945336854411890}
   m_Layer: 0
-  m_Name: Military Waterway
+  m_Name: Military_Waterway
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

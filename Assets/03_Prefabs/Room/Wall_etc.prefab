@@ -1431,7 +1431,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6895051835045971362}
   m_Layer: 0
-  m_Name: Security Corridor
+  m_Name: Wall_etc
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
