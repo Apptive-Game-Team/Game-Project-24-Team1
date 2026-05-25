@@ -20,6 +20,14 @@ namespace MushOut.Enemy
         [Range(1f, 30000f)]
         [SerializeField] private float _stunnedDuration = 10f;
 
+        /// <summary>
+        /// 외부(예: 마취총 피격 시)에서 기절 지속 시간을 동적으로 변경합니다.
+        /// </summary>
+        public void SetStunnedDuration(float duration)
+        {
+            _stunnedDuration = duration;
+        }
+
         private bool _isRunning = false;
 
         /// <summary> 기절 연출 중 색상을 변경할 렌더러들입니다. </summary>

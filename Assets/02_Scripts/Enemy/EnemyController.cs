@@ -60,13 +60,12 @@ namespace MushOut.Enemy
         [SerializeField] private float _sightDistance = 10f;
 
         [Tooltip("적의 공격 사거리를 계산하기 위한 반지름 값입니다.")]
-        [Range(0.1f, 10.0f)]
+        [Range(0.1f, 100.0f)]
         [SerializeField] private float _attackRadius = 4.0f;
 
         [Header("Patrol Info")]
-        [Tooltip("순찰 경로의 양 끝점입니다.")]
-        [SerializeField] private Transform _patrolPointA;
-        [SerializeField] private Transform _patrolPointB;
+        [Tooltip("순찰할 지점들입니다. 순서대로 순환합니다.")]
+        [SerializeField] private Transform[] _patrolPoints;
 
         [Tooltip("순찰 중 멈춰설 지점들입니다.")]
         [SerializeField] private Transform[] _stopPoints;
@@ -174,11 +173,8 @@ namespace MushOut.Enemy
         /// <summary> 적의 시야 거리를 반환합니다. </summary>
         public float SightDistance => _sightDistance;
 
-        /// <summary> 순찰 경로의 시작점(A)을 반환합니다. </summary>
-        public Transform PatrolPointA => _patrolPointA;
-
-        /// <summary> 순찰 경로의 끝점(B)을 반환합니다. </summary>
-        public Transform PatrolPointB => _patrolPointB;
+        /// <summary> 순찰 지점 배열을 반환합니다. </summary>
+        public Transform[] PatrolPoints => _patrolPoints;
 
         /// <summary> 순찰 중 멈춰설 지점들을 반환합니다. </summary>
         public Transform[] StopPoints => _stopPoints;
@@ -291,6 +287,12 @@ namespace MushOut.Enemy
             // 마취 수치가 있다면 기절 상태로 전환
             if (hitInfo.amount > 0)
             {
+                EnemyStunned stunnedComponent = GetComponent<EnemyStunned>();
+                if (stunnedComponent != null)
+                {
+                    stunnedComponent.SetStunnedDuration(120.0f);
+                }
+
                 ChangeState(State.Stunned);
                 Debug.Log($"[EnemyController] 마취총 피격! 기절 상태로 변경됩니다. (마취 수치: {hitInfo.amount})");
                 // TODO: 기절 애니메이션 재생 및 기절 지속 시간 처리 로직
@@ -327,19 +329,7 @@ namespace MushOut.Enemy
                     continue;
                 }
 
-                if (iterator.name == "_patrolPointB")
-                {
-                    // 이제 초기 상태를 기준으로 검사 (실행 전 인스펙터 기준)
-                    SerializedProperty initialStateProp = serializedObject.FindProperty("_initialState");
-                    if (initialStateProp != null)
-                    {
-                        // 초기 상태가 Idle이면 _patrolPointB를 인스펙터에서 숨김
-                        if (initialStateProp.enumValueIndex == (int)EnemyController.State.Idle)
-                        {
-                            continue;
-                        }
-                    }
-                }
+                // _patrolPoints는 Idle 상태일 때도 표시 (배열 크기 0으로 사용 가능)
 
                 EditorGUILayout.PropertyField(iterator, true);
             }

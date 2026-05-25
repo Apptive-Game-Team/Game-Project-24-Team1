@@ -31,8 +31,6 @@ namespace MushOut.Player
         [Header("Throw Settings")]
         [Tooltip("기본 투척 거리입니다.")]
         [SerializeField] private float defaultThrowDistance = 5.0f;
-        [Tooltip("마우스 휠 1틱당 조절되는 투척 거리입니다.")]
-        [SerializeField] private float scrollSensitivity = 1.0f;
         [Tooltip("최소 투척 거리입니다.")]
         [SerializeField] private float minThrowDistance = 2.0f;
         [Tooltip("최대 투척 거리입니다.")]
@@ -120,19 +118,22 @@ namespace MushOut.Player
                 return;
             }
 
-            // 마우스 휠 입력을 통한 투척 거리 조절
-            if (Mouse.current != null)
+            // 카메라 상하 각도(Pitch)에 따른 투척 거리 자동 조절
+            if (Camera.main != null)
             {
-                float scrollY = Mouse.current.scroll.ReadValue().y;
-                if (scrollY > 0)
+                // forward.y는 -1(완전 아래)부터 1(완전 위)까지의 값을 가집니다.
+                float pitchY = Camera.main.transform.forward.y;
+
+                if (pitchY >= 0)
                 {
-                    _currentThrowDistance += scrollSensitivity;
+                    // 화면을 위로 올릴 때: 기본 거리에서 최대 거리까지 증가
+                    _currentThrowDistance = Mathf.Lerp(defaultThrowDistance, maxThrowDistance, pitchY);
                 }
-                else if (scrollY < 0)
+                else
                 {
-                    _currentThrowDistance -= scrollSensitivity;
+                    // 화면을 아래로 내릴 때: 기본 거리에서 최소 거리까지 감소
+                    _currentThrowDistance = Mathf.Lerp(defaultThrowDistance, minThrowDistance, -pitchY);
                 }
-                _currentThrowDistance = Mathf.Clamp(_currentThrowDistance, minThrowDistance, maxThrowDistance);
             }
 
             // 발사 초기 속도 계산
@@ -169,9 +170,21 @@ namespace MushOut.Player
 
             // 공식: V = sqrt( d * g / sin(2*theta) )
             float g = Mathf.Abs(Physics.gravity.y);
-            float theta = throwAngle * Mathf.Deg2Rad;
+            
+            float pitchAngle = 0f;
+            if (Camera.main != null)
+            {
+                // 카메라의 상하 각도(Pitch)를 라디안으로 가져옵니다.
+                pitchAngle = Mathf.Asin(Camera.main.transform.forward.y);
+            }
+
+            // 기본 각도(throwAngle)에 목 각도(pitchAngle)를 더해 궤적이 위아래로 움직이게 합니다.
+            // 수학적 에러(분모가 0이 되는 현상)를 방지하기 위해 각도를 10도 ~ 80도 사이로 제한합니다.
+            float theta = (throwAngle * Mathf.Deg2Rad) + pitchAngle;
+            theta = Mathf.Clamp(theta, 10f * Mathf.Deg2Rad, 80f * Mathf.Deg2Rad);
+
             float vSqr = (_currentThrowDistance * g) / Mathf.Sin(2 * theta);
-            float v = Mathf.Sqrt(vSqr);
+            float v = Mathf.Sqrt(Mathf.Max(0, vSqr));
 
             Vector3 velocity = forward * (v * Mathf.Cos(theta)) + Vector3.up * (v * Mathf.Sin(theta));
             return velocity;

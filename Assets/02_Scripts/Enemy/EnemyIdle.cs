@@ -34,9 +34,11 @@ namespace MushOut.Enemy
                 return;
             }
 
-            Transform pointA = _enemyController.PatrolPointA;
+            // PatrolPoints가 지정되어 있지 않으면 시작 지점(0번)(없음)으로 사용
+            var points = _enemyController.PatrolPoints;
+            Transform pointA = (points != null && points.Length > 0) ? points[0] : null;
 
-            // PatrolPointA가 지정되어 있지 않거나, 이미 도달(충돌 범위 내)했다면 대기
+            // PatrolPoints[0]이 지정되어 있지 않거나, 이미 도달(충돌 범위 내)했다면 대기
             if (pointA == null || Vector3.Distance(transform.position, pointA.position) <= _agent.stoppingDistance + 0.1f)
             {
                 if (Quaternion.Angle(transform.rotation, _initialRotation) > 0.1f)
@@ -61,7 +63,7 @@ namespace MushOut.Enemy
             }
             else
             {
-                // PatrolPointA에 아직 도달하지 않았다면 해당 위치로 이동
+                // PatrolPoints[0]에 아직 도달하지 않았다면 해당 위치로 이동
                 _agent.isStopped = false;
                 _agent.speed = _enemyController.MoveSpeed;
                 _agent.SetDestination(pointA.position);
