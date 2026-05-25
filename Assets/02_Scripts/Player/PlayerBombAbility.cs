@@ -30,19 +30,19 @@ namespace MushOut.Player
 
         [Header("Throw Settings")]
         [Tooltip("기본 투척 거리입니다.")]
-        [SerializeField] private float defaultThrowDistance = 5.0f;
+        [SerializeField] private float defaultThrowDistance = 8.0f;
         [Tooltip("최소 투척 거리입니다.")]
-        [SerializeField] private float minThrowDistance = 2.0f;
+        [SerializeField] private float minThrowDistance = 1.0f;
         [Tooltip("최대 투척 거리입니다.")]
-        [SerializeField] private float maxThrowDistance = 15.0f;
+        [SerializeField] private float maxThrowDistance = 25.0f;
         [Tooltip("투척 각도(도)입니다.")]
-        [SerializeField] private float throwAngle = 30.0f;
+        [SerializeField] private float throwAngle = 35.0f;
 
         [Header("Trajectory Settings")]
         [Tooltip("궤적을 그릴 선의 점 개수(해상도)입니다.")]
         [SerializeField] private int trajectoryResolution = 30;
         [Tooltip("궤적을 그릴 선의 굵기입니다.")]
-        [SerializeField] private float trajectoryWidth = 0.05f;
+        [SerializeField] private float trajectoryWidth = 0.005f;
 
         private AbilityController _abilityController;
         private PlayerInputHandler _input;
@@ -168,7 +168,8 @@ namespace MushOut.Player
                 forward.Normalize();
             }
 
-            // 공식: V = sqrt( d * g / sin(2*theta) )
+            // 거리를 기반으로 단순 투척 파워(v)를 계산합니다 (v = sqrt(d * g)).
+            // 예전의 sin(2*theta)로 나누는 방식은 아래로 던질 때(음수 각도) 에러가 발생하므로 제외합니다.
             float g = Mathf.Abs(Physics.gravity.y);
             
             float pitchAngle = 0f;
@@ -179,14 +180,23 @@ namespace MushOut.Player
             }
 
             // 기본 각도(throwAngle)에 목 각도(pitchAngle)를 더해 궤적이 위아래로 움직이게 합니다.
-            // 수학적 에러(분모가 0이 되는 현상)를 방지하기 위해 각도를 10도 ~ 80도 사이로 제한합니다.
+            // 아래(-80도)부터 위(80도)까지 자유롭게 던질 수 있도록 제한을 크게 풉니다.
             float theta = (throwAngle * Mathf.Deg2Rad) + pitchAngle;
-            theta = Mathf.Clamp(theta, 10f * Mathf.Deg2Rad, 80f * Mathf.Deg2Rad);
+            theta = Mathf.Clamp(theta, -80f * Mathf.Deg2Rad, 80f * Mathf.Deg2Rad);
 
-            float vSqr = (_currentThrowDistance * g) / Mathf.Sin(2 * theta);
+            // _currentThrowDistance를 투척 파워의 기준으로 사용합니다.
+            float vSqr = _currentThrowDistance * g;
             float v = Mathf.Sqrt(Mathf.Max(0, vSqr));
 
             Vector3 velocity = forward * (v * Mathf.Cos(theta)) + Vector3.up * (v * Mathf.Sin(theta));
+
+            // 플레이어의 현재 이동 속도를 투척 속도에 더합니다 (관성 적용)
+            CharacterController cc = GetComponent<CharacterController>();
+            if (cc != null)
+            {
+                velocity += cc.velocity;
+            }
+
             return velocity;
         }
 
