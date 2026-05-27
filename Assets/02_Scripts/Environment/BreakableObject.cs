@@ -31,6 +31,17 @@ namespace MushOut.Environment
         [Tooltip("생성된 조각 오브젝트가 제거되기까지의 시간입니다. (0 이하면 제거하지 않음)")]
         [SerializeField] private float _fragmentLifetime = 5.0f;
 
+        [Header("Restore Settings")]
+        [Tooltip("파괴된 원본 오브젝트를 일정 시간 후 복구할지 여부입니다.")]
+        [SerializeField] private bool _shouldRestore = false;
+
+        [Tooltip("복구하기까지의 대기 시간(초)입니다. (_shouldRestore가 true일 때만 적용)")]
+        [SerializeField] private float _restoreDelay = 3.0f;
+
+        [Header("Events")]
+        [Tooltip("오브젝트가 부서질 때 실행될 이벤트입니다.")]
+        public UnityEngine.Events.UnityEvent OnBreakEvent;
+
         /// <summary> 이미 파괴 처리가 진행 중인지 여부 (중복 호출 방지) </summary>
         private bool _isBroken = false;
 
@@ -42,6 +53,13 @@ namespace MushOut.Environment
         {
             if (_isBroken) return;
             if (!IsInBreakLayer(collision.gameObject.layer)) return;
+
+            // 만약 충돌한 대상이 적(Enemy)이라면, 현재 상태가 Attacking(돌진 중)인지 확인
+            var enemy = collision.gameObject.GetComponentInParent<MushOut.Enemy.EnemyController>();
+            if (enemy != null && enemy.CurrentState != MushOut.Enemy.EnemyController.State.Attacking)
+            {
+                return; // 적이지만 돌진 중이 아니라면 부서지지 않음
+            }
 
             Break(collision.GetContact(0).point);
         }
@@ -55,6 +73,22 @@ namespace MushOut.Environment
             if (_isBroken) return;
             if (!IsInBreakLayer(other.gameObject.layer)) return;
 
+            // 만약 충돌한 대상이 적(Enemy)이라면, 현재 상태가 Attacking(돌진 중)인지 확인
+            var enemy = other.gameObject.GetComponentInParent<MushOut.Enemy.EnemyController>();
+            if (enemy != null && enemy.CurrentState != MushOut.Enemy.EnemyController.State.Attacking)
+            {
+                return; // 적이지만 돌진 중이 아니라면 부서지지 않음
+            }
+
+            Break(transform.position);
+        }
+
+        /// <summary>
+        /// 외부 스크립트(또는 UnityEvent)에서 매개변수 없이 호출하기 위한 편의성 메서드입니다.
+        /// 오브젝트의 현재 중심 위치를 폭발 진원지로 사용합니다.
+        /// </summary>
+        public void Break()
+        {
             Break(transform.position);
         }
 
@@ -67,10 +101,21 @@ namespace MushOut.Environment
         public void Break(Vector3 contactPoint)
         {
             _isBroken = true;
+            
+            // 인스펙터에 연결된 이벤트(특정 오브젝트의 메서드 등) 실행
+            OnBreakEvent?.Invoke();
 
             if (_fracturedPrefab == null)
             {
-                Destroy(gameObject);
+                if (_shouldRestore)
+                {
+                    gameObject.SetActive(false);
+                    RestoreAfterDelay();
+                }
+                else
+                {
+                    Destroy(gameObject);
+                }
                 return;
             }
 
@@ -92,6 +137,26 @@ namespace MushOut.Environment
 
             // 원본 오브젝트 비활성화
             gameObject.SetActive(false);
+
+            if (_shouldRestore)
+            {
+                RestoreAfterDelay();
+            }
+        }
+
+        /// <summary>
+        /// 비활성화된 원본 오브젝트를 일정 시간 후 다시 활성화하고 파괴 가능한 상태로 되돌립니다.
+        /// </summary>
+        private async void RestoreAfterDelay()
+        {
+            await System.Threading.Tasks.Task.Delay(Mathf.RoundToInt(_restoreDelay * 1000));
+            
+            // 에디터 종료나 씬 변경으로 오브젝트가 파괴되지 않았는지 확인
+            if (this != null && gameObject != null)
+            {
+                _isBroken = false;
+                gameObject.SetActive(true);
+            }
         }
 
         /// <summary>

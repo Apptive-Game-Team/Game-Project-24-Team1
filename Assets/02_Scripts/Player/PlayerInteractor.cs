@@ -58,7 +58,8 @@ namespace MushOut.Player
         {
             if (_inputHandler == null || _environmentDetector == null) return;
 
-            if (_inputHandler.IsInteractingHeld && _environmentDetector.IsGrounded)
+            // 밀당(PushPull) 오브젝트를 잡는 입력을 좌클릭(IsFiring)으로 변경
+            if (_inputHandler.IsFiring && _environmentDetector.IsGrounded)
             {
                 if (_grabbedObject == null)
                 {
@@ -66,7 +67,8 @@ namespace MushOut.Player
                     Vector3 rayOrigin = transform.position + Vector3.up * 1.0f; 
                     if (Physics.SphereCast(rayOrigin, 0.5f, transform.forward, out RaycastHit hit, pushPullDistance))
                     {
-                        var interactable = hit.collider.GetComponent<MushOut.Interactables.PushPullInteractable>();
+                        // 자식 콜라이더(예: 무기, 방패 등)를 맞췄을 때도 부모에 있는 스크립트를 찾도록 변경
+                        var interactable = hit.collider.GetComponentInParent<MushOut.Interactables.PushPullInteractable>();
                         if (interactable != null && interactable.enabled)
                         {
                             _grabbedObject = interactable;

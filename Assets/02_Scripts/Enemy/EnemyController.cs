@@ -192,11 +192,11 @@ namespace MushOut.Enemy
             _currentState = _initialState;
             _previousState = _initialState;
 
-            // PushPullInteractable 캐싱 및 초기 비활성화 (Stunned 상태에서만 활성화)
+            // PushPullInteractable 캐싱 및 초기화 (초기 상태가 Stunned라면 켜두고, 아니면 끔)
             _pushPullInteractable = GetComponentInChildren<PushPullInteractable>(true);
             if (_pushPullInteractable != null)
             {
-                _pushPullInteractable.enabled = false;
+                _pushPullInteractable.enabled = (_initialState == State.Stunned);
             }
         }
 

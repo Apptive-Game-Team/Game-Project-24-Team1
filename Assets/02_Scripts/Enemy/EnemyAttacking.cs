@@ -197,6 +197,21 @@ namespace MushOut.Enemy
                 {
                     collidedDuringRush = true;
                     hitObstacle = true;
+
+                    // 부딪힌 오브젝트가 파괴 가능한 오브젝트인지 확인
+                    var breakable = hit.collider.GetComponentInParent<MushOut.Environment.BreakableObject>();
+                    if (breakable != null)
+                    {
+                        // 파괴 이벤트 수동 호출 (물리적 겹침 없이 파괴 처리)
+                        breakable.Break(hit.point);
+                    }
+                }
+
+                if (hitObstacle)
+                {
+                    // [버그 수정] 벽을 감지한 경우 더 이상 파고들지 않고(Overlap 방지) 즉시 멈춥니다.
+                    // 이렇게 해야 다음 번 돌진 때 SphereCast가 콜라이더 내부에 있어 충돌을 무시하는 버그를 막을 수 있습니다.
+                    break;
                 }
 
                 // 수평 이동 (Y축은 돌진 시작 시 고정값 rushY로 유지 - 누적 낙하 방지)
@@ -210,12 +225,6 @@ namespace MushOut.Enemy
                 else
                 {
                     transform.position = newPos;
-                }
-
-                if (hitObstacle)
-                {
-                    // 벽을 감지했더라도 한 프레임 더 이동시켜 겹치도록(조금 늦게 멈추도록) 한 뒤 루프 종료
-                    break;
                 }
 
                 yield return null;

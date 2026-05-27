@@ -1028,6 +1028,14 @@ PrefabInstance:
       propertyPath: _patrolPointA
       value: 
       objectReference: {fileID: 1236333968}
+    - target: {fileID: 2953930259849315234, guid: cf69bf537b16d6347a602e98e259c24e, type: 3}
+      propertyPath: _patrolPoints.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2953930259849315234, guid: cf69bf537b16d6347a602e98e259c24e, type: 3}
+      propertyPath: '_patrolPoints.Array.data[0]'
+      value: 
+      objectReference: {fileID: 1236333968}
     - target: {fileID: 6710546229405711075, guid: cf69bf537b16d6347a602e98e259c24e, type: 3}
       propertyPath: m_Name
       value: Enemy_example
@@ -1670,6 +1678,8 @@ MonoBehaviour:
   _explosionForce: 10
   _upwardModifier: 0.3
   _fragmentLifetime: 20
+  _shouldRestore: 0
+  _restoreDelay: 3
 --- !u!65 &362884509
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1803,6 +1813,8 @@ MonoBehaviour:
   _explosionForce: 10
   _upwardModifier: 0.3
   _fragmentLifetime: 20
+  _shouldRestore: 0
+  _restoreDelay: 3
 --- !u!65 &379107726
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2357,6 +2369,8 @@ MonoBehaviour:
   _explosionForce: 10
   _upwardModifier: 0.3
   _fragmentLifetime: 20
+  _shouldRestore: 0
+  _restoreDelay: 3
 --- !u!65 &863597653
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2490,6 +2504,8 @@ MonoBehaviour:
   _explosionForce: 10
   _upwardModifier: 0.3
   _fragmentLifetime: 20
+  _shouldRestore: 0
+  _restoreDelay: 3
 --- !u!65 &906689207
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -8465,6 +8481,8 @@ MonoBehaviour:
   _explosionForce: 10
   _upwardModifier: 0.3
   _fragmentLifetime: 20
+  _shouldRestore: 0
+  _restoreDelay: 3
 --- !u!65 &1236077038
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -9003,6 +9021,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2953930259849315234, guid: cf69bf537b16d6347a602e98e259c24e, type: 3}
       propertyPath: _patrolPointA
+      value: 
+      objectReference: {fileID: 1218889945}
+    - target: {fileID: 2953930259849315234, guid: cf69bf537b16d6347a602e98e259c24e, type: 3}
+      propertyPath: _patrolPoints.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2953930259849315234, guid: cf69bf537b16d6347a602e98e259c24e, type: 3}
+      propertyPath: '_patrolPoints.Array.data[0]'
       value: 
       objectReference: {fileID: 1218889945}
     - target: {fileID: 6710546229405711075, guid: cf69bf537b16d6347a602e98e259c24e, type: 3}

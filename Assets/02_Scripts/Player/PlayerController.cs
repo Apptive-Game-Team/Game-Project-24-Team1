@@ -98,6 +98,9 @@ namespace MushOut.Player
             {
                 _motor.ApplyGravity(Time.deltaTime, _detector.IsInWater, _detector.IsGrounded);
                 _motor.ApplyMovement(Time.deltaTime, _input.MoveInput, _input.IsSprinting, _detector.IsInWater, _detector.IsGrounded, _interactor.GrabbedObject, _detector.HitNormal, _detector.groundLayers);
+                
+                // 플레이어가 밟고 있는 무빙 플랫폼(이동 오브젝트)의 움직임을 플레이어에게 적용
+                _motor.HandleMovingPlatform(_detector.GroundTransform);
             }
 
             UpdateAnimation();

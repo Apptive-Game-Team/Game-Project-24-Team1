@@ -102,8 +102,20 @@ namespace MushOut.Enemy
                 _rigidbody.angularVelocity = Vector3.zero;
                 _rigidbody.isKinematic = true;
             }
+            
             _agent.enabled = true;
-            _agent.isStopped = false;
+            
+            // [버그 수정] NavMeshAgent가 활성화될 때 NavMesh 위에 안착하지 못했다면
+            // isStopped = false 호출 시 에러가 발생하여 코루틴이 멈추고 영원히 Stunned에 빠집니다.
+            // 따라서 isOnNavMesh를 먼저 확인해야 합니다.
+            if (_agent.isOnNavMesh)
+            {
+                _agent.isStopped = false;
+            }
+            else
+            {
+                Debug.LogWarning("[EnemyStunned] 에너미가 NavMesh를 이탈한 상태에서 기절이 풀렸습니다!");
+            }
 
             // 6. 초기 상태로 복귀
             _isRunning = false;
