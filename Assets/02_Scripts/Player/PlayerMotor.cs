@@ -148,8 +148,8 @@ namespace MushOut.Player
             }
 
             float targetSpeed = _moveSpeed;
-            if (grabbedObject != null) targetSpeed = _pushPullSpeed;
             if (isInWater) targetSpeed = _waterMoveSpeed;
+            if (grabbedObject != null) targetSpeed = Mathf.Min(targetSpeed, _pushPullSpeed);
 
             if (grabbedObject != null && grabbedObject.movementType == MushOut.Interactables.PushPullMovementType.ForwardBackwardOnly)
             {

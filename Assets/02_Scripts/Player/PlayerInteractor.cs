@@ -59,7 +59,7 @@ namespace MushOut.Player
             if (_inputHandler == null || _environmentDetector == null) return;
 
             // 밀당(PushPull) 오브젝트를 잡는 입력을 좌클릭(IsFiring)으로 변경
-            if (_inputHandler.IsFiring && _environmentDetector.IsGrounded)
+            if (_inputHandler.IsFiring && (_environmentDetector.IsGrounded || _environmentDetector.IsInWater))
             {
                 if (_grabbedObject == null)
                 {
