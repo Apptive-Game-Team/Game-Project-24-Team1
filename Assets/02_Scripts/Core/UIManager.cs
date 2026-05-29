@@ -106,7 +106,16 @@ namespace MushOut.Core
                     // 일시정지 UI 표시 로직 등
                     break;
                 case GameManager.GameState.Playing:
-                    // 게임 플레이 UI 표시 로직 등
+                    MushOut.UI.EscapeScreenEffect.SetActiveEffect(false, false);
+                    // Game play UI display logic
+                    break;
+                case GameManager.GameState.Escaping:
+                    MushOut.UI.EscapeScreenEffect.SetActiveEffect(true);
+                    break;
+                case GameManager.GameState.Ready:
+                case GameManager.GameState.GameOver:
+                case GameManager.GameState.Success:
+                    MushOut.UI.EscapeScreenEffect.SetActiveEffect(false, false);
                     break;
             }
         }
