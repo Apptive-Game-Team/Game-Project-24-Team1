@@ -79,6 +79,13 @@ namespace MushOut.Player
             if (otherObject == null || !IsPlayerObject() || !IsEnemyObject(otherObject))
                 return;
 
+            // 적이 기절(Stunned) 상태라면 게임오버 처리를 하지 않음
+            var enemyController = otherObject.GetComponentInParent<MushOut.Enemy.EnemyController>();
+            if (enemyController != null && enemyController.CurrentState == MushOut.Enemy.EnemyController.State.Stunned)
+            {
+                return;
+            }
+
             Debug.Log($"[PlayerEnemyCollisionHandler] Enemy collision detected: {otherObject.name} (tag={otherObject.tag}, layer={LayerMask.LayerToName(otherObject.layer)})");
             GameManager.Instance.CrashedByEnemy = true;
         }

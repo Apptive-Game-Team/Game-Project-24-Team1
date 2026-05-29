@@ -15,6 +15,7 @@ namespace MushOut.Player
         public bool IsGrounded { get; private set; } = true;
         public bool IsInWater { get; private set; }
         public Vector3 HitNormal { get; private set; } = Vector3.up;
+        public Transform GroundTransform { get; private set; } // 플레이어가 밟고 있는 바닥 오브젝트
 
         private CharacterController _controller;
 
@@ -38,9 +39,11 @@ namespace MushOut.Player
             float rayLength = _controller != null ? _controller.skinWidth + 0.1f : 0.2f;
             Vector3 rayOrigin = transform.position + Vector3.up * 0.05f;
 
-            bool hitGround = Physics.Raycast(rayOrigin, Vector3.down, rayLength, groundLayers, QueryTriggerInteraction.Ignore);
+            RaycastHit hit;
+            bool hitGround = Physics.Raycast(rayOrigin, Vector3.down, out hit, rayLength, groundLayers, QueryTriggerInteraction.Ignore);
             
             IsGrounded = (_controller != null && _controller.isGrounded) || hitGround;
+            GroundTransform = hitGround ? hit.transform : null;
         }
 
         private void CheckWater()

@@ -22,6 +22,12 @@ namespace MushOut.Enemy
         [Tooltip("시야(Raycast 및 기즈모)가 시작되는 위치의 로컬 오프셋입니다.")]
         [SerializeField] private Vector3 _eyeOffset = new Vector3(0f, 1.0f, 0f);
 
+        [Tooltip("기즈모(시야 원뿔)를 가로막는 장애물 레이어입니다. 이 레이어에 닿으면 기즈모가 벽 앞에서 잘립니다.")]
+        [SerializeField] private LayerMask _gizmoObstacleLayer = ~0; // 기본: 모든 레이어
+
+        [Tooltip("기즈모가 벽 앞에서 잘릴 때 벽 표면에서 추가로 당기는 거리입니다. 값이 클수록 더 일찍 사라집니다.")]
+        [SerializeField, Range(0f, 1f)] private float _gizmoClipBias = 2.0f;
+
         /// <summary> 플레이어의 Transform을 캐싱합니다. </summary>
         private Transform _playerTransform;
         
@@ -204,118 +210,147 @@ namespace MushOut.Enemy
         {
             if (_enemyController == null || _coneMaterial == null) return;
 
-            // 사망하거나 기절한 상태면 탐지 범위 기즈모를 숨김
-            if (_enemyController.CurrentState == EnemyController.State.Dead || 
+            if (_enemyController.CurrentState == EnemyController.State.Dead ||
                 _enemyController.CurrentState == EnemyController.State.Stunned)
-            {
                 return;
-            }
 
-            bool isSpotted  = _enemyController.IsPlayerSpotted;
-
-            // 탐지 여부에 따라 색상 결정
+            bool isSpotted = _enemyController.IsPlayerSpotted;
             Color fillColor = isSpotted
                 ? new Color(1f, 0f, 0f, _alpha)
                 : new Color(1f, 1f, 0f, _alpha);
-
             Color lineColor = new Color(fillColor.r, fillColor.g, fillColor.b, Mathf.Min(_alpha * 5f, 1f));
 
-            // 정점 정보가 변경되었을 때만 캐시 업데이트 (메모리 재할당 방지 및 CPU 최적화)
             UpdateCachedPoints();
+
+            // ── 장애물 클리핑: 각 세그먼트 방향으로 Raycast해 실제 거리 계산 ──
+            float maxDist = CurrentDetectionDist;
+            Vector3 worldApex = transform.TransformPoint(_eyeOffset);
+            float[] clippedRatios = new float[_segments];
+            for (int i = 0; i < _segments; i++)
+            {
+                Vector3 worldCirclePt = transform.TransformPoint(_localCirclePoints[i]);
+                Vector3 dir = worldCirclePt - worldApex;
+                float len = dir.magnitude;
+                if (len < 0.001f) { clippedRatios[i] = 1f; continue; }
+                dir /= len;
+                if (_gizmoObstacleLayer.value != 0 &&
+                    Physics.Raycast(worldApex, dir, out RaycastHit hit, len, _gizmoObstacleLayer))
+                    clippedRatios[i] = Mathf.Clamp01((hit.distance - _gizmoClipBias) / len);
+                else
+                    clippedRatios[i] = 1f;
+            }
 
             _coneMaterial.SetPass(0);
             GL.PushMatrix();
-            // 로컬 좌표계 매트릭스 적용
             GL.MultMatrix(transform.localToWorldMatrix);
 
             Vector3 localApex = _eyeOffset;
-            Vector3 localBaseCenter = _eyeOffset + Vector3.forward * CurrentDetectionDist;
 
-            // ── 채우기: 옆면 + 밑면 삼각형 팬 ───────────────────────────────
+            // ── 채우기: 옆면 삼각형 (벽까지만) + 밑면 ──────────────────────
             GL.Begin(GL.TRIANGLES);
             GL.Color(fillColor);
 
             for (int i = 0; i < _segments; i++)
             {
-                Vector3 p1 = _localCirclePoints[i];
-                Vector3 p2 = _localCirclePoints[(i + 1) % _segments];
+                int j = (i + 1) % _segments;
+                // 클리핑된 원 위의 두 점
+                Vector3 p1 = Vector3.Lerp(localApex, _localCirclePoints[i], clippedRatios[i]);
+                Vector3 p2 = Vector3.Lerp(localApex, _localCirclePoints[j], clippedRatios[j]);
 
-                // 옆면: 꼭짓점 → 밑면 두 점
+                // 옆면
                 GL.Vertex(localApex);
                 GL.Vertex(p1);
                 GL.Vertex(p2);
 
-                // 밑면: 원 중심 → 밑면 두 점
-                GL.Vertex(localBaseCenter);
-                GL.Vertex(p2);
-                GL.Vertex(p1);
+                // 밑면 (두 점이 모두 막히지 않은 경우에만)
+                if (clippedRatios[i] >= 1f && clippedRatios[j] >= 1f)
+                {
+                    Vector3 localBaseCenter = _eyeOffset + Vector3.forward * maxDist;
+                    GL.Vertex(localBaseCenter);
+                    GL.Vertex(p2);
+                    GL.Vertex(p1);
+                }
             }
 
             GL.End();
 
-            // ── 윤곽선: 밑면 원 테두리만 ─────────────────────────────────────
+            // ── 윤곽선: 클리핑된 테두리 ──────────────────────────────────────
             GL.Begin(GL.LINES);
             GL.Color(lineColor);
 
             for (int i = 0; i < _segments; i++)
             {
-                GL.Vertex(_localCirclePoints[i]);
-                GL.Vertex(_localCirclePoints[(i + 1) % _segments]);
+                int j = (i + 1) % _segments;
+                Vector3 p1 = Vector3.Lerp(localApex, _localCirclePoints[i], clippedRatios[i]);
+                Vector3 p2 = Vector3.Lerp(localApex, _localCirclePoints[j], clippedRatios[j]);
+                GL.Vertex(p1);
+                GL.Vertex(p2);
             }
 
             GL.End();
             GL.PopMatrix();
         }
 
+        /// <summary>
+        /// 방향 벡터로 Raycast하여 장애물에 막히면 그 거리까지만의 끝점을 반환합니다.
+        /// </summary>
+        private Vector3 ClipToObstacle(Vector3 origin, Vector3 dir, float maxDist)
+        {
+            if (_gizmoObstacleLayer.value != 0 &&
+                Physics.Raycast(origin, dir.normalized, out RaycastHit hit, maxDist, _gizmoObstacleLayer))
+                return origin + dir.normalized * Mathf.Max(0f, hit.distance - _gizmoClipBias);
+            return origin + dir;
+        }
+
         private void OnDrawGizmosSelected()
         {
             if (_enemyController == null)
-            {
                 _enemyController = GetComponentInParent<EnemyController>();
-            }
             if (_enemyController == null) return;
 
             Vector3 origin = transform.position + transform.TransformDirection(_eyeOffset);
+            float dist = CurrentDetectionDist;
 
-            // 시야각 경계선 (수평 좌/우)
-            Vector3 leftBoundary = Quaternion.AngleAxis(-CurrentFov * 0.5f, transform.up) * transform.forward * CurrentDetectionDist;
-            Vector3 rightBoundary = Quaternion.AngleAxis(CurrentFov * 0.5f, transform.up) * transform.forward * CurrentDetectionDist;
-            
-            // 시야각 경계선 (수직 상/하)
-            Vector3 topBoundary = Quaternion.AngleAxis(-CurrentFov * 0.5f, transform.right) * transform.forward * CurrentDetectionDist;
-            Vector3 bottomBoundary = Quaternion.AngleAxis(CurrentFov * 0.5f, transform.right) * transform.forward * CurrentDetectionDist;
-            
+            Vector3 leftDir   = Quaternion.AngleAxis(-CurrentFov * 0.5f, transform.up)    * transform.forward * dist;
+            Vector3 rightDir  = Quaternion.AngleAxis( CurrentFov * 0.5f, transform.up)    * transform.forward * dist;
+            Vector3 topDir    = Quaternion.AngleAxis(-CurrentFov * 0.5f, transform.right)  * transform.forward * dist;
+            Vector3 bottomDir = Quaternion.AngleAxis( CurrentFov * 0.5f, transform.right)  * transform.forward * dist;
+
+            // 장애물 클리핑된 끝점
+            Vector3 leftEnd   = ClipToObstacle(origin, leftDir,   dist);
+            Vector3 rightEnd  = ClipToObstacle(origin, rightDir,  dist);
+            Vector3 topEnd    = ClipToObstacle(origin, topDir,    dist);
+            Vector3 bottomEnd = ClipToObstacle(origin, bottomDir, dist);
+
             Gizmos.color = Color.cyan;
-            
-            // 중심에서 각 모서리로 뻗어나가는 선
-            Gizmos.DrawLine(origin, origin + leftBoundary);
-            Gizmos.DrawLine(origin, origin + rightBoundary);
-            Gizmos.DrawLine(origin, origin + topBoundary);
-            Gizmos.DrawLine(origin, origin + bottomBoundary);
-            
-            // 시야 끝부분을 이어주는 다이아몬드 형태 테두리
-            Gizmos.DrawLine(origin + leftBoundary, origin + topBoundary);
-            Gizmos.DrawLine(origin + topBoundary, origin + rightBoundary);
-            Gizmos.DrawLine(origin + rightBoundary, origin + bottomBoundary);
-            Gizmos.DrawLine(origin + bottomBoundary, origin + leftBoundary);
 
-            // 플레이어 탐지 시각화
+            // 중심 → 각 꼭짓점 (원래대로 전체 거리)
+            Gizmos.DrawLine(origin, origin + leftDir);
+            Gizmos.DrawLine(origin, origin + rightDir);
+            Gizmos.DrawLine(origin, origin + topDir);
+            Gizmos.DrawLine(origin, origin + bottomDir);
+
+            // 다이아몬드 테두리
+            Gizmos.DrawLine(origin + leftDir,   origin + topDir);
+            Gizmos.DrawLine(origin + topDir,    origin + rightDir);
+            Gizmos.DrawLine(origin + rightDir,  origin + bottomDir);
+            Gizmos.DrawLine(origin + bottomDir, origin + leftDir);
+
+            // 플레이어 탐지 시각화 (시야각 안이고 장애물이 없는 방향만)
             if (Application.isPlaying && _playerTransform != null)
             {
-                int checkResolution = 30;
                 Gizmos.color = Color.yellow;
-                
+                int checkResolution = 30;
                 for (int i = 0; i <= checkResolution; i++)
                 {
                     float height = Mathf.Lerp(1.8f, 0.2f, (float)i / checkResolution);
-                    Vector3 offset = Vector3.up * height;
-                    
-                    Vector3 targetPos = _playerTransform.position + offset;
-                    Vector3 dirToTarget = targetPos - origin;
-
-                    if (dirToTarget.magnitude <= CurrentDetectionDist && Vector3.Angle(transform.forward, dirToTarget) <= CurrentFov * 0.5f)
+                    Vector3 targetPos = _playerTransform.position + Vector3.up * height;
+                    Vector3 toTarget  = targetPos - origin;
+                    if (toTarget.magnitude <= dist && Vector3.Angle(transform.forward, toTarget) <= CurrentFov * 0.5f)
                     {
-                        Gizmos.DrawLine(origin, targetPos);
+                        // 중간에 장애물이 없을 때만 선 표시
+                        if (!Physics.Raycast(origin, toTarget.normalized, toTarget.magnitude, _gizmoObstacleLayer))
+                            Gizmos.DrawLine(origin, targetPos);
                     }
                 }
             }

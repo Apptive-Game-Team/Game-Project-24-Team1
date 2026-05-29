@@ -1,4 +1,5 @@
 using UnityEngine;
+using MushOut.Interfaces;
 
 namespace MushOut.Player
 {
@@ -18,7 +19,7 @@ namespace MushOut.Player
     [RequireComponent(typeof(PlayerAnimationDriver))]
     [RequireComponent(typeof(PlayerInteractor))]
     [RequireComponent(typeof(PlayerEnemyCollisionHandler))]
-    public class PlayerController : MonoBehaviour
+    public class PlayerController : MonoBehaviour, IHittable
     {
         private PlayerState _currentState = PlayerState.Idle;
 
@@ -97,6 +98,9 @@ namespace MushOut.Player
             {
                 _motor.ApplyGravity(Time.deltaTime, _detector.IsInWater, _detector.IsGrounded);
                 _motor.ApplyMovement(Time.deltaTime, _input.MoveInput, _input.IsSprinting, _detector.IsInWater, _detector.IsGrounded, _interactor.GrabbedObject, _detector.HitNormal, _detector.groundLayers);
+                
+                // 플레이어가 밟고 있는 무빙 플랫폼(이동 오브젝트)의 움직임을 플레이어에게 적용
+                _motor.HandleMovingPlatform(_detector.GroundTransform);
             }
 
             UpdateAnimation();
@@ -215,6 +219,18 @@ namespace MushOut.Player
             {
                 _motor.VerticalVelocity = value;
             }
+        }
+        // ── IHittable 구현 ──────────────────────────────────────────────
+        /// <summary>
+        /// [IHittable] 피격 시 호출됩니다. 원거리 발사체 등에 맞으면 GameOver 처리합니다.
+        /// </summary>
+        public void OnHit(HitInfo hitInfo)
+        {
+            if (MushOut.Core.GameManager.Instance == null) return;
+            if (MushOut.Core.GameManager.Instance.CurrentState == MushOut.Core.GameManager.GameState.GameOver) return;
+
+            Debug.Log("[PlayerController] 피격! GameOver 상태로 변경됩니다.");
+            MushOut.Core.GameManager.Instance.ChangeState(MushOut.Core.GameManager.GameState.GameOver);
         }
     }
 }

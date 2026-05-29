@@ -9,6 +9,9 @@ namespace MushOut.Interaction
         [Tooltip("오브젝트가 변화하는 속도")]
         [SerializeField] private float moveSpeed = 1f;
 
+        [Tooltip("한 번 이동할 때 이동하는 거리")]
+        [SerializeField] private float moveDistance = 6f;
+
         [Tooltip("목표 위치 도달 후 대기할 시간 (초). 기본값은 2분(120초)입니다.")]
         [SerializeField] private float waitTime = 120f;
 
@@ -31,25 +34,25 @@ namespace MushOut.Interaction
         }
 
         #region 기본 이동 메서드 (돌아오지 않음)
-        public void MovePlusX(float distance) { targetPosition.x += distance; }
-        public void MoveMinusX(float distance) { targetPosition.x -= distance; }
+        public void MovePlusX() { targetPosition.x += moveDistance; }
+        public void MoveMinusX() { targetPosition.x -= moveDistance; }
 
-        public void MovePlusY(float distance) { targetPosition.y += distance; }
-        public void MoveMinusY(float distance) { targetPosition.y -= distance; }
+        public void MovePlusY() { targetPosition.y += moveDistance; }
+        public void MoveMinusY() { targetPosition.y -= moveDistance; }
 
-        public void MovePlusZ(float distance) { targetPosition.z += distance; }
-        public void MoveMinusZ(float distance) { targetPosition.z -= distance; }
+        public void MovePlusZ() { targetPosition.z += moveDistance; }
+        public void MoveMinusZ() { targetPosition.z -= moveDistance; }
         #endregion
 
         #region T초 대기 후 원래 위치로 돌아오는 메서드
-        public void MovePlusXWaitForT(float distance) { StartCoroutine(RoutineMoveWaitForT(Vector3.right * distance)); }
-        public void MoveMinusXWaitForT(float distance) { StartCoroutine(RoutineMoveWaitForT(Vector3.left * distance)); }
+        public void MovePlusXWaitForT() { StartCoroutine(RoutineMoveWaitForT(Vector3.right * moveDistance)); }
+        public void MoveMinusXWaitForT() { StartCoroutine(RoutineMoveWaitForT(Vector3.left * moveDistance)); }
 
-        public void MovePlusYWaitForT(float distance) { StartCoroutine(RoutineMoveWaitForT(Vector3.up * distance)); }
-        public void MoveMinusYWaitForT(float distance) { StartCoroutine(RoutineMoveWaitForT(Vector3.down * distance)); }
+        public void MovePlusYWaitForT() { StartCoroutine(RoutineMoveWaitForT(Vector3.up * moveDistance)); }
+        public void MoveMinusYWaitForT() { StartCoroutine(RoutineMoveWaitForT(Vector3.down * moveDistance)); }
 
-        public void MovePlusZWaitForT(float distance) { StartCoroutine(RoutineMoveWaitForT(Vector3.forward * distance)); }
-        public void MoveMinusZWaitForT(float distance) { StartCoroutine(RoutineMoveWaitForT(Vector3.back * distance)); }
+        public void MovePlusZWaitForT() { StartCoroutine(RoutineMoveWaitForT(Vector3.forward * moveDistance)); }
+        public void MoveMinusZWaitForT() { StartCoroutine(RoutineMoveWaitForT(Vector3.back * moveDistance)); }
         #endregion
 
         // 공통 대기 코루틴

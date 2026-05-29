@@ -15,6 +15,7 @@ namespace MushOut.Enemy
 
         private bool _isLookingAround = false;
         private Transform _lastStopPoint = null;
+        private int _patrolIndex = 0;
 
         private void Awake()
         {
@@ -53,17 +54,31 @@ namespace MushOut.Enemy
         }
 
         /// <summary>
-        /// Target을 A와 B로 번갈아가며 지정하여 순찰하는 로직
+        /// PatrolPoints를 순서대로 순환하며 순찰하는 로직 (1, 2, 3, 1, 2, 3, ...)
         /// </summary>
         private void HandlePatrol()
         {
-            // 현재 타겟이 없거나 A, B 둘 다 아니면 A를 기본 목적지로 설정
-            if (_enemyController.Target != _enemyController.PatrolPointA && _enemyController.Target != _enemyController.PatrolPointB)
+            var points = _enemyController.PatrolPoints;
+
+            // 순찰 지점이 없으면 수행하지 않음
+            if (points == null || points.Length == 0) return;
+
+            // 인덱스 범위 비정 방지
+            _patrolIndex = _patrolIndex % points.Length;
+
+            // 현재 타겟이 PatrolPoints에 포함되지 않으면 현재 인덱스로 초기화
+            bool isCurrentTargetValid = false;
+            for (int i = 0; i < points.Length; i++)
             {
-                if (_enemyController.PatrolPointA != null)
+                if (_enemyController.Target == points[i])
                 {
-                    _enemyController.Target = _enemyController.PatrolPointA;
+                    isCurrentTargetValid = true;
+                    break;
                 }
+            }
+            if (!isCurrentTargetValid && points[_patrolIndex] != null)
+            {
+                _enemyController.Target = points[_patrolIndex];
             }
 
             if (_enemyController.Target != null)
@@ -78,18 +93,12 @@ namespace MushOut.Enemy
                 {
                     if (!_agent.hasPath || _agent.velocity.sqrMagnitude == 0f)
                     {
-                        // A에 도착했다면 B로, B에 도착했다면 A로 타겟 교체
-                        if (_enemyController.Target == _enemyController.PatrolPointA)
-                        {
-                            _enemyController.Target = _enemyController.PatrolPointB;
-                        }
-                        else
-                        {
-                            _enemyController.Target = _enemyController.PatrolPointA;
-                        }
+                        // 다음 순찰 지점으로 인덱스 증가 (순환)
+                        _patrolIndex = (_patrolIndex + 1) % points.Length;
+                        _enemyController.Target = points[_patrolIndex];
 
-                        // 다음 왕복 시 스탑 포인트에서 다시 멈출 수 있도록 방문 기록 초기화
-                        _lastStopPoint = null; 
+                        // 다음 순환 시 스탑 포인트에서 다시 멈슬 수 있도록 방문 기록 초기화
+                        _lastStopPoint = null;
                     }
                 }
             }

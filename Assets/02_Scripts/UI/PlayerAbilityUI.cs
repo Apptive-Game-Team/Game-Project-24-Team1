@@ -16,11 +16,13 @@ namespace MushOut.UI
             public Sprite iconSprite;
             public GameObject slotRoot;
             public RectTransform rectTransform;
+            public RectTransform cardClipRect;
             public CanvasGroup canvasGroup;
             public Image iconImage;
             public Image beamImage;
             public Image baseGlowImage;
             public Image plateImage;
+            public Image selectedFrameFillImage;
             public GameObject selectedIndicator;
             public Text keyText;
             public Text nameText;
@@ -46,8 +48,8 @@ namespace MushOut.UI
         [SerializeField] private bool autoBuildSlots = true;
         [SerializeField] private bool createCanvasIfMissing = true;
         [SerializeField] private Vector2 canvasAnchoredPosition = new Vector2(320f, 190f);
-        [SerializeField] private Vector2 carouselRootSize = new Vector2(1080f, 390f);
-        [SerializeField] private Vector2 slotSize = new Vector2(285f, 315f);
+        [SerializeField] private Vector2 carouselRootSize = new Vector2(1080f, 460f);
+        [SerializeField] private Vector2 slotSize = new Vector2(315f, 360f);
         [SerializeField] private Color slotColor = new Color(0.07f, 0.12f, 0.17f, 0.86f);
         [SerializeField] private Color selectedRingColor = new Color(0.35f, 0.95f, 1f, 1f);
         [SerializeField] private Color beamColor = new Color(0.24f, 0.88f, 1f, 0.55f);
@@ -58,15 +60,15 @@ namespace MushOut.UI
 
         [Header("Carousel")]
         [SerializeField] private bool useCarouselLayout = true;
-        [SerializeField] private float horizontalSpacing = 285f;
-        [SerializeField] private float depthYOffset = 39f;
-        [SerializeField] private float selectedScale = 1.25f;
-        [SerializeField] private float sideScale = 0.82f;
-        [SerializeField] private float farScale = 0.56f;
-        [SerializeField] private float sideRotationY = 48f;
-        [SerializeField] private float farRotationY = 64f;
-        [SerializeField] private float sideAlphaMultiplier = 0.75f;
-        [SerializeField] private float farAlphaMultiplier = 0.45f;
+        [SerializeField] private float horizontalSpacing = 125f;
+        [SerializeField] private float depthYOffset = 0f;
+        [SerializeField] private float selectedScale = 1.18f;
+        [SerializeField] private float sideScale = 0.92f;
+        [SerializeField] private float farScale = 0.74f;
+        [SerializeField] private float sideRotationY = 12f;
+        [SerializeField] private float farRotationY = 0f;
+        [SerializeField] private float sideAlphaMultiplier = 0.82f;
+        [SerializeField] private float farAlphaMultiplier = 0.7f;
         [SerializeField] private float carouselLerpSpeed = 12f;
         [SerializeField] private float floatAmplitude = 13.5f;
         [SerializeField] private float floatSpeed = 2.4f;
@@ -81,8 +83,19 @@ namespace MushOut.UI
         private Transform _slotParent;
         private AbilityState _lastState;
         private int _lastSwitchDirection = 1;
+        private bool _initialized;
 
         private void Awake()
+        {
+            Initialize();
+        }
+
+        private void OnEnable()
+        {
+            Initialize();
+        }
+
+        private void Initialize()
         {
             if (abilityController == null)
             {
@@ -92,7 +105,12 @@ namespace MushOut.UI
             AssignIconSprites();
             AssignLabels();
             _slots = new[] { dashSlot, paralyzeSlot, madSlot, bombSlot };
-            _lastState = abilityController != null ? abilityController.CurrentState : AbilityState.Nothing;
+
+            if (!_initialized)
+            {
+                _lastState = abilityController != null ? abilityController.CurrentState : AbilityState.Nothing;
+            }
+
             EnsureSlotParent();
 
             if (autoBuildSlots)
@@ -104,6 +122,8 @@ namespace MushOut.UI
             {
                 EnsureSlotReferences(_slots[i]);
             }
+
+            _initialized = true;
         }
 
         private void Start()
@@ -111,13 +131,16 @@ namespace MushOut.UI
             Refresh();
         }
 
-        private void Update()
+        private void LateUpdate()
         {
+            // 대시 같은 능력 사용 처리가 Update에서 끝난 뒤에 UI를 읽어야 바로 반투명 상태가 맞게 보여서 LateUpdate에서 갱신함.
             Refresh();
         }
 
         public void Refresh()
         {
+            Initialize();
+
             if (abilityController == null) return;
 
             EnsureRuntimeSlots();
@@ -299,6 +322,8 @@ namespace MushOut.UI
         private void BuildMissingSlots()
         {
             EnsureGeneratedSprites();
+
+            // 캔버스에 직접 배치해둔 게 아니라, 시작할 때 무기 카드 4개를 코드로 만들어주는 구조.
             BuildSlotIfMissing(dashSlot, "01_Dash");
             BuildSlotIfMissing(paralyzeSlot, "02_SleepSpore");
             BuildSlotIfMissing(madSlot, "03_Provocation");
@@ -327,6 +352,7 @@ namespace MushOut.UI
             beamRect.pivot = new Vector2(0.5f, 0f);
             beamRect.anchoredPosition = new Vector2(0f, 42f);
             beamRect.sizeDelta = new Vector2(232.5f, 225f);
+            // 선택된 무기 밑에서 파란 빛이 위로 올라오는 느낌을 주는 빔 이미지.
             slot.beamImage = beamImage;
 
             GameObject baseObject = CreateUIObject("ProjectorBaseGlow", root.transform);
@@ -340,9 +366,22 @@ namespace MushOut.UI
             baseRect.pivot = new Vector2(0.5f, 0.5f);
             baseRect.anchoredPosition = new Vector2(0f, 39f);
             baseRect.sizeDelta = new Vector2(237f, 63f);
+            // 빔이 바닥에서 나오는 것처럼 보이게 해주는 바닥 글로우.
             slot.baseGlowImage = baseImage;
 
-            GameObject plateObject = CreateUIObject("FloatingWeaponPlate", root.transform);
+            GameObject cardClipObject = CreateUIObject("CardClip", root.transform);
+            RectMask2D cardClipMask = cardClipObject.AddComponent<RectMask2D>();
+            cardClipMask.padding = Vector4.zero;
+            RectTransform cardClipRect = cardClipObject.GetComponent<RectTransform>();
+            cardClipRect.anchorMin = new Vector2(0.5f, 0.5f);
+            cardClipRect.anchorMax = new Vector2(0.5f, 0.5f);
+            cardClipRect.pivot = new Vector2(0.5f, 0.5f);
+            cardClipRect.anchoredPosition = new Vector2(0f, 42f);
+            cardClipRect.sizeDelta = new Vector2(225f, 186f);
+            // 뒤에 있는 카드가 중앙 카드를 침범한 부분은 여기서 잘라서, 진짜 뒤에 숨어있는 것처럼 보이게 함.
+            slot.cardClipRect = cardClipRect;
+
+            GameObject plateObject = CreateUIObject("FloatingWeaponPlate", cardClipObject.transform);
             Image plateImage = plateObject.AddComponent<Image>();
             plateImage.sprite = _plateSprite;
             plateImage.color = slotColor;
@@ -351,10 +390,20 @@ namespace MushOut.UI
             plateRect.anchorMin = new Vector2(0.5f, 0.5f);
             plateRect.anchorMax = new Vector2(0.5f, 0.5f);
             plateRect.pivot = new Vector2(0.5f, 0.5f);
-            plateRect.anchoredPosition = new Vector2(0f, 42f);
+            plateRect.anchoredPosition = Vector2.zero;
             plateRect.sizeDelta = new Vector2(225f, 186f);
             plateRect.localRotation = Quaternion.Euler(12f, 0f, 0f);
+            // 무기 아이콘이 올라가는 어두운 카드 판. 살짝 기울여서 평면 UI가 덜 밋밋하게 보이게 함.
             slot.plateImage = plateImage;
+
+            GameObject frameFillObject = CreateUIObject("SelectedFrameFill", plateObject.transform);
+            Image frameFillImage = frameFillObject.AddComponent<Image>();
+            frameFillImage.sprite = _plateSprite;
+            frameFillImage.color = new Color(slotColor.r, slotColor.g, slotColor.b, 0.62f);
+            frameFillImage.raycastTarget = false;
+            Stretch(frameFillImage.rectTransform, Vector2.zero);
+            // 선택된 카드 안쪽이 너무 뻥 뚫려 보이지 않게 파란 프레임 안을 살짝 채워주는 레이어.
+            slot.selectedFrameFillImage = frameFillImage;
 
             GameObject frameObject = CreateUIObject("SelectedFrame", plateObject.transform);
             Image frameImage = frameObject.AddComponent<Image>();
@@ -362,6 +411,7 @@ namespace MushOut.UI
             frameImage.color = selectedRingColor;
             frameImage.raycastTarget = false;
             Stretch(frameImage.rectTransform, new Vector2(-8f, -8f));
+            // 현재 선택된 무기를 강조하는 파란 테두리.
             slot.selectedIndicator = frameObject;
 
             GameObject iconObject = CreateUIObject("WeaponIcon", plateObject.transform);
@@ -375,56 +425,8 @@ namespace MushOut.UI
             iconRect.pivot = new Vector2(0.5f, 0.5f);
             iconRect.anchoredPosition = new Vector2(0f, 15f);
             iconRect.sizeDelta = new Vector2(144f, 108f);
+            // 실제 무기/능력 아이콘 이미지.
             slot.iconImage = iconImage;
-
-            GameObject keyObject = CreateUIObject("KeyLabel", plateObject.transform);
-            Text keyText = keyObject.AddComponent<Text>();
-            keyText.alignment = TextAnchor.MiddleCenter;
-            keyText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-            keyText.fontSize = 30;
-            keyText.fontStyle = FontStyle.Bold;
-            keyText.color = selectedRingColor;
-            keyText.raycastTarget = false;
-            RectTransform keyRect = keyText.rectTransform;
-            keyRect.anchorMin = new Vector2(0f, 1f);
-            keyRect.anchorMax = new Vector2(0f, 1f);
-            keyRect.pivot = new Vector2(0.5f, 0.5f);
-            keyRect.anchoredPosition = new Vector2(25.5f, -25.5f);
-            keyRect.sizeDelta = new Vector2(42f, 42f);
-            slot.keyText = keyText;
-
-            GameObject nameObject = CreateUIObject("AbilityName", plateObject.transform);
-            Text nameText = nameObject.AddComponent<Text>();
-            nameText.alignment = TextAnchor.MiddleCenter;
-            nameText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-            nameText.fontSize = 19;
-            nameText.fontStyle = FontStyle.Bold;
-            nameText.color = new Color(0.83f, 0.98f, 1f, 0.95f);
-            nameText.raycastTarget = false;
-            RectTransform nameRect = nameText.rectTransform;
-            nameRect.anchorMin = new Vector2(0.5f, 0f);
-            nameRect.anchorMax = new Vector2(0.5f, 0f);
-            nameRect.pivot = new Vector2(0.5f, 0.5f);
-            nameRect.anchoredPosition = new Vector2(0f, 27f);
-            nameRect.sizeDelta = new Vector2(192f, 33f);
-            slot.nameText = nameText;
-
-            GameObject countObject = CreateUIObject("Count", root.transform);
-            Text countText = countObject.AddComponent<Text>();
-            countText.alignment = TextAnchor.MiddleCenter;
-            countText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-            countText.fontSize = 24;
-            countText.fontStyle = FontStyle.Bold;
-            countText.color = new Color(0.9f, 1f, 1f, 1f);
-            countText.raycastTarget = false;
-
-            RectTransform countRect = countText.rectTransform;
-            countRect.anchorMin = new Vector2(0.5f, 0f);
-            countRect.anchorMax = new Vector2(0.5f, 0f);
-            countRect.pivot = new Vector2(0.5f, 0.5f);
-            countRect.anchoredPosition = new Vector2(0f, 4.5f);
-            countRect.sizeDelta = new Vector2(120f, 36f);
-            slot.countText = countText;
         }
 
         private void RefreshSlot(AbilitySlot slot)
@@ -447,6 +449,7 @@ namespace MushOut.UI
 
             if (slot.canvasGroup != null)
             {
+                // 대시 쿨타임이거나 자원이 없으면 카드 전체를 반투명하게 해서 지금 못 쓴다는 걸 보여줌.
                 slot.canvasGroup.alpha = isEmpty ? emptyAlpha : usableAlpha;
                 slot.canvasGroup.interactable = !isEmpty;
                 slot.canvasGroup.blocksRaycasts = !isEmpty;
@@ -454,19 +457,33 @@ namespace MushOut.UI
 
             if (slot.selectedIndicator != null)
             {
+                // 선택된 카드만 파란 테두리가 켜지게 함.
                 slot.selectedIndicator.SetActive(abilityController.CurrentState == slot.state);
+            }
+
+            if (slot.selectedFrameFillImage != null)
+            {
+                slot.selectedFrameFillImage.enabled = abilityController.CurrentState == slot.state;
+                slot.selectedFrameFillImage.color = new Color(slotColor.r, slotColor.g, slotColor.b, 0.62f);
+            }
+
+            if (slot.plateImage != null)
+            {
+                RectTransform plateRect = slot.plateImage.rectTransform;
+                plateRect.sizeDelta = new Vector2(225f, 186f);
+                slot.plateImage.color = slotColor;
             }
 
             if (slot.beamImage != null)
             {
+                // 빔 효과도 선택된 무기에서만 켜짐.
                 slot.beamImage.enabled = abilityController.CurrentState == slot.state;
             }
 
             if (slot.baseGlowImage != null)
             {
-                slot.baseGlowImage.color = abilityController.CurrentState == slot.state
-                    ? baseGlowColor
-                    : new Color(baseGlowColor.r, baseGlowColor.g, baseGlowColor.b, 0.34f);
+                slot.baseGlowImage.enabled = abilityController.CurrentState == slot.state;
+                slot.baseGlowImage.color = baseGlowColor;
             }
 
             if (slot.keyText != null)
@@ -507,22 +524,25 @@ namespace MushOut.UI
                 AbilitySlot slot = _visibleSlots[i];
                 if (slot.rectTransform == null) continue;
 
-                int offset = GetCircularOffset(i, selectedIndex, visibleCount);
-                int distance = Mathf.Abs(offset);
+                int layoutIndex = GetCarouselLayoutIndex(i, selectedIndex, visibleCount);
+                int depth = GetLayoutDepth(layoutIndex);
                 bool isEmpty = abilityController.GetResourceCount(slot.state) <= 0;
 
-                float scale = GetScale(distance);
-                float rotationY = GetRotationY(offset, distance);
-                float positionAlpha = GetPositionAlpha(distance);
+                float scale = GetScale(layoutIndex);
+                float rotationY = GetRotationY(layoutIndex);
+                float positionAlpha = GetPositionAlpha(layoutIndex);
                 float resourceAlpha = isEmpty ? emptyAlpha : usableAlpha;
+                // 카드들이 가만히 붙어있지 않고 살짝 떠다니는 것처럼 보이게 사인파로 위아래 움직임을 줌.
                 float floatOffset = Mathf.Sin((Time.unscaledTime * floatSpeed) + (i * 0.7f)) * floatAmplitude;
-                float pulse = distance == 0 ? 1f + Mathf.Sin(Time.unscaledTime * selectedPulseSpeed) * 0.04f : 1f;
+                // 선택된 중앙 무기는 아주 약하게 커졌다 작아지는 펄스를 줘서 현재 선택 느낌을 더 살림.
+                float pulse = layoutIndex == 0 ? 1f + Mathf.Sin(Time.unscaledTime * selectedPulseSpeed) * 0.035f : 1f;
 
-                Vector2 targetPosition = new Vector2(offset * horizontalSpacing, -distance * depthYOffset + floatOffset);
-                Quaternion targetRotation = Quaternion.Euler(0f, rotationY, offset * -5f);
+                Vector2 targetPosition = GetCarouselPosition(layoutIndex, floatOffset);
+                Quaternion targetRotation = Quaternion.Euler(layoutIndex == 3 ? 0f : 4f, rotationY, GetZRotation(layoutIndex));
                 Vector3 targetScale = Vector3.one * (scale * pulse);
 
                 float lerpAmount = Time.unscaledDeltaTime * carouselLerpSpeed;
+                // 바로 순간이동하지 않고 보간해서 무기들이 원형으로 돌아가는 느낌을 만듦.
                 slot.rectTransform.anchoredPosition = Vector2.Lerp(slot.rectTransform.anchoredPosition, targetPosition, lerpAmount);
                 slot.rectTransform.localRotation = Quaternion.Lerp(slot.rectTransform.localRotation, targetRotation, lerpAmount);
                 slot.rectTransform.localScale = Vector3.Lerp(slot.rectTransform.localScale, targetScale, lerpAmount);
@@ -535,12 +555,52 @@ namespace MushOut.UI
                 if (slot.beamImage != null)
                 {
                     Color color = beamColor;
-                    color.a *= distance == 0 ? 1f : 0.18f;
+                    color.a *= layoutIndex == 0 ? 1f : 0f;
                     slot.beamImage.color = color;
                 }
 
-                slot.rectTransform.SetSiblingIndex(Mathf.Max(0, 10 - distance));
+                ApplyCardClip(slot, layoutIndex);
+
+                // 중앙 선택 카드가 무조건 제일 앞에 그려지게 해서 뒤 카드들이 중앙 카드를 덮지 못하게 함.
+                slot.rectTransform.SetSiblingIndex(layoutIndex == 0 ? 100 : Mathf.Max(0, 2 - depth));
             }
+        }
+
+        private void ApplyCardClip(AbilitySlot slot, int layoutIndex)
+        {
+            if (slot.cardClipRect == null || slot.plateImage == null) return;
+
+            RectTransform clipRect = slot.cardClipRect;
+            RectTransform plateRect = slot.plateImage.rectTransform;
+
+            switch (layoutIndex)
+            {
+                case 1:
+                    // 오른쪽 뒤 카드: 중앙 카드 안쪽으로 들어간 부분은 마스크로 잘라서 뒤에 숨어있는 것처럼 보이게 함.
+                    clipRect.anchoredPosition = new Vector2(22f, 42f);
+                    clipRect.sizeDelta = new Vector2(190f, 186f);
+                    plateRect.anchoredPosition = new Vector2(-22f, 0f);
+                    break;
+                case 2:
+                    // 왼쪽 뒤 카드도 오른쪽과 반대로 같은 방식으로 잘라줌.
+                    clipRect.anchoredPosition = new Vector2(-22f, 42f);
+                    clipRect.sizeDelta = new Vector2(190f, 186f);
+                    plateRect.anchoredPosition = new Vector2(22f, 0f);
+                    break;
+                case 3:
+                    // 아래 뒤 카드는 윗부분이 중앙 카드 뒤로 들어가고, 아이콘만 살짝 보이는 느낌으로 창을 낮고 얇게 둠.
+                    clipRect.anchoredPosition = new Vector2(0f, -22f);
+                    clipRect.sizeDelta = new Vector2(218f, 88f);
+                    plateRect.anchoredPosition = Vector2.zero;
+                    break;
+                default:
+                    clipRect.anchoredPosition = new Vector2(0f, 42f);
+                    clipRect.sizeDelta = new Vector2(225f, 186f);
+                    plateRect.anchoredPosition = Vector2.zero;
+                    break;
+            }
+
+            plateRect.sizeDelta = new Vector2(225f, 186f);
         }
 
         private void SnapSelectedSlotForward()
@@ -552,8 +612,9 @@ namespace MushOut.UI
                 AbilitySlot slot = _slots[i];
                 if (slot == null || slot.rectTransform == null || slot.state != _lastState) continue;
 
-                slot.rectTransform.localScale = Vector3.one * (selectedScale * 0.8f);
-                slot.rectTransform.anchoredPosition += new Vector2(_lastSwitchDirection * 129f, 42f);
+                // 무기 바꿀 때 선택된 카드가 살짝 앞으로 튀어나오는 느낌을 주는 한 번짜리 보정.
+                slot.rectTransform.localScale = Vector3.one * (selectedScale * 0.86f);
+                slot.rectTransform.anchoredPosition += new Vector2(_lastSwitchDirection * 120f, 36f);
                 break;
             }
         }
@@ -641,42 +702,81 @@ namespace MushOut.UI
             return 0;
         }
 
-        private int GetCircularOffset(int index, int selectedIndex, int visibleCount)
+        private int GetCarouselLayoutIndex(int index, int selectedIndex, int visibleCount)
         {
-            int offset = index - selectedIndex;
-            int halfCount = visibleCount / 2;
+            // 현재 선택된 무기를 기준으로 0=중앙, 1=오른쪽, 2=왼쪽, 3=아래 뒤쪽 위치를 정함.
+            int forwardOffset = (index - selectedIndex + visibleCount) % visibleCount;
 
-            if (offset > halfCount)
+            if (visibleCount <= 3)
             {
-                offset -= visibleCount;
-            }
-            else if (offset < -halfCount)
-            {
-                offset += visibleCount;
+                if (forwardOffset == 0) return 0;
+                return forwardOffset == 1 ? 1 : 2;
             }
 
-            return offset;
+            if (forwardOffset == 0) return 0;
+            if (forwardOffset == 1) return 1;
+            if (forwardOffset == 2) return 2;
+            return 3;
         }
 
-        private float GetScale(int distance)
+        private Vector2 GetCarouselPosition(int layoutIndex, float floatOffset)
         {
-            if (distance == 0) return selectedScale;
-            if (distance == 1) return sideScale;
+            switch (layoutIndex)
+            {
+                case 0:
+                    // 선택된 무기는 중앙 위쪽에 크게 배치.
+                    return new Vector2(0f, 78f + floatOffset);
+                case 1:
+                    // 다음 무기는 오른쪽 뒤에 배치.
+                    return new Vector2(horizontalSpacing, 40f + (floatOffset * 0.28f));
+                case 2:
+                    // 이전 쪽 무기는 왼쪽 뒤에 배치.
+                    return new Vector2(-horizontalSpacing, 40f + (floatOffset * 0.28f));
+                default:
+                    // 마지막 무기는 아래 뒤쪽에 살짝 보이게 배치.
+                    return new Vector2(0f, -depthYOffset + (floatOffset * 0.12f));
+            }
+        }
+
+        private int GetLayoutDepth(int layoutIndex)
+        {
+            switch (layoutIndex)
+            {
+                case 0:
+                    return 0;
+                case 1:
+                case 2:
+                    return 1;
+                default:
+                    return 2;
+            }
+        }
+
+        private float GetScale(int layoutIndex)
+        {
+            if (layoutIndex == 0) return selectedScale;
+            if (layoutIndex == 1 || layoutIndex == 2) return sideScale;
             return farScale;
         }
 
-        private float GetRotationY(int offset, int distance)
+        private float GetRotationY(int layoutIndex)
         {
-            if (distance == 0) return 0f;
-
-            float rotation = distance == 1 ? sideRotationY : farRotationY;
-            return -Mathf.Sign(offset) * rotation;
+            if (layoutIndex == 1) return -sideRotationY;
+            if (layoutIndex == 2) return sideRotationY;
+            return farRotationY;
         }
 
-        private float GetPositionAlpha(int distance)
+        private float GetZRotation(int layoutIndex)
         {
-            if (distance == 0) return 1f;
-            if (distance == 1) return sideAlphaMultiplier;
+            if (layoutIndex == 1) return -2f;
+            if (layoutIndex == 2) return 2f;
+            return 0f;
+        }
+
+        private float GetPositionAlpha(int layoutIndex)
+        {
+            if (layoutIndex == 0) return 1f;
+            if (layoutIndex == 1 || layoutIndex == 2) return sideAlphaMultiplier;
             return farAlphaMultiplier;
         }
 
@@ -718,12 +818,12 @@ namespace MushOut.UI
         {
             if (_plateSprite == null)
             {
-                _plateSprite = CreateRoundedRectSprite(96, 96, 14, false);
+                _plateSprite = CreateRoundedRectSprite(128, 96, 4, false);
             }
 
             if (_frameSprite == null)
             {
-                _frameSprite = CreateRoundedRectSprite(112, 112, 18, true);
+                _frameSprite = CreateRoundedRectSprite(136, 104, 5, true);
             }
 
             if (_softDiscSprite == null)

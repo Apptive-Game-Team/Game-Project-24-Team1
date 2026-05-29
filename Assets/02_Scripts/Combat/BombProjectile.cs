@@ -27,6 +27,7 @@ namespace MushOut.Combat
 
         private Rigidbody _rb;
         private bool _isStuck = false;
+        private MushOut.Environment.BreakableObject _attachedBreakable;
 
         private void Awake()
         {
@@ -88,6 +89,9 @@ namespace MushOut.Combat
         {
             _isStuck = true;
 
+            // 박힌 대상이 BreakableObject인지 확인 후 기억해둠
+            _attachedBreakable = targetTransform.GetComponentInParent<MushOut.Environment.BreakableObject>();
+
             // 물리 연산 정지 → 해당 위치에 고정
             _rb.isKinematic = true;
             _rb.linearVelocity = Vector3.zero;
@@ -103,7 +107,7 @@ namespace MushOut.Combat
 
         /// <summary>
         /// 폭탄을 폭발시킵니다.
-        /// 폭발 이펙트를 생성하고, 반경 내의 파괴 가능한 오브젝트를 직접 파괴한 뒤 자신을 제거합니다.
+        /// 폭발 이펙트를 생성하고, 폭탄이 붙어있는 파괴 가능한 오브젝트를 파괴한 뒤 자신을 제거합니다.
         /// </summary>
         private void Explode()
         {
@@ -117,22 +121,10 @@ namespace MushOut.Combat
                 Debug.LogWarning("[BombProjectile] ExplosionPrefab이 할당되지 않았습니다!");
             }
 
-            // 유니티 물리 엔진의 트리거 인식 불안정성을 보완하기 위해
-            // 코드 레벨에서 반경 내의 벽(BreakableObject)을 직접 찾아 강제로 파괴합니다.
-            Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRadius);
-            foreach (Collider col in colliders)
+            // 폭탄이 현재 붙어있는(박혀있는) BreakableObject만 파괴
+            if (_attachedBreakable != null)
             {
-                MushOut.Environment.BreakableObject breakable = col.GetComponent<MushOut.Environment.BreakableObject>();
-                if (breakable == null)
-                {
-                    breakable = col.GetComponentInParent<MushOut.Environment.BreakableObject>();
-                }
-
-                if (breakable != null)
-                {
-                    // 수동으로 파괴 명령 전달
-                    breakable.Break(transform.position);
-                }
+                _attachedBreakable.Break(transform.position);
             }
 
             // 폭탄 파괴
