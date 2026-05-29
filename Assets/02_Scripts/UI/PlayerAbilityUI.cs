@@ -252,11 +252,6 @@ namespace MushOut.UI
 
         private void AssignIconSprites()
         {
-            if (dashIcon == null) dashIcon = Resources.Load<Sprite>("AbilityIcons/dash");
-            if (sleepSporeIcon == null) sleepSporeIcon = Resources.Load<Sprite>("AbilityIcons/sleep_spore");
-            if (provocationIcon == null) provocationIcon = Resources.Load<Sprite>("AbilityIcons/Provocation");
-            if (bombSporeIcon == null) bombSporeIcon = Resources.Load<Sprite>("AbilityIcons/boom");
-
             dashSlot.iconSprite = dashIcon;
             paralyzeSlot.iconSprite = sleepSporeIcon;
             madSlot.iconSprite = provocationIcon;
@@ -423,8 +418,8 @@ namespace MushOut.UI
             iconRect.anchorMin = new Vector2(0.5f, 0.5f);
             iconRect.anchorMax = new Vector2(0.5f, 0.5f);
             iconRect.pivot = new Vector2(0.5f, 0.5f);
-            iconRect.anchoredPosition = new Vector2(0f, 15f);
-            iconRect.sizeDelta = new Vector2(144f, 108f);
+            iconRect.anchoredPosition = Vector2.zero;
+            iconRect.sizeDelta = new Vector2(210f, 168f);
             // 실제 무기/능력 아이콘 이미지.
             slot.iconImage = iconImage;
         }
