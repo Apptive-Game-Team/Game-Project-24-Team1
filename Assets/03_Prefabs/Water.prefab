@@ -127,7 +127,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MushOut.Environment.Buoyancy
   buoyancyPower: 11
-  submergeRatio: 0.7
+  submergeRatio: 0.65
 --- !u!114 &6100301076030318502
 MonoBehaviour:
   m_ObjectHideFlags: 0

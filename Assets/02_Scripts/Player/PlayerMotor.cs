@@ -336,5 +336,45 @@ namespace MushOut.Player
         {
             return _controller;
         }
+
+        // --- 무빙 플랫폼(이동하는 오브젝트) 관련 ---
+        private Transform _movingPlatform;
+        private Vector3 _lastPlatformPosition;
+
+        /// <summary>
+        /// 플레이어가 이동하는 오브젝트 위에 있을 때, 그 오브젝트의 이동량(Delta)을 추적하여 플레이어에게 적용합니다.
+        /// </summary>
+        /// <param name="groundTransform">현재 밟고 있는 바닥의 Transform</param>
+        public void HandleMovingPlatform(Transform groundTransform)
+        {
+            if (groundTransform != null)
+            {
+                if (_movingPlatform != groundTransform)
+                {
+                    // 새로 플랫폼에 올라탔을 때 위치 기억
+                    _movingPlatform = groundTransform;
+                    _lastPlatformPosition = _movingPlatform.position;
+                }
+                else
+                {
+                    // 기존 플랫폼에 계속 타고 있을 때 위치 변화량 계산
+                    Vector3 deltaPos = _movingPlatform.position - _lastPlatformPosition;
+                    
+                    if (deltaPos.sqrMagnitude > 0.00001f)
+                    {
+                        // 플랫폼이 이동한 만큼 플레이어도 강제 이동시킴 (충돌 무시 방지를 위해 Move 사용)
+                        _controller.Move(deltaPos);
+                    }
+                    
+                    // 다음 프레임을 위해 현재 위치 갱신
+                    _lastPlatformPosition = _movingPlatform.position;
+                }
+            }
+            else
+            {
+                // 공중이거나 바닥이 없을 때
+                _movingPlatform = null;
+            }
+        }
     }
 }

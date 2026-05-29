@@ -9,6 +9,9 @@ namespace MushOut.Interaction
         [Tooltip("오브젝트가 회전하는 속도 (초당 각도)")]
         [SerializeField] private float rotateSpeed = 90f;
 
+        [Tooltip("한 번 회전할 때 돌아가는 각도")]
+        [SerializeField] private float rotateAngle = 90f;
+
         [Tooltip("목표 각도 도달 후 대기할 시간 (초). 기본값은 2분(120초)입니다.")]
         [SerializeField] private float waitTime = 120f;
 
@@ -31,25 +34,25 @@ namespace MushOut.Interaction
         }
 
         #region 기본 회전 메서드 (돌아오지 않음)
-        public void RotatePlusX(float angle) { targetRotation *= Quaternion.Euler(angle, 0, 0); }
-        public void RotateMinusX(float angle) { targetRotation *= Quaternion.Euler(-angle, 0, 0); }
+        public void RotatePlusX() { targetRotation *= Quaternion.Euler(rotateAngle, 0, 0); }
+        public void RotateMinusX() { targetRotation *= Quaternion.Euler(-rotateAngle, 0, 0); }
 
-        public void RotatePlusY(float angle) { targetRotation *= Quaternion.Euler(0, angle, 0); }
-        public void RotateMinusY(float angle) { targetRotation *= Quaternion.Euler(0, -angle, 0); }
+        public void RotatePlusY() { targetRotation *= Quaternion.Euler(0, rotateAngle, 0); }
+        public void RotateMinusY() { targetRotation *= Quaternion.Euler(0, -rotateAngle, 0); }
 
-        public void RotatePlusZ(float angle) { targetRotation *= Quaternion.Euler(0, 0, angle); }
-        public void RotateMinusZ(float angle) { targetRotation *= Quaternion.Euler(0, 0, -angle); }
+        public void RotatePlusZ() { targetRotation *= Quaternion.Euler(0, 0, rotateAngle); }
+        public void RotateMinusZ() { targetRotation *= Quaternion.Euler(0, 0, -rotateAngle); }
         #endregion
 
         #region T초 대기 후 원래 회전으로 돌아오는 메서드
-        public void RotatePlusXWaitForT(float angle) { StartCoroutine(RoutineRotateWaitForT(Quaternion.Euler(angle, 0, 0))); }
-        public void RotateMinusXWaitForT(float angle) { StartCoroutine(RoutineRotateWaitForT(Quaternion.Euler(-angle, 0, 0))); }
+        public void RotatePlusXWaitForT() { StartCoroutine(RoutineRotateWaitForT(Quaternion.Euler(rotateAngle, 0, 0))); }
+        public void RotateMinusXWaitForT() { StartCoroutine(RoutineRotateWaitForT(Quaternion.Euler(-rotateAngle, 0, 0))); }
 
-        public void RotatePlusYWaitForT(float angle) { StartCoroutine(RoutineRotateWaitForT(Quaternion.Euler(0, angle, 0))); }
-        public void RotateMinusYWaitForT(float angle) { StartCoroutine(RoutineRotateWaitForT(Quaternion.Euler(0, -angle, 0))); }
+        public void RotatePlusYWaitForT() { StartCoroutine(RoutineRotateWaitForT(Quaternion.Euler(0, rotateAngle, 0))); }
+        public void RotateMinusYWaitForT() { StartCoroutine(RoutineRotateWaitForT(Quaternion.Euler(0, -rotateAngle, 0))); }
 
-        public void RotatePlusZWaitForT(float angle) { StartCoroutine(RoutineRotateWaitForT(Quaternion.Euler(0, 0, angle))); }
-        public void RotateMinusZWaitForT(float angle) { StartCoroutine(RoutineRotateWaitForT(Quaternion.Euler(0, 0, -angle))); }
+        public void RotatePlusZWaitForT() { StartCoroutine(RoutineRotateWaitForT(Quaternion.Euler(0, 0, rotateAngle))); }
+        public void RotateMinusZWaitForT() { StartCoroutine(RoutineRotateWaitForT(Quaternion.Euler(0, 0, -rotateAngle))); }
         #endregion
 
         // 공통 대기 코루틴

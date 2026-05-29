@@ -91,4 +91,9 @@ InitCodeMarker
 
 # AI Assistant / Local Tools
 .agents/
-.gemini/
+.gemini/
+
+
+# 개인이 사용하는 유료 에디터 에셋 제외
+Assets/HierarchyDesigner/
+Assets/HierarchyDesigner.meta

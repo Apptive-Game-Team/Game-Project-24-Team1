@@ -231,5 +231,84 @@ namespace MushOut.Player
             if (angle < -180f) angle += 360f;
             return angle;
         }
+
+        private Coroutine _earthquakeCoroutine;
+        private Coroutine _currentShakeCoroutine;
+
+        /// <summary>
+        /// 5초마다 카메라에 지진 효과(흔들림)를 줍니다.
+        /// </summary>
+        public void LetsShake()
+        {
+            EndShake(); // 기존 흔들림이 있다면 안전하게 멈추고 시작
+            _earthquakeCoroutine = StartCoroutine(EarthquakeRoutine());
+        }
+
+        /// <summary>
+        /// 진행 중인 지진 효과(흔들림)를 즉시 종료합니다.
+        /// </summary>
+        public void EndShake()
+        {
+            if (_earthquakeCoroutine != null)
+            {
+                StopCoroutine(_earthquakeCoroutine);
+                _earthquakeCoroutine = null;
+            }
+
+            if (_currentShakeCoroutine != null)
+            {
+                StopCoroutine(_currentShakeCoroutine);
+                _currentShakeCoroutine = null;
+            }
+
+            // 시네머신 노이즈 값을 0으로 강제 초기화
+            var tpsNoise = tpsCamera != null ? tpsCamera.GetComponent<CinemachineBasicMultiChannelPerlin>() : null;
+            var fpsNoise = fpsCamera != null ? fpsCamera.GetComponent<CinemachineBasicMultiChannelPerlin>() : null;
+            
+            if (tpsNoise != null) tpsNoise.AmplitudeGain = 0f;
+            if (fpsNoise != null) fpsNoise.AmplitudeGain = 0f;
+        }
+
+        private System.Collections.IEnumerator EarthquakeRoutine()
+        {
+            while (true)
+            {
+                _currentShakeCoroutine = StartCoroutine(ShakeCamera(1.0f, 2.0f));
+                yield return new WaitForSeconds(5f);
+            }
+        }
+
+        private System.Collections.IEnumerator ShakeCamera(float duration, float intensity)
+        {
+            var tpsNoise = tpsCamera != null ? tpsCamera.GetComponent<CinemachineBasicMultiChannelPerlin>() : null;
+            var fpsNoise = fpsCamera != null ? fpsCamera.GetComponent<CinemachineBasicMultiChannelPerlin>() : null;
+            
+            if (tpsNoise != null) tpsNoise.AmplitudeGain = intensity;
+            if (fpsNoise != null) fpsNoise.AmplitudeGain = intensity;
+
+            Vector3 originalLocalPos = cameraTarget != null ? cameraTarget.localPosition : Vector3.zero;
+
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                
+                // 시네머신 노이즈 컴포넌트가 없을 경우 트랜스폼을 직접 흔듭니다.
+                if (tpsNoise == null && fpsNoise == null && cameraTarget != null)
+                {
+                    cameraTarget.localPosition = originalLocalPos + UnityEngine.Random.insideUnitSphere * (intensity * 0.05f);
+                }
+                
+                yield return null;
+            }
+
+            if (tpsNoise != null) tpsNoise.AmplitudeGain = 0f;
+            if (fpsNoise != null) fpsNoise.AmplitudeGain = 0f;
+            
+            if (tpsNoise == null && fpsNoise == null && cameraTarget != null)
+            {
+                cameraTarget.localPosition = originalLocalPos;
+            }
+        }
     }
 }

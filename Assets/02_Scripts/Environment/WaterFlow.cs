@@ -34,24 +34,31 @@ namespace MushOut.Environment
 
             // 로컬 방향 벡터를 월드 방향 벡터로 변환 (오브젝트 회전 반영)
             Vector3 worldDirection = transform.TransformDirection(flowDirection).normalized;
-            Vector3 forceVector = worldDirection * flowForce;
+            
+            // 기존에는 flowForce를 '힘(Force)'으로 썼지만, 이제는 '목표 속도(Target Speed)'로 취급합니다.
+            Vector3 targetVelocity = worldDirection * flowForce;
 
             // 1. PlayerController를 가진 플레이어인 경우
             if (other.TryGetComponent<PlayerController>(out var player))
             {
-                player.AddExternalForce(forceVector);
+                // 플레이어의 물 속 저항(Drag) 기본값이 3.0이므로,
+                // 목표 속도를 유지하기 위해 (목표 속도 * 3.0) 만큼의 힘을 지속적으로 가해줍니다.
+                // 이렇게 하면 최종적으로 플레이어의 떠내려가는 속도가 targetVelocity와 정확히 일치하게 됩니다.
+                player.AddExternalForce(targetVelocity * 3.0f);
             }
-            // 2. 일반 Rigidbody를 가진 오브젝트인 경우
+            // 2. 일반 Rigidbody를 가진 오브젝트인 경우 (폭탄, 나무상자 등)
             else if (other.TryGetComponent<Rigidbody>(out var rb))
             {
-                // 질량(Mass) 스펙트럼 제한 (0 ~ 1.0): 0(에 가까울수록) 100% 힘, 1.01 이상이면 0% 힘
-                float massMultiplier = Mathf.InverseLerp(1.01f, 0.0f, rb.mass);
+                // 중력이나 부력(Y축 오르내림)을 방해하지 않기 위해 X, Z축(수평) 속도만 고려
+                Vector3 currentHorizontalVel = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+                Vector3 targetHorizontalVel = new Vector3(targetVelocity.x, 0, targetVelocity.z);
 
-                if (massMultiplier > 0f)
-                {
-                    // Rigidbody에는 FixedUpdate 주기에 맞는 ForceMode.Acceleration 사용
-                    rb.AddForce(forceVector * massMultiplier, ForceMode.Acceleration);
-                }
+                // 목표 속도까지 얼마나 부족한지(차이) 계산
+                Vector3 velocityDiff = targetHorizontalVel - currentHorizontalVel;
+
+                // 질량(Mass)을 무시하고 직접 속도를 변화시키는 VelocityChange 모드 사용
+                // 단번에 훅 바뀌지 않고 자연스럽게 가속되도록 Time.fixedDeltaTime과 보간 상수(5.0f)를 곱해줍니다.
+                rb.AddForce(velocityDiff * 5.0f * Time.fixedDeltaTime, ForceMode.VelocityChange);
             }
         }
 

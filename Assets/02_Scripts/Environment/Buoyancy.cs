@@ -3,6 +3,19 @@ using MushOut.Player;
 
 namespace MushOut.Environment
 {
+    [System.Serializable]
+    public struct GrabBuoyancyPenalty
+    {
+        [Tooltip("비교할 태그 이름입니다. (예: Box, Enemy)")]
+        public string targetTag;
+        
+        [Tooltip("비교할 레이어 이름입니다. 비워두면 태그만 검사합니다. (예: EnemyHeavy)")]
+        public string targetLayer;
+        
+        [Tooltip("해당 오브젝트를 잡았을 때 곱해질 부력 배율입니다. (0.5 = 부력 절반)")]
+        public float multiplier;
+    }
+
     [RequireComponent(typeof(Collider))]
     public class Buoyancy : MonoBehaviour
     {
@@ -13,6 +26,15 @@ namespace MushOut.Environment
         [Tooltip("물에 잠기는 비율 (0 = 수면 위로 완전히 뜸, 1 = 물에 완전히 잠김). 기본값은 0.7(70% 잠김)입니다.")]
         [Range(0f, 1f)]
         [SerializeField] private float submergeRatio = 0.7f;
+
+        [Header("Grab Penalties")]
+        [Tooltip("플레이어가 물체를 잡고 있을 때 적용할 부력 페널티(배율) 목록입니다. 일치하는 첫 번째 규칙이 적용됩니다.")]
+        [SerializeField] private GrabBuoyancyPenalty[] grabPenalties = new GrabBuoyancyPenalty[]
+        {
+            new GrabBuoyancyPenalty { targetTag = "Box", targetLayer = "", multiplier = 0.1f },
+            new GrabBuoyancyPenalty { targetTag = "Enemy", targetLayer = "Enemy", multiplier = 0.2f },
+            new GrabBuoyancyPenalty { targetTag = "Enemy", targetLayer = "EnemyHeavy", multiplier = 0.1f }
+        };
 
         private Collider _waterCollider;
 
@@ -78,6 +100,48 @@ namespace MushOut.Environment
                 bottomY = other.bounds.min.y;
             }
 
+            // --- [추가] 잡고 있는 물체에 따른 부력 페널티 계산 (Inspector 설정 기반) ---
+            float currentBuoyancyPower = buoyancyPower;
+            GameObject grabbedObj = null;
+            
+            if (isPlayer)
+            {
+                var interactor = other.GetComponent<PlayerInteractor>();
+                if (interactor != null && interactor.GrabbedObject != null)
+                {
+                    // 플레이어의 경우, 자신이 잡고 있는 물체를 기준으로 페널티 적용
+                    grabbedObj = interactor.GrabbedObject.gameObject;
+                }
+            }
+            else if (rb != null)
+            {
+                var pushPull = other.GetComponent<MushOut.Interactables.PushPullInteractable>();
+                if (pushPull != null && pushPull.isGrabbed)
+                {
+                    // 일반 오브젝트의 경우, 자신이 누군가에게 잡혀있다면 스스로에게 페널티 적용
+                    grabbedObj = other.gameObject;
+                }
+            }
+
+            if (grabbedObj != null)
+            {
+                string grabbedTag = grabbedObj.tag;
+                string grabbedLayerName = LayerMask.LayerToName(grabbedObj.layer);
+
+                foreach (var penalty in grabPenalties)
+                {
+                    bool tagMatch = string.IsNullOrEmpty(penalty.targetTag) || grabbedTag == penalty.targetTag;
+                    bool layerMatch = string.IsNullOrEmpty(penalty.targetLayer) || grabbedLayerName == penalty.targetLayer;
+
+                    if (tagMatch && layerMatch)
+                    {
+                        currentBuoyancyPower *= penalty.multiplier;
+                        break; // 조건에 맞는 첫 번째 규칙의 배율을 적용하고 종료
+                    }
+                }
+            }
+            // ----------------------------------------------------
+
             // 목표 하단(바닥) Y 좌표: 전체 높이의 지정된 비율(submergeRatio)만큼 수면 아래에 있도록 설정
             float targetBottomY = waterSurfaceY - (objHeight * submergeRatio);
 
@@ -87,12 +151,12 @@ namespace MushOut.Environment
                 // 얼마나 더 올라가야 하는지 계산
                 float diff = targetBottomY - bottomY;
 
-                // 목표 높이까지 올라가는 상승 속도 (최대값은 buoyancyPower로 제한)
+                // 목표 높이까지 올라가는 상승 속도 (최대값은 currentBuoyancyPower로 제한)
                 // 거리가 가까워질수록 diff가 작아져서 상승 속도도 자연스럽게 줄어듦
-                float targetRiseVelocity = Mathf.Min(diff / Time.fixedDeltaTime, buoyancyPower);
+                float targetRiseVelocity = Mathf.Min(diff / Time.fixedDeltaTime, currentBuoyancyPower);
                 
                 // 물 속에서 위로 밀어올리는 가속도 (부력 파워에 비례)
-                float upwardAcceleration = buoyancyPower * 5f;
+                float upwardAcceleration = currentBuoyancyPower * 5f;
 
                 if (isPlayer && playerMotor != null)
                 {
@@ -145,7 +209,7 @@ namespace MushOut.Environment
                     // 낙하 중이면 뚝 멈추지 않도록 MoveTowards로 서서히 0으로 감속
                     // 이미 0이거나 상승 중이면 그 속도를 유지하여 부드럽게 수면에 안착
                     float currentVy = rb.linearVelocity.y;
-                    float brakeAcceleration = buoyancyPower * 5f;
+                    float brakeAcceleration = currentBuoyancyPower * 5f;
                     float newVy = Mathf.MoveTowards(currentVy, 0f, brakeAcceleration * Time.fixedDeltaTime);
                     rb.linearVelocity = new Vector3(rb.linearVelocity.x, newVy, rb.linearVelocity.z);
                     // 중력 상쇄하여 수면에 고정

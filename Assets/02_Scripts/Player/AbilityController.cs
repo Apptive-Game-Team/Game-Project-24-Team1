@@ -36,14 +36,23 @@ namespace MushOut.Player
 
         private float _dashChargeTimer = 0f;
         
-        [Tooltip("수면 포자 보유 개수입니다.")]
-        [SerializeField] private int _sleepFungus = 3;
+        [Tooltip("최대 수면 포자 보유 개수입니다.")]
+        [SerializeField] private int _maxSleepFungus = 2;
         
-        [Tooltip("광분 포자 보유 개수입니다.")]
-        [SerializeField] private int _aggroFungus = 3;
+        [Tooltip("최대 광분 포자 보유 개수입니다.")]
+        [SerializeField] private int _maxAggroFungus = 2;
         
-        [Tooltip("폭탄 포자 보유 개수입니다.")]
-        [SerializeField] private int _bombFungus = 3;
+        [Tooltip("최대 폭탄 포자 보유 개수입니다.")]
+        [SerializeField] private int _maxBombFungus = 2;
+
+        [Tooltip("현재 수면 포자 보유 개수입니다.")]
+        [SerializeField] private int _sleepFungus = 2;
+        
+        [Tooltip("현재 광분 포자 보유 개수입니다.")]
+        [SerializeField] private int _aggroFungus = 2;
+        
+        [Tooltip("현재 폭탄 포자 보유 개수입니다.")]
+        [SerializeField] private int _bombFungus = 2;
 
         [Header("능력 해금")]
         [Tooltip("마비 능력 해금 여부입니다.")]
@@ -166,6 +175,16 @@ namespace MushOut.Player
 
             _currentState = newState;
             Debug.Log($"[AbilityController] 현재 능력이 변경되었습니다: {_currentState}");
+        }
+
+        /// <summary>
+        /// 자원을 모두 최대치로 회복합니다
+        /// </summary>
+        public void Refill() 
+        {
+            _sleepFungus = _maxSleepFungus;
+            _aggroFungus = _maxAggroFungus;
+            _bombFungus = _maxBombFungus;
         }
 
         /// <summary>
