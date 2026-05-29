@@ -2937,6 +2937,9 @@ MonoBehaviour:
   _maxDashCount: 3
   _dashCount: 1
   _dashChargeTime: 2
+  _maxSleepFungus: 2
+  _maxAggroFungus: 2
+  _maxBombFungus: 2
   _sleepFungus: 3
   _aggroFungus: 3
   _bombFungus: 3
@@ -2994,7 +2997,6 @@ MonoBehaviour:
   bombPrefab: {fileID: 5060683366595423038, guid: 6446dc1870ca7614b8855dc5d8ed1395, type: 3}
   throwPoint: {fileID: 6860834271406022648}
   defaultThrowDistance: 5
-  scrollSensitivity: 1
   minThrowDistance: 2
   maxThrowDistance: 15
   throwAngle: 30
