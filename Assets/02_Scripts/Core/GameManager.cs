@@ -36,6 +36,7 @@ namespace MushOut.Core
             Loading,
             Ready,      // 게임 시작 전 대기 상태
             Playing,    // 플레이 중
+            Escaping,   // Final objective acquired, escape phase is active
             Paused,     // 일시 정지
             GameOver,   // 실패
             Success     // 클리어
@@ -47,6 +48,7 @@ namespace MushOut.Core
 
         #region Fields
         private GameState _currentState = GameState.None;
+        private GameState _stateBeforePause = GameState.Playing;
 
         /// <summary> 현재 게임의 상태입니다. 외부에서는 읽기만 가능합니다. </summary>
         public GameState CurrentState
@@ -146,14 +148,15 @@ namespace MushOut.Core
         /// </summary>
         public void TogglePause()
         {
-            if (CurrentState == GameState.Playing)
+            if (CurrentState == GameState.Playing || CurrentState == GameState.Escaping)
             {
+                _stateBeforePause = CurrentState;
                 ChangeState(GameState.Paused);
                 Time.timeScale = 0f;
             }
             else if (CurrentState == GameState.Paused)
             {
-                ChangeState(GameState.Playing);
+                ChangeState(_stateBeforePause);
                 Time.timeScale = 1f;
             }
         }

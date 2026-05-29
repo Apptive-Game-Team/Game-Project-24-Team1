@@ -50,8 +50,8 @@ namespace MushOut.Core
 
             Texture2D backgroundTexture = ResolveGameOverBackground();
             CreateBackground(_gameOverCanvasObject.transform, backgroundTexture);
-            CreateButton("\uD648\uC73C\uB85C \uB3CC\uC544\uAC00\uAE30", new Vector2(-240f, 120f), ReturnHome);
-            CreateButton("\uB2E4\uC2DC\uC2DC\uB3C4", new Vector2(240f, 120f), Retry);
+            CreateButton("\uD648\uC73C\uB85C \uB3CC\uC544\uAC00\uAE30", new Vector2(0f, -15f), ReturnHome);
+            CreateButton("\uB2E4\uC2DC\uC2DC\uB3C4", new Vector2(0f, -105f), Retry);
 
             if (backgroundTexture == null)
             {
@@ -112,9 +112,9 @@ namespace MushOut.Core
             button.colors = CreateButtonColors();
 
             RectTransform buttonRect = buttonObject.GetComponent<RectTransform>();
-            buttonRect.anchorMin = new Vector2(0.5f, 0f);
-            buttonRect.anchorMax = new Vector2(0.5f, 0f);
-            buttonRect.sizeDelta = new Vector2(380f, 96f);
+            buttonRect.anchorMin = new Vector2(0.5f, 0.5f);
+            buttonRect.anchorMax = new Vector2(0.5f, 0.5f);
+            buttonRect.sizeDelta = new Vector2(360f, 76f);
             buttonRect.anchoredPosition = anchoredPosition;
 
             CreateButtonText(buttonObject.transform, label);
