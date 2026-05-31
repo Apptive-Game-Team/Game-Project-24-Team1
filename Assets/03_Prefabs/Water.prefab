@@ -128,6 +128,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MushOut.Environment.Buoyancy
   buoyancyPower: 11
   submergeRatio: 0.65
+  grabPenalties:
+  - targetTag: Box
+    targetLayer: 
+    overrideBuoyancy: 0.5
+  - targetTag: Enemy
+    targetLayer: Enemy
+    overrideBuoyancy: 0.8
+  - targetTag: Enemy
+    targetLayer: EnemyHeavy
+    overrideBuoyancy: 0.4
 --- !u!114 &6100301076030318502
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -21,9 +21,7 @@ namespace MushOut.Combat
         [Tooltip("폭발이 미치는 물리적 반경(벽 파괴 등)입니다.")]
         [SerializeField] private float explosionRadius = 3.0f;
 
-        [Header("Collision Settings")]
-        [Tooltip("폭탄이 부딪혔을 때 박혀서 고정될 대상 레이어입니다.")]
-        [SerializeField] private LayerMask stickLayer;
+        private LayerMask stickLayer;
 
         private Rigidbody _rb;
         private bool _isStuck = false;
@@ -38,9 +36,11 @@ namespace MushOut.Combat
         /// PlayerBombAbility에서 발사할 때 호출됩니다.
         /// </summary>
         /// <param name="initialVelocity">초기 발사 속도</param>
-        public void Initialize(Vector3 initialVelocity)
+        /// <param name="targetStickLayer">폭탄이 박힐 레이어</param>
+        public void Initialize(Vector3 initialVelocity, LayerMask targetStickLayer)
         {
             _rb.linearVelocity = initialVelocity;
+            stickLayer = targetStickLayer;
 
             // 발사된 순간부터 타이머 시작
             StartCoroutine(ExplodeRoutine());

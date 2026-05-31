@@ -160,22 +160,8 @@ namespace MushOut.Environment
 
                 if (isPlayer && playerMotor != null)
                 {
-                    float currentVy = playerMotor.VerticalVelocity;
-                    
-                    if (currentVy < targetRiseVelocity)
-                    {
-                        // 1. 낙하 중(-속도)이면: 서서히 0으로 감속 (뚝 멈추는 현상 방지)
-                        // 2. 0이 되면: 서서히 targetRiseVelocity까지 가속 (자연스럽게 떠오름)
-                        playerMotor.VerticalVelocity = Mathf.MoveTowards(currentVy, targetRiseVelocity, upwardAcceleration * Time.fixedDeltaTime);
-                    }
-                    else
-                    {
-                        // 상승 속도가 너무 빠르면 목표 속도로 제한하여 수면 밖으로 튀어나가지 않게 함
-                        playerMotor.VerticalVelocity = targetRiseVelocity;
-                    }
-
-                    // PlayerMotor의 Update에서 적용되는 중력을 상쇄
-                    player.AddBuoyancy(15.0f);
+                    // PlayerMotor 쪽에 목표 높이와 부력 값을 전달하여 Update()에서 부드럽게 처리하도록 위임
+                    playerMotor.SetBuoyancyTarget(targetBottomY, currentBuoyancyPower);
                 }
                 else if (rb != null)
                 {
@@ -200,9 +186,8 @@ namespace MushOut.Environment
             {
                 if (isPlayer && playerMotor != null)
                 {
-                    // 정확히 그 위치에 고정시키기 위해 수직 속도를 0으로 만듦
-                    playerMotor.VerticalVelocity = 0f;
-                    player.AddBuoyancy(15.0f);
+                    // 수면에 도달했을 때도 목표값을 전달하여 PlayerMotor 내부에서 수직 속도를 부드럽게 0으로 고정하도록 함
+                    playerMotor.SetBuoyancyTarget(targetBottomY, currentBuoyancyPower);
                 }
                 else if (rb != null)
                 {
