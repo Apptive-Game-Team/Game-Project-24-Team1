@@ -73,8 +73,14 @@ namespace MushOut.Player
 
             _climbOverStartPos = transform.position;
             Vector3 forwardDir = new Vector3(-_ladderForward.x, 0f, -_ladderForward.z).normalized;
-            _climbOverTargetPos = _ladderTopPoint + (forwardDir * _climbOverStepDist) + (Vector3.up * 0.05f);
-            _climbOverTargetPos.z = _climbOverStartPos.z;
+            Vector3 rightDir = Vector3.Cross(Vector3.up, forwardDir).normalized;
+
+            // 사다리 중심점(topPoint)을 기준으로 플레이어가 가로(좌우)로 얼마나 떨어져 있는지 계산
+            Vector3 toPlayer = _climbOverStartPos - _ladderTopPoint;
+            float lateralOffset = Vector3.Dot(toPlayer, rightDir);
+
+            // 목표 지점 = 사다리 꼭대기 중심 + 전진(forward) + 좌우 오프셋 유지(right) + 위로 살짝(up)
+            _climbOverTargetPos = _ladderTopPoint + (forwardDir * _climbOverStepDist) + (Vector3.up * 0.05f) + (rightDir * lateralOffset);
 
             // 애니메이터 직접 제어 코드는 Controller.ChangeState로 이동됨
             _playerController.ChangeState(PlayerState.ClimbOver);

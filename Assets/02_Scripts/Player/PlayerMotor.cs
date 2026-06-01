@@ -58,6 +58,10 @@ namespace MushOut.Player
         /// <summary>물 속 이동 속도를 외부에서 읽을 수 있는 프로퍼티입니다.</summary>
         public float WaterMoveSpeed => _waterMoveSpeed;
 
+        private float _buoyancyTargetY = float.MinValue;
+        private float _buoyancyPower;
+        private float _buoyancyTime;
+
         private CharacterController _controller;
         private float _currentSpeed;
 
@@ -93,7 +97,38 @@ namespace MushOut.Player
                 VerticalVelocity = -2f;
             }
 
-            if (VerticalVelocity > -53f)
+            bool applyGravity = true;
+
+            // 물 속이고 최근(0.1초 내)에 부력 정보가 업데이트 되었다면, PlayerMotor에서 부드럽게 부력 적용 (덜덜 떨림 방지)
+            if (isInWater && Time.time - _buoyancyTime < 0.1f)
+            {
+                float bottomY = transform.position.y;
+                
+                if (bottomY < _buoyancyTargetY)
+                {
+                    float diff = _buoyancyTargetY - bottomY;
+                    float targetRiseVelocity = Mathf.Min(diff / deltaTime, _buoyancyPower);
+                    float upwardAcceleration = _buoyancyPower * 5f;
+
+                    if (VerticalVelocity < targetRiseVelocity)
+                    {
+                        VerticalVelocity = Mathf.MoveTowards(VerticalVelocity, targetRiseVelocity, upwardAcceleration * deltaTime);
+                    }
+                    else
+                    {
+                        VerticalVelocity = targetRiseVelocity;
+                    }
+                    
+                    applyGravity = false; // 부력으로 상승 중일 때는 중력을 무시
+                }
+                else if (bottomY <= _buoyancyTargetY + 0.05f)
+                {
+                    VerticalVelocity = 0f;
+                    applyGravity = false; // 수면 고정 시 중력 무시
+                }
+            }
+
+            if (applyGravity && VerticalVelocity > -53f)
             {
                 VerticalVelocity += _gravity * deltaTime;
             }
@@ -148,8 +183,8 @@ namespace MushOut.Player
             }
 
             float targetSpeed = _moveSpeed;
-            if (grabbedObject != null) targetSpeed = _pushPullSpeed;
             if (isInWater) targetSpeed = _waterMoveSpeed;
+            if (grabbedObject != null) targetSpeed = Mathf.Min(targetSpeed, _pushPullSpeed);
 
             if (grabbedObject != null && grabbedObject.movementType == MushOut.Interactables.PushPullMovementType.ForwardBackwardOnly)
             {
@@ -316,6 +351,17 @@ namespace MushOut.Player
         public void AddExternalForce(Vector3 force)
         {
             ExternalVelocity += force * Time.fixedDeltaTime;
+        }
+
+        /// <summary>
+        /// Buoyancy (부력) 목표 지점을 설정합니다.
+        /// Buoyancy.cs 등에서 호출되며, 플레이어가 물 속에서 수면으로 떠오르도록 유도합니다.
+        /// </summary>
+        public void SetBuoyancyTarget(float targetY, float power)
+        {
+            _buoyancyTargetY = targetY;
+            _buoyancyPower = power;
+            _buoyancyTime = Time.time;
         }
 
         /// <summary>

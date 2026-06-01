@@ -15,8 +15,15 @@ namespace MushOut.Interaction
         [Tooltip("목표 각도 도달 후 대기할 시간 (초). 기본값은 2분(120초)입니다.")]
         [SerializeField] private float waitTime = 120f;
 
+        [Tooltip("회전을 시작할 때 서서히 가속할지 여부")]
+        [SerializeField] private bool useAcceleration = false;
+
+        [Tooltip("최대 속도에 도달하기까지 걸리는 시간 (초)")]
+        [SerializeField] private float accelerationTime = 2f;
+
         // 내부적으로 회전해야 할 목표 각도
         private Quaternion targetRotation;
+        private float currentSpeed = 0f;
 
         private void Start()
         {
@@ -29,7 +36,20 @@ namespace MushOut.Interaction
             // 현재 회전과 목표 회전이 다르면 부드럽게 회전
             if (Quaternion.Angle(transform.localRotation, targetRotation) > 0.01f)
             {
-                transform.localRotation = Quaternion.RotateTowards(transform.localRotation, targetRotation, rotateSpeed * Time.deltaTime);
+                if (useAcceleration && accelerationTime > 0f)
+                {
+                    currentSpeed = Mathf.MoveTowards(currentSpeed, rotateSpeed, (rotateSpeed / accelerationTime) * Time.deltaTime);
+                }
+                else
+                {
+                    currentSpeed = rotateSpeed;
+                }
+
+                transform.localRotation = Quaternion.RotateTowards(transform.localRotation, targetRotation, currentSpeed * Time.deltaTime);
+            }
+            else
+            {
+                currentSpeed = 0f;
             }
         }
 

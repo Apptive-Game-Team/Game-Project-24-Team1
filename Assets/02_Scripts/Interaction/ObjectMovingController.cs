@@ -15,8 +15,15 @@ namespace MushOut.Interaction
         [Tooltip("목표 위치 도달 후 대기할 시간 (초). 기본값은 2분(120초)입니다.")]
         [SerializeField] private float waitTime = 120f;
 
+        [Tooltip("이동을 시작할 때 서서히 가속할지 여부")]
+        [SerializeField] private bool useAcceleration = false;
+
+        [Tooltip("최대 속도에 도달하기까지 걸리는 시간 (초)")]
+        [SerializeField] private float accelerationTime = 2f;
+
         // 내부적으로 이동해야 할 목표 좌표
         private Vector3 targetPosition;
+        private float currentSpeed = 0f;
 
         private void Start()
         {
@@ -29,7 +36,20 @@ namespace MushOut.Interaction
             // 현재 좌표와 목표 좌표가 다르면 부드럽게 이동
             if (Vector3.Distance(transform.position, targetPosition) > 0.001f)
             {
-                transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
+                if (useAcceleration && accelerationTime > 0f)
+                {
+                    currentSpeed = Mathf.MoveTowards(currentSpeed, moveSpeed, (moveSpeed / accelerationTime) * Time.deltaTime);
+                }
+                else
+                {
+                    currentSpeed = moveSpeed;
+                }
+
+                transform.position = Vector3.MoveTowards(transform.position, targetPosition, currentSpeed * Time.deltaTime);
+            }
+            else
+            {
+                currentSpeed = 0f;
             }
         }
 

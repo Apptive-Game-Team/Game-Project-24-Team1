@@ -27,6 +27,8 @@ namespace MushOut.Player
         [SerializeField] private GameObject bombPrefab;
         [Tooltip("폭탄이 발사될 위치 기준점입니다.")]
         [SerializeField] private Transform throwPoint;
+        [Tooltip("폭탄이 부딪혔을 때 박혀서 고정될 대상 레이어입니다.")]
+        [SerializeField] private LayerMask stickLayer;
 
         [Header("Throw Settings")]
         [Tooltip("기본 투척 거리입니다.")]
@@ -266,7 +268,7 @@ namespace MushOut.Player
             MushOut.Combat.BombProjectile bombProj = bombObj.GetComponent<MushOut.Combat.BombProjectile>();
             if (bombProj != null)
             {
-                bombProj.Initialize(velocity);
+                bombProj.Initialize(velocity, stickLayer);
             }
             else
             {
