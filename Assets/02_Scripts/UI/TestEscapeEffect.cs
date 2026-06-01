@@ -7,6 +7,18 @@ using UnityEngine.InputSystem;
 
 public class TestEscapeEffect : MonoBehaviour
 {
+    private const string RuntimeObjectName = "[Runtime] TestEscapeEffect";
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    private static void CreateRuntimeListener()
+    {
+        if (FindFirstObjectByType<TestEscapeEffect>() != null) return;
+
+        GameObject listener = new GameObject(RuntimeObjectName);
+        DontDestroyOnLoad(listener);
+        listener.AddComponent<TestEscapeEffect>();
+    }
+
     private void Update()
     {
         if (WasPressed(KeyCode.T))
