@@ -99,7 +99,7 @@ namespace MushOut.Player
         {
             int layer = otherObject.layer;
             return otherObject.CompareTag("Enemy")
-                && (layer == LayerMask.NameToLayer("Enemy") || layer == LayerMask.NameToLayer("EnemyHeavy"));
+                && (layer == LayerMask.NameToLayer("Enemy") || layer == LayerMask.NameToLayer("Enemy(Heavy)"));
         }
     }
 }
