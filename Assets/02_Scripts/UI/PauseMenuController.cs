@@ -8,51 +8,54 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
 #endif
 
-// 게임 중 ESC를 눌렀을 때 나오는 일시정지 메뉴를 관리하는 스크립트
-// 계속하기, 설정, 게임 종료 버튼의 기능도 여기서 연결한다.
 public class PauseMenuController : MonoBehaviour
 {
-    [SerializeField] private string startSceneName = "GameStartScene"; // 메인 메뉴로 돌아갈 때 이동할 씬 이름
+    [SerializeField] private string startSceneName = "GameStartScene";
 
-    private GameObject pausePanel; // ESC를 누르면 켜지고 꺼지는 일시정지 전체 패널
-    private GameObject settingsPanel; // 일시정지 메뉴 안에 있는 설정창 패널
-    private bool isPaused; // 현재 게임이 일시정지 상태인지 저장하는 변수
+    private GameObject pausePanel;
+    private GameObject settingsPanel;
+    private Button resumeButton;
+    private Button settingsButton;
+    private Button closeSettingsButton;
+    private Button mainMenuButton;
+    private Button quitButton;
+    private bool isPaused;
 
-    private void Awake() // 씬이 시작될 때 한 번 실행되고, 필요한 UI와 버튼을 자동으로 연결한다.
+    private void Awake()
     {
-        // PauseMenu prefab 안에서 필요한 패널들을 경로로 찾아 저장한다.
+        EnsureCanvasPresentation();
+
         pausePanel = FindChild("Canvas/PausePanel");
         settingsPanel = FindChild("Canvas/PausePanel/SettingsPanel");
 
-        // 버튼을 누르면 실행될 함수를 각각 연결한다.
-        BindButton("Canvas/PausePanel/MenuBox/ResumeButton", Resume);
-        BindButton("Canvas/PausePanel/MenuBox/SettingsButton", OpenSettings);
-        BindButton("Canvas/PausePanel/SettingsPanel/CloseSettingsButton", CloseSettings);
-        BindButton("Canvas/PausePanel/MenuBox/MainMenuButton", GoToMainMenu);
-        BindButton("Canvas/PausePanel/MenuBox/QuitButton", QuitGame);
+        resumeButton = BindButton("Canvas/PausePanel/MenuBox/ResumeButton", Resume);
+        settingsButton = BindButton("Canvas/PausePanel/MenuBox/SettingsButton", OpenSettings);
+        closeSettingsButton = BindButton("Canvas/PausePanel/SettingsPanel/CloseSettingsButton", CloseSettings);
+        mainMenuButton = BindButton("Canvas/PausePanel/MenuBox/MainMenuButton", GoToMainMenu);
+        quitButton = BindButton("Canvas/PausePanel/MenuBox/QuitButton", QuitGame);
 
-        // UI 버튼 클릭을 받기 위해 EventSystem이 없으면 자동으로 만든다.
         EnsureEventSystem();
-
-        // 게임 시작 직후에는 일시정지 메뉴가 보이면 안 되므로 꺼둔다.
         SetPaused(false);
     }
 
-    private void Update() // 매 프레임 실행되면서 ESC 입력을 확인한다.
+    private void Update()
     {
         if (IsEscapePressed())
         {
-            // ESC를 누르면 현재 상태의 반대로 바꾼다. 꺼져 있으면 켜고, 켜져 있으면 끈다.
             SetPaused(!isPaused);
+        }
+        else if (isPaused)
+        {
+            HandlePausePointerClick();
         }
     }
 
-    public void Resume() // 계속하기 버튼을 눌렀을 때 게임을 다시 진행한다.
+    public void Resume()
     {
         SetPaused(false);
     }
 
-    public void OpenSettings() // 설정 버튼을 눌렀을 때 설정창을 켠다.
+    public void OpenSettings()
     {
         if (settingsPanel != null)
         {
@@ -60,7 +63,7 @@ public class PauseMenuController : MonoBehaviour
         }
     }
 
-    public void CloseSettings() // 설정창의 돌아가기 버튼을 눌렀을 때 설정창을 끈다.
+    public void CloseSettings()
     {
         if (settingsPanel != null)
         {
@@ -68,25 +71,22 @@ public class PauseMenuController : MonoBehaviour
         }
     }
 
-    public void GoToMainMenu() // 메인 메뉴로 돌아가는 버튼이 있을 때 사용하는 함수
+    public void GoToMainMenu()
     {
-        // 씬을 바꾸기 전에 게임 시간을 정상 속도로 돌려놓는다.
         Time.timeScale = 1f;
         SceneManager.LoadScene(startSceneName);
     }
 
-    public void QuitGame() // 게임 종료 버튼을 눌렀을 때 실행된다.
+    public void QuitGame()
     {
 #if UNITY_EDITOR
-        // Unity 에디터에서는 Play 모드를 멈춘다.
         UnityEditor.EditorApplication.isPlaying = false;
 #else
-        // 실제 빌드된 게임에서는 프로그램을 종료한다.
         Application.Quit();
 #endif
     }
 
-    private void SetPaused(bool paused) // 실제로 게임을 멈추거나 다시 시작하는 핵심 함수
+    private void SetPaused(bool paused)
     {
         isPaused = paused;
 
@@ -97,70 +97,217 @@ public class PauseMenuController : MonoBehaviour
 
         if (!paused)
         {
-            // 일시정지를 풀 때 설정창이 열려 있었다면 같이 닫는다.
             CloseSettings();
         }
 
-        // paused가 true면 게임 시간을 0으로 만들어 멈추고, false면 다시 1로 돌린다.
         Time.timeScale = paused ? 0f : 1f;
-
-        // 일시정지 중에는 마우스 커서를 보이게 해서 버튼을 누를 수 있게 한다.
         Cursor.visible = paused;
         Cursor.lockState = paused ? CursorLockMode.None : CursorLockMode.Locked;
+
+        if (paused)
+        {
+            EnsureEventSystem();
+            SelectButton("Canvas/PausePanel/MenuBox/ResumeButton");
+        }
+        else if (EventSystem.current != null)
+        {
+            EventSystem.current.SetSelectedGameObject(null);
+        }
     }
 
-    private void BindButton(string path, UnityEngine.Events.UnityAction action) // 버튼 경로와 실행할 함수를 연결하는 공통 함수
+    private Button BindButton(string path, UnityEngine.Events.UnityAction action)
     {
         GameObject buttonObject = FindChild(path);
         if (buttonObject == null)
         {
-            return;
+            return null;
         }
 
         Button button = buttonObject.GetComponent<Button>();
         if (button == null)
         {
-            return;
+            return null;
         }
 
-        // 같은 함수가 중복 등록되지 않도록 먼저 제거한 뒤 다시 등록한다.
         button.onClick.RemoveListener(action);
         button.onClick.AddListener(action);
+        button.interactable = true;
+
+        if (button.targetGraphic != null)
+        {
+            button.targetGraphic.raycastTarget = true;
+        }
+
+        return button;
     }
 
-    private GameObject FindChild(string path) // PauseMenu 오브젝트 안에서 자식 오브젝트를 경로로 찾는다.
+    private GameObject FindChild(string path)
     {
         Transform found = transform.Find(path);
         return found != null ? found.gameObject : null;
     }
 
-    private bool IsEscapePressed() // 현재 프로젝트의 입력 시스템에 맞춰 ESC가 눌렸는지 확인한다.
+    private bool IsEscapePressed()
     {
 #if ENABLE_INPUT_SYSTEM
-        // 새 Input System을 사용하는 경우
         return Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame;
 #else
-        // 기존 Input Manager를 사용하는 경우
         return Input.GetKeyDown(KeyCode.Escape);
 #endif
     }
 
-    private void EnsureEventSystem() // UI 버튼 클릭을 처리하는 EventSystem이 없으면 자동으로 생성한다.
+    private void HandlePausePointerClick()
     {
-        if (EventSystem.current != null)
+        if (!WasPrimaryPointerPressed(out Vector2 screenPosition))
         {
             return;
         }
 
-        GameObject eventSystemObject = new GameObject("EventSystem");
-        eventSystemObject.AddComponent<EventSystem>();
+        if (TryClickButton(closeSettingsButton, screenPosition, CloseSettings))
+            return;
+
+        if (TryClickButton(resumeButton, screenPosition, Resume))
+            return;
+
+        if (TryClickButton(settingsButton, screenPosition, OpenSettings))
+            return;
+
+        if (TryClickButton(mainMenuButton, screenPosition, GoToMainMenu))
+            return;
+
+        TryClickButton(quitButton, screenPosition, QuitGame);
+    }
+
+    private bool WasPrimaryPointerPressed(out Vector2 screenPosition)
+    {
+#if ENABLE_INPUT_SYSTEM
+        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            screenPosition = Mouse.current.position.ReadValue();
+            return true;
+        }
+
+        if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.wasPressedThisFrame)
+        {
+            screenPosition = Touchscreen.current.primaryTouch.position.ReadValue();
+            return true;
+        }
+
+        screenPosition = Vector2.zero;
+        return false;
+#else
+        screenPosition = Input.mousePosition;
+        return Input.GetMouseButtonDown(0);
+#endif
+    }
+
+    private bool TryClickButton(Button button, Vector2 screenPosition, UnityEngine.Events.UnityAction action)
+    {
+        if (button == null || !button.gameObject.activeInHierarchy || !button.interactable)
+        {
+            return false;
+        }
+
+        RectTransform rectTransform = button.transform as RectTransform;
+        if (rectTransform == null || !RectTransformUtility.RectangleContainsScreenPoint(rectTransform, screenPosition, null))
+        {
+            return false;
+        }
+
+        action.Invoke();
+        return true;
+    }
+
+    private void EnsureCanvasPresentation()
+    {
+        Canvas canvas = GetComponentInChildren<Canvas>(true);
+        if (canvas == null)
+        {
+            return;
+        }
+
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = Mathf.Max(canvas.sortingOrder, 1000);
+        canvas.enabled = true;
+
+        RectTransform canvasTransform = canvas.transform as RectTransform;
+        if (canvasTransform != null)
+        {
+            canvasTransform.localScale = Vector3.one;
+            canvasTransform.localPosition = Vector3.zero;
+            canvasTransform.localRotation = Quaternion.identity;
+            canvasTransform.anchorMin = Vector2.zero;
+            canvasTransform.anchorMax = Vector2.zero;
+            canvasTransform.pivot = Vector2.zero;
+            canvasTransform.anchoredPosition = Vector2.zero;
+            canvasTransform.sizeDelta = Vector2.zero;
+        }
+
+        CanvasScaler scaler = canvas.GetComponent<CanvasScaler>();
+        if (scaler == null)
+        {
+            scaler = canvas.gameObject.AddComponent<CanvasScaler>();
+        }
+
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920f, 1080f);
+        scaler.matchWidthOrHeight = 0.5f;
+
+        if (canvas.GetComponent<GraphicRaycaster>() == null)
+        {
+            canvas.gameObject.AddComponent<GraphicRaycaster>();
+        }
+    }
+
+    private void SelectButton(string path)
+    {
+        if (EventSystem.current == null)
+        {
+            return;
+        }
+
+        GameObject buttonObject = FindChild(path);
+        EventSystem.current.SetSelectedGameObject(buttonObject);
+    }
+
+    private void EnsureEventSystem()
+    {
+        EventSystem eventSystem = EventSystem.current != null ? EventSystem.current : FindFirstObjectByType<EventSystem>();
+        if (eventSystem == null)
+        {
+            GameObject eventSystemObject = new GameObject("EventSystem");
+            eventSystem = eventSystemObject.AddComponent<EventSystem>();
+        }
+
+        eventSystem.gameObject.SetActive(true);
 
 #if ENABLE_INPUT_SYSTEM
-        // 새 Input System용 UI 입력 모듈
-        eventSystemObject.AddComponent<InputSystemUIInputModule>();
+        InputSystemUIInputModule inputSystemModule = eventSystem.GetComponent<InputSystemUIInputModule>();
+        if (inputSystemModule == null)
+        {
+            inputSystemModule = eventSystem.gameObject.AddComponent<InputSystemUIInputModule>();
+        }
+
+        if (inputSystemModule.actionsAsset == null)
+        {
+            inputSystemModule.AssignDefaultActions();
+        }
+
+        inputSystemModule.enabled = true;
+
+        StandaloneInputModule standaloneModule = eventSystem.GetComponent<StandaloneInputModule>();
+        if (standaloneModule != null)
+        {
+            standaloneModule.enabled = false;
+        }
 #else
-        // 기존 Input Manager용 UI 입력 모듈
-        eventSystemObject.AddComponent<StandaloneInputModule>();
+        StandaloneInputModule standaloneModule = eventSystem.GetComponent<StandaloneInputModule>();
+        if (standaloneModule == null)
+        {
+            standaloneModule = eventSystem.gameObject.AddComponent<StandaloneInputModule>();
+        }
+
+        standaloneModule.enabled = true;
 #endif
     }
 }

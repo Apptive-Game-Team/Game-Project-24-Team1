@@ -38,6 +38,12 @@ namespace MushOut.UI
         [SerializeField] private Sprite provocationIcon;
         [SerializeField] private Sprite bombSporeIcon;
 
+        [Header("Count Display")]
+        [SerializeField] private Font countFont;
+        [SerializeField] private int countFontSize = 54;
+        [SerializeField] private Color countTextColor = Color.white;
+        [SerializeField] private Color countOutlineColor = new Color(0f, 0f, 0f, 0.72f);
+
         [Header("Slots")]
         [SerializeField] private AbilitySlot dashSlot = new AbilitySlot { state = AbilityState.Nothing };
         [SerializeField] private AbilitySlot paralyzeSlot = new AbilitySlot { state = AbilityState.Paralyze };
@@ -79,10 +85,13 @@ namespace MushOut.UI
         private static Sprite _softDiscSprite;
         private static Sprite _beamSprite;
         private readonly AbilitySlot[] _visibleSlots = new AbilitySlot[4];
+        private readonly AbilitySlot[] _layoutSlots = new AbilitySlot[4];
         private AbilitySlot[] _slots;
         private Transform _slotParent;
         private AbilityState _lastState;
         private int _lastSwitchDirection = 1;
+        private int _carouselDirection;
+        private bool _hasLayoutSlots;
         private bool _initialized;
 
         private void Awake()
@@ -111,6 +120,7 @@ namespace MushOut.UI
                 _lastState = abilityController != null ? abilityController.CurrentState : AbilityState.Nothing;
             }
 
+            EnsureCanvasPresentation();
             EnsureSlotParent();
 
             if (autoBuildSlots)
@@ -124,6 +134,46 @@ namespace MushOut.UI
             }
 
             _initialized = true;
+        }
+
+        private void EnsureCanvasPresentation()
+        {
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas == null) return;
+
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = Mathf.Max(canvas.sortingOrder, 50);
+
+            RectTransform canvasRect = canvas.transform as RectTransform;
+            if (canvasRect != null)
+            {
+                canvasRect.localScale = Vector3.one;
+                canvasRect.localPosition = Vector3.zero;
+                canvasRect.localRotation = Quaternion.identity;
+            }
+
+            CanvasScaler scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler == null)
+            {
+                scaler = canvas.gameObject.AddComponent<CanvasScaler>();
+            }
+
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920f, 1080f);
+            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+            scaler.matchWidthOrHeight = 0.5f;
+
+            RectTransform rootRect = transform as RectTransform;
+            if (rootRect == null) return;
+
+            rootRect.localScale = Vector3.one;
+            rootRect.localPosition = new Vector3(rootRect.localPosition.x, rootRect.localPosition.y, 0f);
+            rootRect.localRotation = Quaternion.identity;
+            rootRect.anchorMin = new Vector2(0f, 0f);
+            rootRect.anchorMax = new Vector2(0f, 0f);
+            rootRect.pivot = new Vector2(0.5f, 0.5f);
+            rootRect.anchoredPosition = canvasAnchoredPosition;
+            rootRect.sizeDelta = carouselRootSize;
         }
 
         private void Start()
@@ -147,9 +197,9 @@ namespace MushOut.UI
 
             if (_lastState != abilityController.CurrentState)
             {
-                _lastSwitchDirection = GetSwitchDirection(_lastState, abilityController.CurrentState);
+                _lastSwitchDirection = GetVisualSwitchDirection(_lastState, abilityController.CurrentState);
+                _carouselDirection = _lastSwitchDirection;
                 _lastState = abilityController.CurrentState;
-                SnapSelectedSlotForward();
             }
 
             ApplySingleDisplayFallback();
@@ -185,13 +235,13 @@ namespace MushOut.UI
             if (paralyzeSlot.slotRoot != null && madSlot.slotRoot != null && bombSlot.slotRoot != null) return;
 
             AbilityState state = abilityController.CurrentState;
-            bool isEmpty = abilityController.GetResourceCount(state) <= 0;
+            bool isDepleted = IsResourceVisuallyDepleted(state);
 
             if (dashSlot.iconImage != null)
             {
                 dashSlot.iconImage.sprite = GetIconForState(state);
                 dashSlot.iconImage.overrideSprite = GetIconForState(state);
-                dashSlot.iconImage.color = isEmpty ? emptyTint : Color.white;
+                dashSlot.iconImage.color = isDepleted ? emptyTint : Color.white;
             }
 
             if (dashSlot.keyText != null)
@@ -206,7 +256,13 @@ namespace MushOut.UI
 
             if (dashSlot.countText != null)
             {
-                dashSlot.countText.text = $"x{abilityController.GetResourceCount(state)}";
+                bool showCount = ShouldShowResourceCount(state);
+                dashSlot.countText.gameObject.SetActive(showCount);
+                dashSlot.countText.text = showCount ? abilityController.GetResourceCount(state).ToString() : string.Empty;
+                dashSlot.countText.font = countFont != null ? countFont : dashSlot.countText.font;
+                dashSlot.countText.fontSize = countFontSize;
+                dashSlot.countText.color = countTextColor;
+                SyncCountShadow(dashSlot.countText);
             }
 
             if (dashSlot.selectedIndicator != null)
@@ -261,13 +317,13 @@ namespace MushOut.UI
         private void AssignLabels()
         {
             dashSlot.displayName = "DASH";
-            dashSlot.keyLabel = "1";
+            dashSlot.keyLabel = "";
             paralyzeSlot.displayName = "SLEEP SPORE";
-            paralyzeSlot.keyLabel = "2";
+            paralyzeSlot.keyLabel = "";
             madSlot.displayName = "TAUNT SPORE";
-            madSlot.keyLabel = "3";
+            madSlot.keyLabel = "";
             bombSlot.displayName = "BOMB SPORE";
-            bombSlot.keyLabel = "4";
+            bombSlot.keyLabel = "";
         }
 
         private void EnsureSlotParent()
@@ -422,6 +478,26 @@ namespace MushOut.UI
             iconRect.sizeDelta = new Vector2(210f, 168f);
             // 실제 무기/능력 아이콘 이미지.
             slot.iconImage = iconImage;
+
+            GameObject countObject = CreateUIObject("ResourceCount", plateObject.transform);
+            Text countText = countObject.AddComponent<Text>();
+            countText.font = countFont != null ? countFont : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            countText.fontSize = countFontSize;
+            countText.fontStyle = FontStyle.Bold;
+            countText.alignment = TextAnchor.LowerRight;
+            countText.horizontalOverflow = HorizontalWrapMode.Overflow;
+            countText.verticalOverflow = VerticalWrapMode.Overflow;
+            countText.color = countTextColor;
+            countText.raycastTarget = false;
+
+            RectTransform countRect = countText.rectTransform;
+            countRect.anchorMin = new Vector2(1f, 0f);
+            countRect.anchorMax = new Vector2(1f, 0f);
+            countRect.pivot = new Vector2(1f, 0f);
+            countRect.anchoredPosition = new Vector2(-12f, 6f);
+            countRect.sizeDelta = new Vector2(82f, 68f);
+            CreateCountShadow(countText);
+            slot.countText = countText;
         }
 
         private void RefreshSlot(AbilitySlot slot)
@@ -434,18 +510,19 @@ namespace MushOut.UI
             if (!unlocked) return;
 
             int count = abilityController.GetResourceCount(slot.state);
-            bool isEmpty = count <= 0;
+            bool isEmpty = IsResourceEmpty(slot.state);
+            bool isDepleted = IsResourceVisuallyDepleted(slot.state);
 
             if (slot.iconImage != null)
             {
                 slot.iconImage.sprite = slot.iconSprite;
-                slot.iconImage.color = isEmpty ? emptyTint : Color.white;
+                slot.iconImage.color = isDepleted ? emptyTint : Color.white;
             }
 
             if (slot.canvasGroup != null)
             {
                 // 대시 쿨타임이거나 자원이 없으면 카드 전체를 반투명하게 해서 지금 못 쓴다는 걸 보여줌.
-                slot.canvasGroup.alpha = isEmpty ? emptyAlpha : usableAlpha;
+                slot.canvasGroup.alpha = isDepleted ? emptyAlpha : usableAlpha;
                 slot.canvasGroup.interactable = !isEmpty;
                 slot.canvasGroup.blocksRaycasts = !isEmpty;
             }
@@ -493,8 +570,75 @@ namespace MushOut.UI
 
             if (slot.countText != null)
             {
-                slot.countText.text = $"x{count}";
+                bool showCount = ShouldShowResourceCount(slot.state);
+                slot.countText.gameObject.SetActive(showCount);
+                slot.countText.text = showCount ? count.ToString() : string.Empty;
+                slot.countText.font = countFont != null ? countFont : slot.countText.font;
+                slot.countText.fontSize = countFontSize;
+                slot.countText.color = countTextColor;
+                SyncCountShadow(slot.countText);
             }
+        }
+
+        private void CreateCountShadow(Text sourceText)
+        {
+            GameObject shadowObject = CreateUIObject("ResourceCountShadow", sourceText.transform);
+            Text shadowText = shadowObject.AddComponent<Text>();
+            shadowText.font = sourceText.font;
+            shadowText.fontSize = sourceText.fontSize;
+            shadowText.fontStyle = sourceText.fontStyle;
+            shadowText.alignment = sourceText.alignment;
+            shadowText.horizontalOverflow = sourceText.horizontalOverflow;
+            shadowText.verticalOverflow = sourceText.verticalOverflow;
+            shadowText.color = countOutlineColor;
+            shadowText.raycastTarget = false;
+
+            RectTransform shadowRect = shadowText.rectTransform;
+            shadowRect.anchorMin = Vector2.zero;
+            shadowRect.anchorMax = Vector2.one;
+            shadowRect.offsetMin = new Vector2(2f, -2f);
+            shadowRect.offsetMax = new Vector2(2f, -2f);
+            shadowObject.transform.SetAsFirstSibling();
+        }
+
+        private void SyncCountShadow(Text sourceText)
+        {
+            if (sourceText == null) return;
+
+            Transform shadowTransform = sourceText.transform.Find("ResourceCountShadow");
+            if (shadowTransform == null) return;
+
+            Text shadowText = shadowTransform.GetComponent<Text>();
+            if (shadowText == null) return;
+
+            shadowText.text = sourceText.text;
+            shadowText.font = sourceText.font;
+            shadowText.fontSize = sourceText.fontSize;
+            shadowText.fontStyle = sourceText.fontStyle;
+            shadowText.alignment = sourceText.alignment;
+            shadowText.color = countOutlineColor;
+            shadowTransform.gameObject.SetActive(sourceText.gameObject.activeSelf);
+        }
+
+        private bool IsResourceEmpty(AbilityState state)
+        {
+            return abilityController.GetResourceCount(state) <= 0;
+        }
+
+        private bool IsResourceVisuallyDepleted(AbilityState state)
+        {
+            int count = abilityController.GetResourceCount(state);
+            if (state == AbilityState.Nothing)
+            {
+                return abilityController.IsDashCoolingDown;
+            }
+
+            return count <= 0;
+        }
+
+        private bool ShouldShowResourceCount(AbilityState state)
+        {
+            return state == AbilityState.Paralyze || state == AbilityState.Mad || state == AbilityState.Bomb;
         }
 
         private void ApplyCarouselLayout()
@@ -512,21 +656,21 @@ namespace MushOut.UI
 
             if (visibleCount == 0) return;
 
-            int selectedIndex = GetSelectedIndex(visibleCount);
+            SyncCarouselLayoutSlots(visibleCount);
 
             for (int i = 0; i < visibleCount; i++)
             {
-                AbilitySlot slot = _visibleSlots[i];
+                AbilitySlot slot = _layoutSlots[i];
                 if (slot.rectTransform == null) continue;
 
-                int layoutIndex = GetCarouselLayoutIndex(i, selectedIndex, visibleCount);
+                int layoutIndex = i;
                 int depth = GetLayoutDepth(layoutIndex);
-                bool isEmpty = abilityController.GetResourceCount(slot.state) <= 0;
+                bool isDepleted = IsResourceVisuallyDepleted(slot.state);
 
                 float scale = GetScale(layoutIndex);
                 float rotationY = GetRotationY(layoutIndex);
                 float positionAlpha = GetPositionAlpha(layoutIndex);
-                float resourceAlpha = isEmpty ? emptyAlpha : usableAlpha;
+                float resourceAlpha = isDepleted ? emptyAlpha : usableAlpha;
                 // 카드들이 가만히 붙어있지 않고 살짝 떠다니는 것처럼 보이게 사인파로 위아래 움직임을 줌.
                 float floatOffset = Mathf.Sin((Time.unscaledTime * floatSpeed) + (i * 0.7f)) * floatAmplitude;
                 // 선택된 중앙 무기는 아주 약하게 커졌다 작아지는 펄스를 줘서 현재 선택 느낌을 더 살림.
@@ -536,7 +680,7 @@ namespace MushOut.UI
                 Quaternion targetRotation = Quaternion.Euler(layoutIndex == 3 ? 0f : 4f, rotationY, GetZRotation(layoutIndex));
                 Vector3 targetScale = Vector3.one * (scale * pulse);
 
-                float lerpAmount = Time.unscaledDeltaTime * carouselLerpSpeed;
+                float lerpAmount = 1f - Mathf.Exp(-carouselLerpSpeed * Time.unscaledDeltaTime);
                 // 바로 순간이동하지 않고 보간해서 무기들이 원형으로 돌아가는 느낌을 만듦.
                 slot.rectTransform.anchoredPosition = Vector2.Lerp(slot.rectTransform.anchoredPosition, targetPosition, lerpAmount);
                 slot.rectTransform.localRotation = Quaternion.Lerp(slot.rectTransform.localRotation, targetRotation, lerpAmount);
@@ -558,6 +702,149 @@ namespace MushOut.UI
 
                 // 중앙 선택 카드가 무조건 제일 앞에 그려지게 해서 뒤 카드들이 중앙 카드를 덮지 못하게 함.
                 slot.rectTransform.SetSiblingIndex(layoutIndex == 0 ? 100 : Mathf.Max(0, 2 - depth));
+            }
+        }
+
+        private void SyncCarouselLayoutSlots(int visibleCount)
+        {
+            if (!_hasLayoutSlots || !LayoutMatchesVisibleSlots(visibleCount))
+            {
+                BuildInitialLayoutSlots(visibleCount);
+            }
+
+            RotateLayoutToSelected(visibleCount);
+        }
+
+        private bool LayoutMatchesVisibleSlots(int visibleCount)
+        {
+            for (int i = 0; i < visibleCount; i++)
+            {
+                if (_layoutSlots[i] == null || !ContainsVisibleSlot(_layoutSlots[i], visibleCount))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private bool ContainsVisibleSlot(AbilitySlot slot, int visibleCount)
+        {
+            for (int i = 0; i < visibleCount; i++)
+            {
+                if (_visibleSlots[i] == slot)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void BuildInitialLayoutSlots(int visibleCount)
+        {
+            int selectedIndex = GetSelectedIndex(visibleCount);
+            for (int i = 0; i < _layoutSlots.Length; i++)
+            {
+                _layoutSlots[i] = null;
+            }
+
+            for (int i = 0; i < visibleCount; i++)
+            {
+                AbilitySlot slot = _visibleSlots[i];
+                int layoutIndex = GetCarouselLayoutIndex(i, selectedIndex, visibleCount);
+                _layoutSlots[layoutIndex] = slot;
+            }
+
+            _hasLayoutSlots = true;
+        }
+
+        private void RotateLayoutToSelected(int visibleCount)
+        {
+            int selectedLayoutIndex = GetSelectedLayoutIndex(visibleCount);
+            if (selectedLayoutIndex <= 0) return;
+
+            if (visibleCount == 2 || selectedLayoutIndex == 1)
+            {
+                RotateLayoutRight(visibleCount);
+                return;
+            }
+
+            if (selectedLayoutIndex == 2)
+            {
+                RotateLayoutLeft(visibleCount);
+                return;
+            }
+
+            BuildInitialLayoutSlots(visibleCount);
+        }
+
+        private int GetSelectedLayoutIndex(int visibleCount)
+        {
+            for (int i = 0; i < visibleCount; i++)
+            {
+                if (_layoutSlots[i] != null && _layoutSlots[i].state == abilityController.CurrentState)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        private void RotateLayoutRight(int visibleCount)
+        {
+            if (visibleCount <= 1) return;
+
+            AbilitySlot center = _layoutSlots[0];
+            _layoutSlots[0] = _layoutSlots[1];
+
+            if (visibleCount == 2)
+            {
+                _layoutSlots[1] = center;
+                return;
+            }
+
+            AbilitySlot left = _layoutSlots[2];
+            AbilitySlot bottom = visibleCount > 3 ? _layoutSlots[3] : null;
+            _layoutSlots[2] = center;
+
+            if (visibleCount > 3)
+            {
+                _layoutSlots[1] = bottom;
+                _layoutSlots[3] = left;
+            }
+            else
+            {
+                _layoutSlots[1] = left;
+            }
+        }
+
+        private void RotateLayoutLeft(int visibleCount)
+        {
+            if (visibleCount <= 1) return;
+
+            AbilitySlot center = _layoutSlots[0];
+            _layoutSlots[0] = _layoutSlots[2];
+
+            if (visibleCount == 2)
+            {
+                _layoutSlots[1] = center;
+                return;
+            }
+
+            AbilitySlot right = _layoutSlots[1];
+            AbilitySlot bottom = visibleCount > 3 ? _layoutSlots[3] : null;
+            _layoutSlots[1] = center;
+
+            if (visibleCount > 3)
+            {
+                _layoutSlots[2] = bottom;
+                _layoutSlots[3] = right;
+            }
+            else
+            {
+                _layoutSlots[2] = right;
             }
         }
 
@@ -598,22 +885,6 @@ namespace MushOut.UI
             plateRect.sizeDelta = new Vector2(225f, 186f);
         }
 
-        private void SnapSelectedSlotForward()
-        {
-            if (_slots == null) return;
-
-            for (int i = 0; i < _slots.Length; i++)
-            {
-                AbilitySlot slot = _slots[i];
-                if (slot == null || slot.rectTransform == null || slot.state != _lastState) continue;
-
-                // 무기 바꿀 때 선택된 카드가 살짝 앞으로 튀어나오는 느낌을 주는 한 번짜리 보정.
-                slot.rectTransform.localScale = Vector3.one * (selectedScale * 0.86f);
-                slot.rectTransform.anchoredPosition += new Vector2(_lastSwitchDirection * 120f, 36f);
-                break;
-            }
-        }
-
         private int GetSwitchDirection(AbilityState previous, AbilityState next)
         {
             int previousIndex = GetStateIndex(previous);
@@ -626,6 +897,50 @@ namespace MushOut.UI
             }
 
             return delta >= 0 ? 1 : -1;
+        }
+
+        private int GetVisualSwitchDirection(AbilityState previous, AbilityState next)
+        {
+            int visibleCount = GetVisibleSlotCount();
+            if (visibleCount <= 1) return GetSwitchDirection(previous, next);
+
+            int previousIndex = GetVisibleStateIndex(previous, visibleCount);
+            int nextIndex = GetVisibleStateIndex(next, visibleCount);
+            if (previousIndex < 0 || nextIndex < 0) return GetSwitchDirection(previous, next);
+
+            int layoutIndex = GetCarouselLayoutIndex(nextIndex, previousIndex, visibleCount);
+            if (layoutIndex == 1) return 1;
+            if (layoutIndex == 2) return -1;
+
+            return GetSwitchDirection(previous, next);
+        }
+
+        private int GetVisibleSlotCount()
+        {
+            int visibleCount = 0;
+            for (int i = 0; i < _slots.Length; i++)
+            {
+                if (_slots[i] != null && _slots[i].slotRoot != null && _slots[i].slotRoot.activeSelf)
+                {
+                    _visibleSlots[visibleCount] = _slots[i];
+                    visibleCount++;
+                }
+            }
+
+            return visibleCount;
+        }
+
+        private int GetVisibleStateIndex(AbilityState state, int visibleCount)
+        {
+            for (int i = 0; i < visibleCount; i++)
+            {
+                if (_visibleSlots[i].state == state)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
         }
 
         private int GetStateIndex(AbilityState state)
@@ -681,7 +996,7 @@ namespace MushOut.UI
 
         private string GetKeyLabelForState(AbilityState state)
         {
-            return (GetStateIndex(state) + 1).ToString();
+            return "";
         }
 
         private int GetSelectedIndex(int visibleCount)
@@ -709,6 +1024,21 @@ namespace MushOut.UI
             }
 
             if (forwardOffset == 0) return 0;
+
+            if (_carouselDirection > 0)
+            {
+                if (forwardOffset == 1) return 1;
+                if (forwardOffset == 2) return 3;
+                return 2;
+            }
+
+            if (_carouselDirection < 0)
+            {
+                if (forwardOffset == 1) return 2;
+                if (forwardOffset == 2) return 1;
+                return 3;
+            }
+
             if (forwardOffset == 1) return 1;
             if (forwardOffset == 2) return 2;
             return 3;

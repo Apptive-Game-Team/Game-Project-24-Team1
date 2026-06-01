@@ -73,6 +73,10 @@ namespace MushOut.Player
         /// </summary>
         public bool IsAbility4 { get; private set; }
 
+        public bool IsAbilityPrevious { get; private set; }
+
+        public bool IsAbilityNext { get; private set; }
+
         private InputAction _moveAction;
         private InputAction _lookAction;
         private InputAction _jumpAction;
@@ -84,6 +88,8 @@ namespace MushOut.Player
         private InputAction _ability2Action;
         private InputAction _ability3Action;
         private InputAction _ability4Action;
+        private InputAction _previousAction;
+        private InputAction _nextAction;
 
         /// <summary>
         /// 입력 차단 플래그.
@@ -118,6 +124,8 @@ namespace MushOut.Player
             _ability2Action = playerMap.FindAction("Ability2");
             _ability3Action = playerMap.FindAction("Ability3");
             _ability4Action = playerMap.FindAction("Ability4");
+            _previousAction = playerMap.FindAction("Previous");
+            _nextAction = playerMap.FindAction("Next");
         }
 
         private void OnEnable()
@@ -148,6 +156,8 @@ namespace MushOut.Player
                 IsAbility2 = false;
                 IsAbility3 = false;
                 IsAbility4 = false;
+                IsAbilityPrevious = false;
+                IsAbilityNext = false;
                 return;
             }
 
@@ -162,10 +172,12 @@ namespace MushOut.Player
             IsInteractingHeld = _interactAction != null && _interactAction.IsPressed();
 
             // 능력 입력 (Input Action을 우선시하고, 설정되지 않았을 경우 Keyboard 강제 폴백)
-            IsAbility1 = _ability1Action != null ? _ability1Action.WasPressedThisFrame() : (Keyboard.current != null && Keyboard.current[Key.Digit1].wasPressedThisFrame);
-            IsAbility2 = _ability2Action != null ? _ability2Action.WasPressedThisFrame() : (Keyboard.current != null && Keyboard.current[Key.Digit2].wasPressedThisFrame);
-            IsAbility3 = _ability3Action != null ? _ability3Action.WasPressedThisFrame() : (Keyboard.current != null && Keyboard.current[Key.Digit3].wasPressedThisFrame);
-            IsAbility4 = _ability4Action != null ? _ability4Action.WasPressedThisFrame() : (Keyboard.current != null && Keyboard.current[Key.Digit4].wasPressedThisFrame);
+            IsAbility1 = false;
+            IsAbility2 = false;
+            IsAbility3 = false;
+            IsAbility4 = false;
+            IsAbilityPrevious = _previousAction != null ? _previousAction.WasPressedThisFrame() : (Keyboard.current != null && Keyboard.current.qKey.wasPressedThisFrame);
+            IsAbilityNext = _nextAction != null ? _nextAction.WasPressedThisFrame() : (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame);
         }
     }
 }
