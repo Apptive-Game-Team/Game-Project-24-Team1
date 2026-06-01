@@ -2810,6 +2810,7 @@ GameObject:
   - component: {fileID: 8097850621285759813}
   - component: {fileID: 7232757549871853805}
   - component: {fileID: 7868314490704252333}
+  - component: {fileID: 8241588370965208516}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -3248,6 +3249,32 @@ MonoBehaviour:
     m_Bits: 4294967295
   targetCamera: {fileID: 0}
   memorySporeModelPrefab: {fileID: 919132149155446097, guid: 306d165d0e66f11499433b7381888a2d, type: 3}
+--- !u!114 &8241588370965208516
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8596124297504245249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64f1d79c338d7d146be75c6b595b41ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.UI.PushPullHandHintUI
+  availableHandSprite: {fileID: 0}
+  grabbedHandSprite: {fileID: 0}
+  detectHeight: 1
+  detectRadius: 0.5
+  detectDistance: 1.25
+  handAlpha: 0.55
+  heightOffset: 0.65
+  iconScale: 0.43
+  floatAmplitude: 0.12
+  floatSpeed: 3.2
+  keyLabel: F
+  keyFontSize: 108
+  keyColor: {r: 1, g: 1, b: 1, a: 0.82}
+  keyShadowColor: {r: 0, g: 0, b: 0, a: 0.62}
 --- !u!1 &9122675455333517926
 GameObject:
   m_ObjectHideFlags: 0

@@ -20,6 +20,14 @@ namespace MushOut.Player
     /// </summary>
     public class AbilityController : MonoBehaviour
     {
+        private static readonly AbilityState[] AbilityOrder =
+        {
+            AbilityState.Nothing,
+            AbilityState.Paralyze,
+            AbilityState.Mad,
+            AbilityState.Bomb
+        };
+
         [Header("능력 상태")]
         [Tooltip("현재 활성화된 특수 행동 상태입니다.")]
         [SerializeField] private AbilityState _currentState = AbilityState.Nothing;
@@ -35,6 +43,7 @@ namespace MushOut.Player
         [SerializeField] private float _dashChargeTime = 3f;
 
         private float _dashChargeTimer = 0f;
+        private float _dashCooldownVisualTimer = 0f;
         
         [Tooltip("수면 포자 보유 개수입니다.")]
         [SerializeField] private int _sleepFungus = 3;
@@ -111,7 +120,11 @@ namespace MushOut.Player
         /// </summary>
         public bool BombUnlocked => _bombUnlocked;
 
+        public bool IsDashCoolingDown => _dashCooldownVisualTimer > 0f || _dashCount <= 0;
+
         private PlayerInputHandler _input;
+        private readonly AbilityState[] _carouselSlots = new AbilityState[4];
+        private bool _hasCarouselSlots;
 
         private void Awake()
         {
@@ -124,36 +137,200 @@ namespace MushOut.Player
             if (_dashCount < _maxDashCount)
             {
                 _dashChargeTimer += Time.deltaTime;
+                if (_dashCooldownVisualTimer > 0f)
+                {
+                    _dashCooldownVisualTimer = Mathf.Max(0f, _dashCooldownVisualTimer - Time.deltaTime);
+                }
+
                 if (_dashChargeTimer >= _dashChargeTime)
                 {
                     _dashCount++;
                     _dashChargeTimer = 0f;
+                    _dashCooldownVisualTimer = 0f;
                 }
             }
             else
             {
                 _dashChargeTimer = 0f;
+                _dashCooldownVisualTimer = 0f;
             }
 
             if (_input == null) return;
 
             // PlayerInputHandler를 통한 상태 전환
-            if (_input.IsAbility1)
+            if (_input.IsAbilityPrevious)
             {
-                ChangeState(AbilityState.Nothing);
+                SelectVisibleCarouselSlot(false);
             }
-            else if (_input.IsAbility2 && _paralyzeUnlocked)
+            else if (_input.IsAbilityNext)
             {
-                ChangeState(AbilityState.Paralyze);
+                SelectVisibleCarouselSlot(true);
             }
-            else if (_input.IsAbility3 && _madUnlocked)
+        }
+
+        private void SelectVisibleCarouselSlot(bool rightSide)
+        {
+            AbilityState[] visibleStates = GetUnlockedAbilityOrder();
+            if (visibleStates.Length <= 1) return;
+
+            SyncCarouselSlots(visibleStates);
+
+            AbilityState nextState = rightSide || visibleStates.Length == 2 ? _carouselSlots[1] : _carouselSlots[2];
+            ChangeState(nextState);
+
+            if (rightSide || visibleStates.Length == 2)
             {
-                ChangeState(AbilityState.Mad);
+                RotateCarouselRight(visibleStates.Length);
             }
-            else if (_input.IsAbility4 && _bombUnlocked)
+            else
             {
-                ChangeState(AbilityState.Bomb);
+                RotateCarouselLeft(visibleStates.Length);
             }
+        }
+
+        private void SyncCarouselSlots(AbilityState[] visibleStates)
+        {
+            if (!_hasCarouselSlots || _carouselSlots[0] != _currentState || !CarouselSlotsMatch(visibleStates))
+            {
+                BuildCarouselSlots(visibleStates);
+            }
+        }
+
+        private bool CarouselSlotsMatch(AbilityState[] visibleStates)
+        {
+            for (int i = 0; i < visibleStates.Length; i++)
+            {
+                if (!ContainsState(visibleStates, _carouselSlots[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool ContainsState(AbilityState[] states, AbilityState state)
+        {
+            for (int i = 0; i < states.Length; i++)
+            {
+                if (states[i] == state) return true;
+            }
+
+            return false;
+        }
+
+        private void BuildCarouselSlots(AbilityState[] visibleStates)
+        {
+            int currentIndex = 0;
+            for (int i = 0; i < visibleStates.Length; i++)
+            {
+                if (visibleStates[i] == _currentState)
+                {
+                    currentIndex = i;
+                    break;
+                }
+            }
+
+            for (int i = 0; i < _carouselSlots.Length; i++)
+            {
+                _carouselSlots[i] = _currentState;
+            }
+
+            _carouselSlots[0] = visibleStates[currentIndex];
+
+            if (visibleStates.Length > 1)
+            {
+                _carouselSlots[1] = visibleStates[(currentIndex + 1) % visibleStates.Length];
+            }
+
+            if (visibleStates.Length > 2)
+            {
+                _carouselSlots[2] = visibleStates[(currentIndex + 2) % visibleStates.Length];
+            }
+
+            if (visibleStates.Length > 3)
+            {
+                _carouselSlots[3] = visibleStates[(currentIndex + 3) % visibleStates.Length];
+            }
+
+            _hasCarouselSlots = true;
+        }
+
+        private void RotateCarouselRight(int visibleCount)
+        {
+            AbilityState center = _carouselSlots[0];
+            _carouselSlots[0] = _carouselSlots[1];
+
+            if (visibleCount == 2)
+            {
+                _carouselSlots[1] = center;
+                return;
+            }
+
+            AbilityState left = _carouselSlots[2];
+            AbilityState bottom = visibleCount > 3 ? _carouselSlots[3] : _carouselSlots[1];
+            _carouselSlots[2] = center;
+
+            if (visibleCount > 3)
+            {
+                _carouselSlots[1] = bottom;
+                _carouselSlots[3] = left;
+            }
+            else
+            {
+                _carouselSlots[1] = left;
+            }
+        }
+
+        private void RotateCarouselLeft(int visibleCount)
+        {
+            AbilityState center = _carouselSlots[0];
+            _carouselSlots[0] = _carouselSlots[2];
+
+            if (visibleCount == 2)
+            {
+                _carouselSlots[1] = center;
+                return;
+            }
+
+            AbilityState right = _carouselSlots[1];
+            AbilityState bottom = visibleCount > 3 ? _carouselSlots[3] : _carouselSlots[2];
+            _carouselSlots[1] = center;
+
+            if (visibleCount > 3)
+            {
+                _carouselSlots[2] = bottom;
+                _carouselSlots[3] = right;
+            }
+            else
+            {
+                _carouselSlots[2] = right;
+            }
+        }
+
+        private AbilityState[] GetUnlockedAbilityOrder()
+        {
+            int count = 0;
+            for (int i = 0; i < AbilityOrder.Length; i++)
+            {
+                if (IsUnlocked(AbilityOrder[i]))
+                {
+                    count++;
+                }
+            }
+
+            AbilityState[] states = new AbilityState[count];
+            int index = 0;
+            for (int i = 0; i < AbilityOrder.Length; i++)
+            {
+                if (IsUnlocked(AbilityOrder[i]))
+                {
+                    states[index] = AbilityOrder[i];
+                    index++;
+                }
+            }
+
+            return states;
         }
 
         /// <summary>
@@ -176,6 +353,7 @@ namespace MushOut.Player
             if (_dashCount > 0)
             {
                 _dashCount -= 1;
+                _dashCooldownVisualTimer = _dashChargeTime;
             }
         }
 
