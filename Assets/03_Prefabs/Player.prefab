@@ -3273,10 +3273,6 @@ MonoBehaviour:
   iconScale: 0.43
   floatAmplitude: 0.12
   floatSpeed: 3.2
-  keyLabel: F
-  keyFontSize: 108
-  keyColor: {r: 1, g: 1, b: 1, a: 0.82}
-  keyShadowColor: {r: 0, g: 0, b: 0, a: 0.62}
 --- !u!1 &9122675455333517926
 GameObject:
   m_ObjectHideFlags: 0

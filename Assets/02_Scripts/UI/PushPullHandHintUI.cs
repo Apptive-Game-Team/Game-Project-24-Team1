@@ -21,18 +21,12 @@ namespace MushOut.UI
         [SerializeField] private float iconScale = 0.43f;
         [SerializeField] private float floatAmplitude = 0.12f;
         [SerializeField] private float floatSpeed = 3.2f;
-        [SerializeField] private string keyLabel = "F";
-        [SerializeField] private int keyFontSize = 108;
-        [SerializeField] private Color keyColor = new Color(1f, 1f, 1f, 0.82f);
-        [SerializeField] private Color keyShadowColor = new Color(0f, 0f, 0f, 0.62f);
 
         private PlayerInteractor _interactor;
         private PlayerEnvironmentDetector _environmentDetector;
         private Camera _mainCamera;
         private GameObject _hintRoot;
         private SpriteRenderer _handRenderer;
-        private TextMesh _keyText;
-        private TextMesh _keyShadowText;
 
         private void Awake()
         {
@@ -110,34 +104,6 @@ namespace MushOut.UI
             handObject.transform.SetParent(_hintRoot.transform, false);
             _handRenderer = handObject.AddComponent<SpriteRenderer>();
             _handRenderer.sortingOrder = 100;
-
-            GameObject shadowObject = new GameObject("KeyShadow");
-            shadowObject.transform.SetParent(_hintRoot.transform, false);
-            _keyShadowText = shadowObject.AddComponent<TextMesh>();
-            ConfigureKeyText(_keyShadowText, keyShadowColor);
-            shadowObject.transform.localPosition = new Vector3(0.025f, -0.025f, -0.02f);
-
-            GameObject keyObject = new GameObject("KeyLabel");
-            keyObject.transform.SetParent(_hintRoot.transform, false);
-            _keyText = keyObject.AddComponent<TextMesh>();
-            ConfigureKeyText(_keyText, keyColor);
-            keyObject.transform.localPosition = new Vector3(0f, 0f, -0.03f);
-        }
-
-        private void ConfigureKeyText(TextMesh textMesh, Color color)
-        {
-            textMesh.text = keyLabel;
-            textMesh.anchor = TextAnchor.MiddleCenter;
-            textMesh.alignment = TextAlignment.Center;
-            textMesh.fontSize = keyFontSize;
-            textMesh.characterSize = 0.052f;
-            textMesh.color = color;
-
-            MeshRenderer renderer = textMesh.GetComponent<MeshRenderer>();
-            if (renderer != null)
-            {
-                renderer.sortingOrder = 101;
-            }
         }
 
         private void UpdateHintVisual(PushPullInteractable target, bool isGrabbed)
@@ -168,18 +134,6 @@ namespace MushOut.UI
                 {
                     _hintRoot.transform.rotation = Quaternion.LookRotation(cameraDirection);
                 }
-            }
-
-            if (_keyText != null)
-            {
-                _keyText.text = keyLabel;
-                _keyText.color = keyColor;
-            }
-
-            if (_keyShadowText != null)
-            {
-                _keyShadowText.text = keyLabel;
-                _keyShadowText.color = keyShadowColor;
             }
         }
 
