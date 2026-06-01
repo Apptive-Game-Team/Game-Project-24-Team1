@@ -334,8 +334,7 @@ namespace MushOut.Player
         /// <returns>CharacterController 컴포넌트</returns>
         public CharacterController GetController()
         {
-            if (_controller == null)
-            {
+            if (_controller == null) {
                 _controller = GetComponent<CharacterController>();
             }
             return _controller;
