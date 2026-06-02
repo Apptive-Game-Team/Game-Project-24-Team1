@@ -667,6 +667,32 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 149783746}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!134 &180448947
+PhysicsMaterial:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  serializedVersion: 2
+  m_DynamicFriction: 0.6
+  m_StaticFriction: 0.6
+  m_Bounciness: 0
+  m_FrictionCombine: 0
+  m_BounceCombine: 0
+--- !u!134 &228381271
+PhysicsMaterial:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: ' (Instance)'
+  serializedVersion: 2
+  m_DynamicFriction: 0.6
+  m_StaticFriction: 0.6
+  m_Bounciness: 0
+  m_FrictionCombine: 0
+  m_BounceCombine: 0
 --- !u!1 &228642211
 GameObject:
   m_ObjectHideFlags: 0
@@ -1032,6 +1058,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Enemy_example
       objectReference: {fileID: 0}
+    - target: {fileID: 8497814169208649674, guid: cf69bf537b16d6347a602e98e259c24e, type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 180448947}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2126,6 +2156,10 @@ PrefabInstance:
       propertyPath: m_StaticEditorFlags
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3262684631734152832, guid: 7fce6b961b26e7d44bfca0dd5d59aba9, type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 228381271}
     - target: {fileID: 4009469705757067474, guid: 7fce6b961b26e7d44bfca0dd5d59aba9, type: 3}
       propertyPath: m_LocalPosition.x
       value: -96.6
@@ -2166,6 +2200,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7868314490704252333, guid: 7fce6b961b26e7d44bfca0dd5d59aba9, type: 3}
+      propertyPath: absorbedMemoryFont
+      value: 
+      objectReference: {fileID: 11400000, guid: dea47f8dba9dbf04598d95950f1e4eda, type: 2}
     - target: {fileID: 8241588370965208516, guid: 7fce6b961b26e7d44bfca0dd5d59aba9, type: 3}
       propertyPath: iconScale
       value: 0.43
