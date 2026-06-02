@@ -135,8 +135,9 @@ namespace MushOut.Enemy
                     {
                         // 시야각 내에 있으면 Raycast로 장애물 확인
                         Vector3 rayDir = dirToTarget.normalized;
+                        int layerMask = Physics.DefaultRaycastLayers & ~LayerMask.GetMask("Water");
 
-                        if (Physics.Raycast(origin, rayDir, out RaycastHit hit, distToTarget, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+                        if (Physics.Raycast(origin, rayDir, out RaycastHit hit, distToTarget, layerMask, QueryTriggerInteraction.Ignore))
                         {
                             if (hit.transform.CompareTag("Player"))
                             {
