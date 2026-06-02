@@ -359,9 +359,22 @@ namespace MushOut.Player
         /// </summary>
         public void SetBuoyancyTarget(float targetY, float power)
         {
-            _buoyancyTargetY = targetY;
-            _buoyancyPower = power;
-            _buoyancyTime = Time.time;
+            // 같은 물리 프레임(FixedUpdate) 내에서 여러 번 호출된 경우 (예: 물과 간헐천 겹침)
+            // 더 높은 수면을 목표로 하거나, 같은 수면이면 더 강한 부력을 우선시합니다.
+            if (Time.fixedTime == _buoyancyTime)
+            {
+                if (targetY > _buoyancyTargetY || (Mathf.Approximately(targetY, _buoyancyTargetY) && power > _buoyancyPower))
+                {
+                    _buoyancyTargetY = targetY;
+                    _buoyancyPower = power;
+                }
+            }
+            else
+            {
+                _buoyancyTargetY = targetY;
+                _buoyancyPower = power;
+                _buoyancyTime = Time.fixedTime;
+            }
         }
 
         /// <summary>
