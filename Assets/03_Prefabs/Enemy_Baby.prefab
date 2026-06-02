@@ -1,5 +1,56 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1606279329294646037
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7090574605043297642}
+  - component: {fileID: 960938112607411576}
+  m_Layer: 0
+  m_Name: Face
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7090574605043297642
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1606279329294646037}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.20083426, y: -0.31, z: 1.34}
+  m_LocalScale: {x: 3.333333, y: 3.333333, z: 3.333333}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4294278807925816206}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &960938112607411576
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1606279329294646037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7a33a910e312c84e945fc0a0379b195, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Enemy.EnemySight
+  _alpha: 0.15
+  _segments: 32
+  _eyeOffset: {x: 0, y: 0, z: 0}
+  _gizmoObstacleLayer:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  _gizmoClipBias: 1
 --- !u!1001 &4328784629899893861
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -22,15 +73,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ed9eca08d46f97a41978611fe1bc8ac6, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.66
+      value: 4.16
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ed9eca08d46f97a41978611fe1bc8ac6, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.86
+      value: 1.63
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ed9eca08d46f97a41978611fe1bc8ac6, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 11.31
+      value: 9.59
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ed9eca08d46f97a41978611fe1bc8ac6, type: 3}
       propertyPath: m_LocalRotation.w
@@ -80,8 +131,250 @@ PrefabInstance:
       propertyPath: m_Name
       value: Enemy_Baby
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ed9eca08d46f97a41978611fe1bc8ac6, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ed9eca08d46f97a41978611fe1bc8ac6, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: ed9eca08d46f97a41978611fe1bc8ac6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7090574605043297642}
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: ed9eca08d46f97a41978611fe1bc8ac6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2082044836411502593}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: ed9eca08d46f97a41978611fe1bc8ac6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 37101666254797949}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: ed9eca08d46f97a41978611fe1bc8ac6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7938605226029141208}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: ed9eca08d46f97a41978611fe1bc8ac6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7198389668334488470}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: ed9eca08d46f97a41978611fe1bc8ac6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 993461224196970197}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: ed9eca08d46f97a41978611fe1bc8ac6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 846738935812089222}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: ed9eca08d46f97a41978611fe1bc8ac6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2936566135573063844}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: ed9eca08d46f97a41978611fe1bc8ac6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8126890521618249237}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: ed9eca08d46f97a41978611fe1bc8ac6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2549022598970735947}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: ed9eca08d46f97a41978611fe1bc8ac6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6662334498570019752}
   m_SourcePrefab: {fileID: 100100000, guid: ed9eca08d46f97a41978611fe1bc8ac6, type: 3}
+--- !u!1 &3518304711194681652 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: ed9eca08d46f97a41978611fe1bc8ac6, type: 3}
+  m_PrefabInstance: {fileID: 4328784629899893861}
+  m_PrefabAsset: {fileID: 0}
+--- !u!136 &2082044836411502593
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3518304711194681652}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 2.2677848
+  m_Height: 4.203814
+  m_Direction: 1
+  m_Center: {x: 0.016958473, y: -0.056938406, z: -0.00057256216}
+--- !u!54 &37101666254797949
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3518304711194681652}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!114 &7938605226029141208
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3518304711194681652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d0469509cdd8da40adb044bbd7f7d09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Interactables.PushPullInteractable
+  Pushable: 0
+  Pullable: 1
+  movementType: 0
+  isGrabbed: 0
+  objectCollider: {fileID: 0}
+--- !u!114 &7198389668334488470
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3518304711194681652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b9d2a2a6918fb445809607fe7e940f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Enemy.EnemyController
+  _initialState: 1
+  _currentState: 0
+  _previousState: 0
+  _maxHp: 100
+  _currentHp: 0
+  _moveSpeed: 3
+  _chaseSpeed: 6
+  _target: {fileID: 0}
+  _fieldOfView: 60
+  _sightDistance: 10
+  _attackRadius: 0.1
+  _patrolPoints:
+  - {fileID: 0}
+  - {fileID: 0}
+  _stopPoints: []
+  _isPlayerSpotted: 0
+  _hasLatestPlayerPosition: 0
+  _latestPlayerPosition: {x: 0, y: 0, z: 0}
+--- !u!195 &993461224196970197
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3518304711194681652}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 2.2693627
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 4.089937
+  m_BaseOffset: 2.0449686
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
+--- !u!114 &846738935812089222
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3518304711194681652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be6c87730c758e6479219e409f986433, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Enemy.EnemyAttacking
+  _rushDistance: 15
+  _rushSpeed: 30
+  _castRadius: 0.4
+  _obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 1024
+  _stateAfterRush: 2
+  _preRushDelay: 2
+  _lookRotateSpeed: 180
+--- !u!114 &2936566135573063844
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3518304711194681652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33fadaba76b0c9848a1251513e424cdc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameProject24.Enemy.EnemyStunned
+  _stunnedDuration: 10
+--- !u!114 &8126890521618249237
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3518304711194681652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f023962fb22ad7a4783bdcf4d4734346, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameProject24.Enemy.EnemyChasing
+  _searchTime: 7
+  _searchFov: 90
+--- !u!114 &2549022598970735947
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3518304711194681652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3cab1c4fae550641a9ae85cba694cdb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameProject24.Enemy.EnemyPatrolling
+--- !u!114 &6662334498570019752
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3518304711194681652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd957f31f14b2f345903789b60631988, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameProject24.Enemy.EnemyIdle
+--- !u!4 &4294278807925816206 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: ed9eca08d46f97a41978611fe1bc8ac6, type: 3}
+  m_PrefabInstance: {fileID: 4328784629899893861}
+  m_PrefabAsset: {fileID: 0}
