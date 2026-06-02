@@ -19,8 +19,8 @@ MonoBehaviour:
     - hasProbeVolume: 1
       bakeScene: 1
       bounds:
-        m_Center: {x: 0, y: 0, z: -13.5}
-        m_Extent: {x: 81, y: 27, z: 67.5}
+        m_Center: {x: 13.5, y: 0, z: -13.5}
+        m_Extent: {x: 67.5, y: 27, z: 67.5}
   singleSceneMode: 1
   dialogNoProbeVolumeInSetShown: 0
   settings:
