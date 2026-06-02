@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using MushOut.Enemy;
 using MushOut.UI;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,6 +9,8 @@ namespace MushOut.Player
 {
     public class PlayerMemorySporeAbility : MonoBehaviour
     {
+        private const float DefaultAbsorbedMemoryTextDuration = 2.5f;
+
         [Header("Input")]
         [SerializeField] private Key useKey = Key.V;
 
@@ -19,6 +23,12 @@ namespace MushOut.Player
 
         [Header("Effect")]
         [SerializeField] private GameObject memorySporeModelPrefab;
+        [TextArea(2, 4)]
+        [SerializeField] private string absorbedMemoryText = "기억이 흘러들어온다.";
+        [SerializeField] private float absorbedMemoryTextDuration = DefaultAbsorbedMemoryTextDuration;
+        [SerializeField] private TMP_FontAsset absorbedMemoryFont;
+
+        private readonly HashSet<EnemyController> _consumedTargets = new HashSet<EnemyController>();
 
         private void Awake()
         {
@@ -54,7 +64,15 @@ namespace MushOut.Player
                 return false;
             }
 
-            MemorySporeAbsorbEffect.Play(memorySporeModelPrefab, target.transform, transform);
+            MemorySporeFloatingText.GuardEditorPauseFor(8.0);
+            MemorySporeAbsorbEffect effect = MemorySporeAbsorbEffect.Play(memorySporeModelPrefab, target.transform, transform, absorbedMemoryText, absorbedMemoryTextDuration, absorbedMemoryFont);
+            if (effect == null)
+            {
+                ui.AddMemorySpores(1);
+                return false;
+            }
+
+            _consumedTargets.Add(target);
             return true;
         }
 
@@ -86,7 +104,7 @@ namespace MushOut.Player
             foreach (RaycastHit hit in hits)
             {
                 EnemyController rayTarget = hit.collider.GetComponentInParent<EnemyController>();
-                if (rayTarget != null)
+                if (IsValidMemoryTarget(rayTarget))
                 {
                     return rayTarget;
                 }
@@ -104,7 +122,7 @@ namespace MushOut.Player
             foreach (Collider hit in hits)
             {
                 EnemyController enemy = hit.GetComponentInParent<EnemyController>();
-                if (enemy == null) continue;
+                if (!IsValidMemoryTarget(enemy)) continue;
 
                 Vector3 targetPoint = enemy.transform.position + Vector3.up;
                 Vector3 toTargetFromCamera = targetPoint - ray.origin;
@@ -123,6 +141,11 @@ namespace MushOut.Player
             }
 
             return bestTarget;
+        }
+
+        private bool IsValidMemoryTarget(EnemyController enemy)
+        {
+            return enemy != null && !_consumedTargets.Contains(enemy);
         }
     }
 }

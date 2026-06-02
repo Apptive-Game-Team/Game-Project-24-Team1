@@ -1,11 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
+using MushOut.Interactables;
+using TMPro;
 using UnityEngine;
 
 namespace MushOut.UI
 {
     public class MemorySporeAbsorbEffect : MonoBehaviour
     {
+        private const float DefaultTextDuration = 2.5f;
+
         [SerializeField] private GameObject memorySporeModelPrefab;
         [SerializeField] private float spawnHeight = 0.75f;
         [SerializeField] private float targetHeight = 1.35f;
@@ -16,17 +20,29 @@ namespace MushOut.UI
         [SerializeField] private float arcHeight = 1.1f;
         [SerializeField] private float sporeScaleMultiplier = 1.8f;
         [SerializeField] private float cleanupDelay = 0.35f;
+        [SerializeField] private string absorbedMemoryText = "기억이 흘러들어온다.";
+        [SerializeField] private float textDuration = DefaultTextDuration;
+        [SerializeField] private Vector3 textOffset = new Vector3(0f, 0.75f, 0f);
+        [SerializeField] private TMP_FontAsset textFont;
 
         private readonly List<Transform> _spores = new List<Transform>();
         private readonly List<Vector3> _originalScales = new List<Vector3>();
 
         public static MemorySporeAbsorbEffect Play(GameObject modelPrefab, Transform enemyRoot, Transform playerRoot)
         {
+            return Play(modelPrefab, enemyRoot, playerRoot, null, DefaultTextDuration, null);
+        }
+
+        public static MemorySporeAbsorbEffect Play(GameObject modelPrefab, Transform enemyRoot, Transform playerRoot, string memoryText, float memoryTextDuration, TMP_FontAsset memoryTextFont)
+        {
             if (modelPrefab == null || enemyRoot == null || playerRoot == null) return null;
 
             GameObject effectObject = new GameObject("MemorySporeAbsorbEffect");
             MemorySporeAbsorbEffect effect = effectObject.AddComponent<MemorySporeAbsorbEffect>();
             effect.memorySporeModelPrefab = modelPrefab;
+            effect.absorbedMemoryText = memoryText;
+            effect.textDuration = memoryTextDuration > 0f ? memoryTextDuration : DefaultTextDuration;
+            effect.textFont = memoryTextFont;
             effect.Begin(enemyRoot, playerRoot);
             return effect;
         }
@@ -44,6 +60,8 @@ namespace MushOut.UI
 
             Vector3 source = (enemyHead != null ? enemyHead.position : enemyRoot.position) + Vector3.up * spawnHeight;
             Vector3 target = (playerHead != null ? playerHead.position : playerRoot.position) + Vector3.up * targetHeight;
+            Transform textTarget = enemyHead != null ? enemyHead : enemyRoot;
+            Collider textFollowCollider = FindFollowCollider(enemyRoot);
 
             GameObject model = Instantiate(memorySporeModelPrefab, source, Quaternion.identity, transform);
             CollectSpores(model.transform);
@@ -54,7 +72,7 @@ namespace MushOut.UI
                 return;
             }
 
-            StartCoroutine(PlayRoutine(source, target));
+            StartCoroutine(PlayRoutine(source, target, textTarget, textFollowCollider));
         }
 
         private void CollectSpores(Transform root)
@@ -72,7 +90,7 @@ namespace MushOut.UI
             }
         }
 
-        private IEnumerator PlayRoutine(Vector3 source, Vector3 target)
+        private IEnumerator PlayRoutine(Vector3 source, Vector3 target, Transform textTarget, Collider textFollowCollider)
         {
             for (int i = 0; i < _spores.Count; i++)
             {
@@ -81,6 +99,7 @@ namespace MushOut.UI
             }
 
             yield return new WaitForSeconds(popDuration + flyDuration + cleanupDelay);
+            ShowMemoryText(textTarget, textFollowCollider);
             Destroy(gameObject);
         }
 
@@ -141,6 +160,32 @@ namespace MushOut.UI
             }
 
             return null;
+        }
+
+        private static Collider FindFollowCollider(Transform root)
+        {
+            PushPullInteractable pushPull = root.GetComponentInChildren<PushPullInteractable>(true);
+            if (pushPull != null)
+            {
+                if (pushPull.objectCollider != null)
+                {
+                    return pushPull.objectCollider;
+                }
+
+                Collider pushPullCollider = pushPull.GetComponentInChildren<Collider>(true);
+                if (pushPullCollider != null)
+                {
+                    return pushPullCollider;
+                }
+            }
+
+            return root.GetComponentInChildren<Collider>(true);
+        }
+
+        private void ShowMemoryText(Transform target, Collider followCollider)
+        {
+            if (string.IsNullOrWhiteSpace(absorbedMemoryText)) return;
+            MemorySporeFloatingText.Show(absorbedMemoryText, target, followCollider, textOffset, textDuration, textFont);
         }
 
         private static float EaseOutBack(float t)
