@@ -13,6 +13,9 @@ namespace MushOut.Environment
         [Tooltip("충돌 시 생성할 조각난 버전의 프리팹입니다.")]
         [SerializeField] private GameObject _fracturedPrefab;
 
+        [Tooltip("조각난 프리팹이 생성될 위치(Transform)입니다. 지정하지 않으면 현재 오브젝트의 위치에 생성됩니다.")]
+        [SerializeField] private Transform _fracturedSpawnPosition;
+
         [Tooltip("파괴를 트리거할 레이어 마스크입니다. 이 레이어의 오브젝트와 충돌 시 파괴됩니다.")]
         [SerializeField] private LayerMask _breakTriggerLayer;
 
@@ -119,11 +122,14 @@ namespace MushOut.Environment
                 return;
             }
 
-            // 원본과 동일한 위치/회전으로 조각 프리팹을 생성
+            // 원본과 동일한 위치/회전으로 조각 프리팹을 생성 (또는 지정된 위치)
+            Vector3 spawnPosition = _fracturedSpawnPosition != null ? _fracturedSpawnPosition.position : transform.position;
+            Quaternion spawnRotation = _fracturedSpawnPosition != null ? _fracturedSpawnPosition.rotation : transform.rotation;
+
             GameObject fractureInstance = Instantiate(
                 _fracturedPrefab,
-                transform.position,
-                transform.rotation
+                spawnPosition,
+                spawnRotation
             );
 
             // 조각들에 폭발력 적용
