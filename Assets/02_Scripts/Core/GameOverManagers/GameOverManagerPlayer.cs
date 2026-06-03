@@ -2,6 +2,7 @@
 // 게임 시작할 때의 처음 위치를 기억해두고, 다시시도 버튼을 누르면 그 위치에서 다시 시작하게 만든다.
 
 using MushOut.Player;
+using MushOut.SavePoint;
 using UnityEngine;
 
 namespace MushOut.Core
@@ -43,7 +44,16 @@ namespace MushOut.Core
                 controller.enabled = false;
             }
 
-            _playerObject.transform.SetPositionAndRotation(_playerSpawnPosition, _playerSpawnRotation);
+            Vector3 respawnPosition = _playerSpawnPosition;
+            Quaternion respawnRotation = _playerSpawnRotation;
+
+            if (SavePointTrigger.TryGetActiveRespawn(out Vector3 savePointPosition, out Quaternion savePointRotation))
+            {
+                respawnPosition = savePointPosition;
+                respawnRotation = savePointRotation;
+            }
+
+            _playerObject.transform.SetPositionAndRotation(respawnPosition, respawnRotation);
 
             if (controller != null)
             {

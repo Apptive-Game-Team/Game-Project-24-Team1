@@ -1,5 +1,7 @@
 using MushOut.Core;
 using MushOut.Interaction;
+using MushOut.Player;
+using MushOut.SavePoint;
 using MushOut.UI;
 using UnityEngine;
 using UnityEngine.Events;
@@ -11,6 +13,8 @@ namespace MushOut.Interactables
         [SerializeField] private bool pickupOnPlayerTouch = true;
         [SerializeField] private bool destroyOnPickup = true;
         [SerializeField] private bool switchToEscapeState = true;
+        [SerializeField] private bool saveRespawnOnPickup = true;
+        [SerializeField] private string pickupSavePointId = "SavePoint_8";
         [SerializeField] private UnityEvent onObjectiveTaken;
 
         private Behaviour _outlineScript;
@@ -27,19 +31,25 @@ namespace MushOut.Interactables
 
         public void Interact()
         {
-            Collect();
+            Collect(FindPlayerTransform());
         }
 
         private void OnTriggerEnter(Collider other)
         {
             if (!pickupOnPlayerTouch || !IsPlayer(other)) return;
-            Collect();
+            Collect(GetPlayerTransform(other));
         }
 
-        private void Collect()
+        private void Collect(Transform collector)
         {
             if (_collected) return;
             _collected = true;
+
+            if (saveRespawnOnPickup)
+            {
+                Transform saveTransform = collector != null ? collector : transform;
+                SavePointTrigger.SetActiveSavePoint(pickupSavePointId, saveTransform.position, saveTransform.rotation);
+            }
 
             EscapeScreenEffect.PlayEnterPulse();
 
@@ -65,6 +75,27 @@ namespace MushOut.Interactables
             if (root != null && root.CompareTag("Player")) return true;
 
             return other.GetComponentInParent<MushOut.Player.PlayerInputHandler>() != null;
+        }
+
+        private static Transform GetPlayerTransform(Collider other)
+        {
+            if (other == null) return null;
+
+            Transform root = other.transform.root;
+            if (root != null && root.CompareTag("Player")) return root;
+            if (other.CompareTag("Player")) return other.transform;
+
+            PlayerInputHandler inputHandler = other.GetComponentInParent<PlayerInputHandler>();
+            return inputHandler != null ? inputHandler.transform : root;
+        }
+
+        private static Transform FindPlayerTransform()
+        {
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null) return player.transform;
+
+            PlayerInputHandler inputHandler = FindFirstObjectByType<PlayerInputHandler>();
+            return inputHandler != null ? inputHandler.transform : null;
         }
 
         public void OnHighlight()

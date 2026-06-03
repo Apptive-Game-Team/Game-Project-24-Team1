@@ -9,8 +9,9 @@ namespace Nexush.Core
 {
     public class StartMenuController : MonoBehaviour
     {
-        [SerializeField] private string gameSceneName = "MainMapScene"; // 게임 시작 버튼을 눌렀을 때 이동할 씬 이름
+        [SerializeField] private string gameSceneName = "GamePlayScene"; // 게임 시작 버튼을 눌렀을 때 이동할 씬 이름
         [SerializeField] private GameObject settingsPanel; // 설정 화면 오브젝트를 담아두는 변수
+        private bool isStartingGame;
         // Inspector에서 직접 넣지 않아도, 아래 Awake에서 Canvas/SettingsPanel을 찾아서 자동으로 연결한다.
 
         private void Awake() // 이 씬이 시작될 때 가장 먼저 자동으로 실행된다.
@@ -30,15 +31,30 @@ namespace Nexush.Core
 
         public void StartGame() // 게임 시작 버튼을 눌렀을 때 실행되는 함수
         {
+            if (isStartingGame)
+            {
+                return;
+            }
+
+            isStartingGame = true;
+
             // 혹시 이전에 일시정지 상태였어도 게임 시간이 정상 속도로 흐르게 만든다.
             Time.timeScale = 1f;
+            ClearEditorPause();
 
-            // 시작 화면 UI가 MainMapScene까지 남아있지 않도록 정리한다.
+            // 시작 화면 UI가 GamePlayScene까지 남아있지 않도록 정리한다.
             DestroyStartMenuObjects();
 
-            // gameSceneName에 적힌 씬, 지금은 MainMapScene으로 화면을 전환한다.
+            // gameSceneName에 적힌 씬, 지금은 GamePlayScene으로 화면을 전환한다.
             SceneManager.LoadScene(gameSceneName);
         }
+        private void ClearEditorPause()
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPaused = false;
+#endif
+        }
+
 
         public void OpenSettings() // 설정 버튼을 눌렀을 때 설정창을 켠다.
         {
