@@ -153,7 +153,7 @@ namespace MushOut.Player
             foreach (var hit in hits)
             {
                 // 1. 카메라 광선이 플레이어(나 자신)를 등 뒤에서 뚫고 나갈 때, 플레이어는 무시합니다.
-                if (hit.collider.transform.root == transform.root || hit.collider.gameObject == gameObject)
+                if (hit.collider.transform.IsChildOf(transform))
                 {
                     continue;
                 }
@@ -166,7 +166,7 @@ namespace MushOut.Player
                 if (foundInteractable != null)
                 {
                     // 3. 맞춘 물체(hit.point)와 '플레이어 본체(캡슐)' 사이의 실제 거리를 계산합니다.
-                    float distanceToTarget = Vector3.Distance(transform.root.position, hit.point);
+                    float distanceToTarget = Vector3.Distance(transform.position, hit.point);
 
                     if (distanceToTarget > interactRange)
                     {
