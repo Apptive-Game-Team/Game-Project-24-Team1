@@ -91,7 +91,7 @@ namespace MushOut.Enemy
                 // 목적지에 도착했는지 확인
                 if (!_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance)
                 {
-                    if (!_agent.hasPath || _agent.velocity.sqrMagnitude == 0f)
+                    if (!_agent.hasPath || _agent.velocity.sqrMagnitude <= 0.1f)
                     {
                         // 다음 순찰 지점으로 인덱스 증가 (순환)
                         _patrolIndex = (_patrolIndex + 1) % points.Length;

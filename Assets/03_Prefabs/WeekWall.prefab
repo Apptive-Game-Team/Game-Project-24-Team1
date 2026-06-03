@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7165958358033999794}
   - component: {fileID: 8267372082217734935}
   - component: {fileID: 5610841599094521482}
+  - component: {fileID: 1728903525834559046}
   m_Layer: 10
   m_Name: WeekWall
   m_TagString: Untagged
@@ -126,6 +127,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MushOut.Environment.BreakableObject
   _fracturedPrefab: {fileID: 6493432924452400458, guid: e8f56c1e7b4575440acc8182202e5231, type: 3}
+  _fracturedSpawnPosition: {fileID: 0}
   _breakTriggerLayer:
     serializedVersion: 2
     m_Bits: 384
@@ -133,3 +135,24 @@ MonoBehaviour:
   _explosionForce: 10
   _upwardModifier: 0.3
   _fragmentLifetime: 20
+  _shouldRestore: 0
+  _restoreDelay: 3
+  OnBreakEvent:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!208 &1728903525834559046
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 246563092549502613}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.5, y: 0.5, z: 0.5}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 0, z: 0}
+  m_TimeToStationary: 0.5
