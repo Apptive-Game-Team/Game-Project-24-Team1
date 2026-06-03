@@ -140,7 +140,7 @@ namespace MushOut.Player
                 {
                     if (testCol.bounds.IntersectRay(ray, out float testDist))
                     {
-                        Debug.Log($"[초정밀 수학 검사] 레이저가 Button(1)에 명중했습니다!! (거리: {testDist}) / 활성화: {testCol.enabled} / 트리거: {testCol.isTrigger} / 레이어: {LayerMask.LayerToName(testBtn.layer)}");
+                        //Debug.Log($"[초정밀 수학 검사] 레이저가 Button(1)에 명중했습니다!! (거리: {testDist}) / 활성화: {testCol.enabled} / 트리거: {testCol.isTrigger} / 레이어: {LayerMask.LayerToName(testBtn.layer)}");
                     }
                 }
             }
@@ -158,7 +158,7 @@ namespace MushOut.Player
                     continue;
                 }
 
-                Debug.Log($"[디버그] 레이저가 닿은 물체: {hit.collider.name} / 레이어: {LayerMask.LayerToName(hit.collider.gameObject.layer)}");
+                //Debug.Log($"[디버그] 레이저가 닿은 물체: {hit.collider.name} / 레이어: {LayerMask.LayerToName(hit.collider.gameObject.layer)}");
 
                 // 2. 플레이어가 아닌 가장 먼저 맞은 물체를 확인합니다. (자식 콜라이더를 맞췄을 경우를 대비해 부모까지 탐색)
                 foundInteractable = hit.collider.GetComponentInParent<IInteractable>();
@@ -170,17 +170,17 @@ namespace MushOut.Player
 
                     if (distanceToTarget > interactRange)
                     {
-                        Debug.Log($"[디버그] 상호작용 실패: 거리가 멉니다! (현재거리: {distanceToTarget:F1} / 최대사거리: {interactRange})");
+                        //Debug.Log($"[디버그] 상호작용 실패: 거리가 멉니다! (현재거리: {distanceToTarget:F1} / 최대사거리: {interactRange})");
                         foundInteractable = null;
                     }
                     else
                     {
-                        Debug.Log($"[디버그] 상호작용 성공! 타겟: {hit.collider.name}");
+                        //Debug.Log($"[디버그] 상호작용 성공! 타겟: {hit.collider.name}");
                     }
                 }
                 else
                 {
-                    Debug.Log($"[디버그] 상호작용 실패: {hit.collider.name}에는 IInteractable 스크립트가 없습니다!");
+                    //Debug.Log($"[디버그] 상호작용 실패: {hit.collider.name}에는 IInteractable 스크립트가 없습니다!");
                 }
                 
                 // 플레이어를 제외한 '가장 처음 맞은' 물체가 기준이므로 루프를 종료합니다. (벽 너머 상호작용 방지)
