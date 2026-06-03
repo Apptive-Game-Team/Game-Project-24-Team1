@@ -542,15 +542,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: b0324bdf498fb414b96675acab482cd8, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -5.17
+      value: -35.7
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: b0324bdf498fb414b96675acab482cd8, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 7.94
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: b0324bdf498fb414b96675acab482cd8, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -31.55
+      value: 13.9
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: b0324bdf498fb414b96675acab482cd8, type: 3}
       propertyPath: m_LocalRotation.w
@@ -558,7 +558,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: b0324bdf498fb414b96675acab482cd8, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: b0324bdf498fb414b96675acab482cd8, type: 3}
       propertyPath: m_LocalRotation.y
@@ -566,7 +566,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: b0324bdf498fb414b96675acab482cd8, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: b0324bdf498fb414b96675acab482cd8, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -1659,14 +1659,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15d580d95f5c08e4b9ab535b2bbb1b59, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MushOut.Player.PlayerMotor
-  _moveSpeed: 5
+  _moveSpeed: 10
   _dashDistance: 3
   _dashDuration: 0.2
   _speedChangeRate: 10
-  _pushPullSpeed: 2
+  _pushPullSpeed: 4
   _jumpHeight: 1.2
   _gravity: -15
-  _waterMoveSpeed: 2
+  _waterMoveSpeed: 4
   _waterDrag: 3
 --- !u!114 &796976640602493779
 MonoBehaviour:
@@ -1684,13 +1684,13 @@ MonoBehaviour:
   _maxDashCount: 1
   _dashCount: 1
   _dashChargeTime: 3
-  _maxSleepFungus: 2
-  _maxAggroFungus: 2
+  _maxSleepFungus: 5
+  _maxAggroFungus: 5
   _maxBombFungus: 2
-  _sleepFungus: 2
-  _aggroFungus: 2
+  _sleepFungus: 5
+  _aggroFungus: 5
   _bombFungus: 2
-  _paralyzeUnlocked: 0
+  _paralyzeUnlocked: 1
   _madUnlocked: 0
   _bombUnlocked: 0
 --- !u!114 &3138646364299533527
@@ -1874,11 +1874,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c78e3c45b6487ec4996eb10f03a8b2d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MushOut.Player.PlayerInteractor
-  interactRange: 3
+  interactRange: 10
   maxRaycastDistance: 50
   interactableLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 17408
   pushPullDistance: 0.5
 --- !u!114 &8399202349237333130
 MonoBehaviour:
