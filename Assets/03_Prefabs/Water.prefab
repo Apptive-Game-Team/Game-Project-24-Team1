@@ -130,14 +130,14 @@ MonoBehaviour:
   submergeRatio: 0.65
   grabPenalties:
   - targetTag: Box
-    targetLayer: 
-    overrideBuoyancy: 0.5
+    targetLayer: Box
+    overrideBuoyancy: 0.1
   - targetTag: Enemy
     targetLayer: Enemy
-    overrideBuoyancy: 0.8
+    overrideBuoyancy: 0.1
   - targetTag: Enemy
     targetLayer: EnemyHeavy
-    overrideBuoyancy: 0.4
+    overrideBuoyancy: 0.01
 --- !u!114 &6100301076030318502
 MonoBehaviour:
   m_ObjectHideFlags: 0
