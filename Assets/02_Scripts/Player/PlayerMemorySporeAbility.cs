@@ -13,7 +13,7 @@ namespace MushOut.Player
         private const string DefaultKoreanFontResourcePath = "Fonts/MaruMinyaHangul SDF";
 
         [Header("Input")]
-        [SerializeField] private Key useKey = Key.V;
+        [SerializeField] private Key useKey = Key.F;
 
         [Header("Targeting")]
         [SerializeField] private float range = 8f;
