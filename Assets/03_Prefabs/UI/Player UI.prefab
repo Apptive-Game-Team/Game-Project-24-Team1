@@ -115,7 +115,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc63e74fa5fd41041aa735b88b58af37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MushOut.UI.MemorySporeUI
-  memorySporeCount: 0
+  memorySporeCount: 5
   memorySporeIcon: {fileID: 21300000, guid: 2bd09098c200641449679d3db0256ec0, type: 3}
   anchoredPosition: {x: -76, y: 70}
   panelSize: {x: 330, y: 132}

@@ -2001,8 +2001,8 @@ MonoBehaviour:
   targetCamera: {fileID: 0}
   memorySporeModelPrefab: {fileID: 0}
   absorbedMemoryText: "\uAE30\uC5B5\uC774 \uD758\uB7EC\uB4E4\uC5B4\uC628\uB2E4."
-  absorbedMemoryTextDuration: 2.5
-  absorbedMemoryFont: {fileID: 0}
+  absorbedMemoryTextDuration: 60
+  absorbedMemoryFont: {fileID: 11400000, guid: dea47f8dba9dbf04598d95950f1e4eda, type: 2}
 --- !u!136 &8042948556577861415
 CapsuleCollider:
   m_ObjectHideFlags: 0

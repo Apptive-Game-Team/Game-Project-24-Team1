@@ -9,7 +9,8 @@ namespace MushOut.Player
 {
     public class PlayerMemorySporeAbility : MonoBehaviour
     {
-        private const float DefaultAbsorbedMemoryTextDuration = 2.5f;
+        private const float DefaultAbsorbedMemoryTextDuration = 60f;
+        private const string DefaultKoreanFontResourcePath = "Fonts/MaruMinyaHangul SDF";
 
         [Header("Input")]
         [SerializeField] private Key useKey = Key.V;
@@ -35,6 +36,11 @@ namespace MushOut.Player
             if (targetCamera == null)
             {
                 targetCamera = Camera.main;
+            }
+
+            if (absorbedMemoryFont == null)
+            {
+                absorbedMemoryFont = Resources.Load<TMP_FontAsset>(DefaultKoreanFontResourcePath);
             }
         }
 
@@ -65,7 +71,8 @@ namespace MushOut.Player
             }
 
             MemorySporeFloatingText.GuardEditorPauseFor(8.0);
-            MemorySporeAbsorbEffect effect = MemorySporeAbsorbEffect.Play(memorySporeModelPrefab, target.transform, transform, absorbedMemoryText, absorbedMemoryTextDuration, absorbedMemoryFont);
+            string memoryText = GetMemoryText(target);
+            MemorySporeAbsorbEffect effect = MemorySporeAbsorbEffect.Play(memorySporeModelPrefab, target.transform, transform, memoryText, absorbedMemoryTextDuration, absorbedMemoryFont);
             if (effect == null)
             {
                 ui.AddMemorySpores(1);
@@ -145,7 +152,17 @@ namespace MushOut.Player
 
         private bool IsValidMemoryTarget(EnemyController enemy)
         {
-            return enemy != null && !_consumedTargets.Contains(enemy);
+            return enemy != null
+                && enemy.CurrentState == EnemyController.State.Stunned
+                && !_consumedTargets.Contains(enemy);
+        }
+
+        private string GetMemoryText(EnemyController enemy)
+        {
+            EnemyMemoryText memoryText = enemy != null ? enemy.GetComponent<EnemyMemoryText>() : null;
+            return memoryText != null && memoryText.HasMemoryText
+                ? memoryText.MemoryText
+                : absorbedMemoryText;
         }
     }
 }
