@@ -55,6 +55,14 @@ namespace MushOut.Core
 
             _playerObject.transform.SetPositionAndRotation(respawnPosition, respawnRotation);
 
+            // 부활 직후 중력 가속도나 물리 충격이 이어져 이상 작동하는 현상을 방지하기 위해 속도를 초기화합니다.
+            PlayerMotor motor = _playerObject.GetComponent<PlayerMotor>();
+            if (motor != null)
+            {
+                motor.VerticalVelocity = 0f;
+                motor.ExternalVelocity = Vector3.zero;
+            }
+
             if (controller != null)
             {
                 controller.enabled = true;
