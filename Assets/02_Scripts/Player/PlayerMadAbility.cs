@@ -42,6 +42,7 @@ namespace MushOut.Player
                 else
                 {
                     _abilityController.UseMad();
+                    RecentItemUseRefund.RecordAggroFungusUse(_abilityController);
                     TriggerNearbyEnemies();
                 }
             }

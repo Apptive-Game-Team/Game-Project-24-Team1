@@ -2,6 +2,7 @@
 // 페이드, 검은 화면 유지, 게임오버 화면 띄우기, 다시시도, 홈으로 돌아가기를 처리한다.
 
 using System.Collections;
+using MushOut.Player;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -42,6 +43,7 @@ namespace MushOut.Core
         private IEnumerator ProcessGameOverSequence()
         {
             _isProcessingGameOver = true;
+            RecentItemUseRefund.RefundRecentUses();
             Time.timeScale = 0f;
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;

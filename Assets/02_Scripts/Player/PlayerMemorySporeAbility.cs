@@ -80,6 +80,7 @@ namespace MushOut.Player
             }
 
             _consumedTargets.Add(target);
+            RecentItemUseRefund.RecordMemorySporeUse(ui);
             return true;
         }
 

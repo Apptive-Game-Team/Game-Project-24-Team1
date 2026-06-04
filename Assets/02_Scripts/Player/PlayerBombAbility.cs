@@ -250,6 +250,7 @@ namespace MushOut.Player
             }
 
             _abilityController.UseBomb(); // 폭탄 자원 1 소모
+            RecentItemUseRefund.RecordBombFungusUse(_abilityController);
 
             GameObject bombObj = Instantiate(bombPrefab, throwPoint.position, Quaternion.identity);
 
