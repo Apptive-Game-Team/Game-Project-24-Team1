@@ -192,6 +192,7 @@ namespace MushOut.Player
             }
 
             _animator.SetSpeed(targetAnimSpeed, _input.MoveInput.magnitude);
+            _animator.PauseAnimation(_motor.IsClinging);
         }
 
         // --- 외부 연동용 브릿지 ---

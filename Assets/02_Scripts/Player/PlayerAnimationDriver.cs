@@ -49,6 +49,14 @@ namespace MushOut.Player
             if (_animator) _animator.SetTrigger(AnimIDJump);
         }
 
+        public void PauseAnimation(bool pause)
+        {
+            if (_animator)
+            {
+                _animator.speed = pause ? 0f : 1f;
+            }
+        }
+
         public void SetState(PlayerState state)
         {
             if (_animator == null) return;
