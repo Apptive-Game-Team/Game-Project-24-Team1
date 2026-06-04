@@ -128,9 +128,23 @@ namespace MushOut.Player
             // 총 쏠 때처럼 화면 정중앙(조준점)을 기준으로 레이캐스트 쏘기
             Ray ray = _mainCam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
 
-            // 광선에 맞는 모든 물체를 가져옵니다.
+            // 광선에 맞는 모든 물체를 가져옵니다. (interactableLayer 마스크 적용)
             RaycastHit[] hits = Physics.RaycastAll(ray, maxRaycastDistance, interactableLayer);
             
+            // 🚨 최후의 수단: 씬에 있는 Button(1)을 직접 찾아서 레이저가 수학적으로 부딪히는지 강제 검사!
+            GameObject testBtn = GameObject.Find("Button(1)");
+            if (testBtn != null)
+            {
+                BoxCollider testCol = testBtn.GetComponent<BoxCollider>();
+                if (testCol != null)
+                {
+                    if (testCol.bounds.IntersectRay(ray, out float testDist))
+                    {
+                        //Debug.Log($"[초정밀 수학 검사] 레이저가 Button(1)에 명중했습니다!! (거리: {testDist}) / 활성화: {testCol.enabled} / 트리거: {testCol.isTrigger} / 레이어: {LayerMask.LayerToName(testBtn.layer)}");
+                    }
+                }
+            }
+
             // 카메라와 가까운 순서대로 정렬합니다.
             System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
 
@@ -139,25 +153,34 @@ namespace MushOut.Player
             foreach (var hit in hits)
             {
                 // 1. 카메라 광선이 플레이어(나 자신)를 등 뒤에서 뚫고 나갈 때, 플레이어는 무시합니다.
-                if (hit.collider.transform.root == transform.root || hit.collider.gameObject == gameObject)
+                if (hit.collider.transform.IsChildOf(transform))
                 {
                     continue;
                 }
 
-                // 2. 플레이어가 아닌 가장 먼저 맞은 물체를 확인합니다.
-                foundInteractable = hit.collider.GetComponent<IInteractable>();
+                //Debug.Log($"[디버그] 레이저가 닿은 물체: {hit.collider.name} / 레이어: {LayerMask.LayerToName(hit.collider.gameObject.layer)}");
+
+                // 2. 플레이어가 아닌 가장 먼저 맞은 물체를 확인합니다. (자식 콜라이더를 맞췄을 경우를 대비해 부모까지 탐색)
+                foundInteractable = hit.collider.GetComponentInParent<IInteractable>();
                 
                 if (foundInteractable != null)
                 {
                     // 3. 맞춘 물체(hit.point)와 '플레이어 본체(캡슐)' 사이의 실제 거리를 계산합니다.
-                    // 이 스크립트가 플레이어 프리팹에 붙어있으므로 transform.root의 위치가 곧 플레이어의 기준점입니다.
-                    float distanceToTarget = Vector3.Distance(transform.root.position, hit.point);
+                    float distanceToTarget = Vector3.Distance(transform.position, hit.point);
 
-                    // 거리가 상호작용 사거리를 벗어났다면 하이라이트하지 않습니다.
                     if (distanceToTarget > interactRange)
                     {
+                        //Debug.Log($"[디버그] 상호작용 실패: 거리가 멉니다! (현재거리: {distanceToTarget:F1} / 최대사거리: {interactRange})");
                         foundInteractable = null;
                     }
+                    else
+                    {
+                        //Debug.Log($"[디버그] 상호작용 성공! 타겟: {hit.collider.name}");
+                    }
+                }
+                else
+                {
+                    //Debug.Log($"[디버그] 상호작용 실패: {hit.collider.name}에는 IInteractable 스크립트가 없습니다!");
                 }
                 
                 // 플레이어를 제외한 '가장 처음 맞은' 물체가 기준이므로 루프를 종료합니다. (벽 너머 상호작용 방지)

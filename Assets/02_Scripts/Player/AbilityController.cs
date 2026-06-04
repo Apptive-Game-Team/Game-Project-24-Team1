@@ -46,19 +46,19 @@ namespace MushOut.Player
         private float _dashCooldownVisualTimer = 0f;
         
         [Tooltip("최대 수면 포자 보유 개수입니다.")]
-        [SerializeField] private int _maxSleepFungus = 2;
+        [SerializeField] private int _maxSleepFungus = 5;
         
         [Tooltip("최대 광분 포자 보유 개수입니다.")]
-        [SerializeField] private int _maxAggroFungus = 2;
+        [SerializeField] private int _maxAggroFungus = 5;
         
         [Tooltip("최대 폭탄 포자 보유 개수입니다.")]
         [SerializeField] private int _maxBombFungus = 2;
 
         [Tooltip("현재 수면 포자 보유 개수입니다.")]
-        [SerializeField] private int _sleepFungus = 2;
+        [SerializeField] private int _sleepFungus = 5;
         
         [Tooltip("현재 광분 포자 보유 개수입니다.")]
-        [SerializeField] private int _aggroFungus = 2;
+        [SerializeField] private int _aggroFungus = 5;
         
         [Tooltip("현재 폭탄 포자 보유 개수입니다.")]
         [SerializeField] private int _bombFungus = 2;
@@ -209,7 +209,8 @@ namespace MushOut.Player
         {
             for (int i = 0; i < visibleStates.Length; i++)
             {
-                if (!ContainsState(visibleStates, _carouselSlots[i]))
+                // 해금된 상태(visibleStates[i])가 현재 캐러셀 슬롯(_carouselSlots)에 존재하는지 확인해야 합니다.
+                if (!ContainsState(_carouselSlots, visibleStates[i]))
                 {
                     return false;
                 }
@@ -377,6 +378,17 @@ namespace MushOut.Player
         }
 
         /// <summary>
+        /// 대시 가능 횟수를 1 증가시킵니다. (최대치 제한)
+        /// </summary>
+        public void AddDash()
+        {
+            if (_dashCount < _maxDashCount)
+            {
+                _dashCount++;
+            }
+        }
+
+        /// <summary>
         /// 마비 능력을 해금합니다.
         /// </summary>
         public void UnlockParalyze() 
@@ -390,6 +402,17 @@ namespace MushOut.Player
         public void UseParalyze() 
         {
             _sleepFungus -= 1;
+        }
+
+        /// <summary>
+        /// 수면 포자 개수를 1 증가시킵니다. (최대치 제한)
+        /// </summary>
+        public void AddSleepFungus()
+        {
+            if (_sleepFungus < _maxSleepFungus)
+            {
+                _sleepFungus++;
+            }
         }
 
         /// <summary>
@@ -409,6 +432,17 @@ namespace MushOut.Player
         }
 
         /// <summary>
+        /// 광분 포자 개수를 1 증가시킵니다. (최대치 제한)
+        /// </summary>
+        public void AddAggroFungus()
+        {
+            if (_aggroFungus < _maxAggroFungus)
+            {
+                _aggroFungus++;
+            }
+        }
+
+        /// <summary>
         /// 폭탄 능력을 해금합니다.
         /// </summary>
         public void UnlockBomb() 
@@ -422,6 +456,17 @@ namespace MushOut.Player
         public void UseBomb() 
         {
             _bombFungus -= 1;
+        }
+
+        /// <summary>
+        /// 폭탄 포자 개수를 1 증가시킵니다. (최대치 제한)
+        /// </summary>
+        public void AddBombFungus()
+        {
+            if (_bombFungus < _maxBombFungus)
+            {
+                _bombFungus++;
+            }
         }
 
         /// <summary>

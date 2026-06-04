@@ -18,14 +18,20 @@ namespace MushOut.Player
         private float _climbOverStepDist = 0.3f; // 앞으로 전진할 거리
         private float _climbOverYSplit = 0.15f;   // Y축 상승 완료 시점 (15%)
 
-        // 상태 변수
         private bool _isNearLadder = false;
-        private Vector3 _ladderForward = Vector3.forward;
-        private Vector3 _ladderTopPoint;
-        private bool _hasLadderTop = false;
+        private MushOut.Interactables.Ladder _activeLadder;
+        private Vector3 _cachedForward = Vector3.forward;
+        private Vector3 _cachedTopPoint;
+        private bool _cachedHasTop = false;
+
+        private Vector3 _ladderForward => _activeLadder != null ? _activeLadder.transform.forward : _cachedForward;
+        private Vector3 _ladderTopPoint => _activeLadder != null ? _activeLadder.GetTopPoint() : _cachedTopPoint;
+        private bool _hasLadderTop => _activeLadder != null ? true : _cachedHasTop;
 
         private Vector3 _climbOverStartPos;
         private Vector3 _climbOverTargetPos;
+        private Vector3 _climbOverStartLocalPos;
+        private Vector3 _climbOverTargetLocalPos;
 
         // 의존성 캐싱
         private PlayerController _playerController;
@@ -82,6 +88,12 @@ namespace MushOut.Player
             // 목표 지점 = 사다리 꼭대기 중심 + 전진(forward) + 좌우 오프셋 유지(right) + 위로 살짝(up)
             _climbOverTargetPos = _ladderTopPoint + (forwardDir * _climbOverStepDist) + (Vector3.up * 0.05f) + (rightDir * lateralOffset);
 
+            if (_activeLadder != null)
+            {
+                _climbOverStartLocalPos = _activeLadder.transform.InverseTransformPoint(_climbOverStartPos);
+                _climbOverTargetLocalPos = _activeLadder.transform.InverseTransformPoint(_climbOverTargetPos);
+            }
+
             // 애니메이터 직접 제어 코드는 Controller.ChangeState로 이동됨
             _playerController.ChangeState(PlayerState.ClimbOver);
         }
@@ -96,6 +108,13 @@ namespace MushOut.Player
             if (_playerController.CurrentState != PlayerState.ClimbOver) return;
 
             _climbOverTimer += deltaTime;
+
+            // 사다리가 움직일 경우를 대비해 목표 위치를 동적으로 업데이트
+            if (_activeLadder != null)
+            {
+                _climbOverStartPos = _activeLadder.transform.TransformPoint(_climbOverStartLocalPos);
+                _climbOverTargetPos = _activeLadder.transform.TransformPoint(_climbOverTargetLocalPos);
+            }
 
             // 1. 회전 처리 (사다리 정면 응시)
             Vector3 lookDirCO = new Vector3(_ladderForward.x, 0f, _ladderForward.z);
@@ -165,7 +184,11 @@ namespace MushOut.Player
             // _animator.SetBool(AnimIDClimbOver, false); // 삭제: Controller에서 관리
 
             _isNearLadder = false;
-            // _isClimbingOver = false; // 삭제
+            if (!_isNearLadder) 
+            {
+                _activeLadder = null;
+                _cachedHasTop = false;
+            }
             _input.EnableInput();
 
             // 컨트롤러에게 상태 종료 알림
@@ -239,14 +262,18 @@ namespace MushOut.Player
             }
         }
 
-        public void SetNearLadder(bool value, Vector3 ladderForward, Vector3 topPoint, bool hasTop, bool isGrounded)
+        public void SetNearLadder(bool value, MushOut.Interactables.Ladder ladder, bool isGrounded)
         {
             _isNearLadder = value;
 
             if (!value && _playerController.CurrentState == PlayerState.Climbing && !IsClimbingOver)
             {
+                bool hasTop = ladder != null;
+                Vector3 topPoint = hasTop ? ladder.GetTopPoint() : Vector3.zero;
+
                 if (hasTop && (topPoint.y - transform.position.y) <= (climbTopThreshold + 0.5f) && _input.MoveInput.y > 0.1f)
                 {
+                    _activeLadder = ladder;
                     StartClimbOver();
                 }
                 else
@@ -257,13 +284,27 @@ namespace MushOut.Player
 
             if (value)
             {
-                _ladderForward = ladderForward;
-                _ladderTopPoint = topPoint;
-                _hasLadderTop = hasTop;
+                _activeLadder = ladder;
+                if (ladder != null)
+                {
+                    _cachedForward = ladder.transform.forward;
+                    _cachedTopPoint = ladder.GetTopPoint();
+                    _cachedHasTop = true;
+                }
             }
             else
             {
-                _hasLadderTop = false;
+                // ClimbOver 중에는 위치 계산을 위해 사다리 참조를 유지해야 함
+                if (!IsClimbingOver)
+                {
+                    if (_activeLadder != null)
+                    {
+                        _cachedForward = _activeLadder.transform.forward;
+                        _cachedTopPoint = _activeLadder.GetTopPoint();
+                        _cachedHasTop = true;
+                    }
+                    _activeLadder = null;
+                }
             }
         }
     }

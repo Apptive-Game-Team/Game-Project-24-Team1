@@ -42,7 +42,7 @@ namespace MushOut.Interactables
                 bool isGrounded = false;
                 if (other.TryGetComponent<PlayerController>(out var player)) isGrounded = player.IsGrounded;
                 
-                climbHandler.SetNearLadder(true, transform.forward, GetTopPoint(), true, isGrounded);
+                climbHandler.SetNearLadder(true, this, isGrounded);
             }
         }
 
@@ -53,7 +53,7 @@ namespace MushOut.Interactables
                 bool isGrounded = false;
                 if (other.TryGetComponent<PlayerController>(out var player)) isGrounded = player.IsGrounded;
 
-                climbHandler.SetNearLadder(false, Vector3.zero, Vector3.zero, false, isGrounded);
+                climbHandler.SetNearLadder(false, this, isGrounded);
             }
         }
 

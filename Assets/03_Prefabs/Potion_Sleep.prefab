@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &467121121154917611
+--- !u!1 &1964806522869936434
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,50 +8,49 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5133431566808064843}
-  - component: {fileID: 44990759100434463}
-  - component: {fileID: 5596703298943798394}
-  - component: {fileID: 1160352511744139226}
-  - component: {fileID: 4242159063530805388}
-  - component: {fileID: 9016172243501097876}
-  - component: {fileID: 9001472946288222618}
-  m_Layer: 0
-  m_Name: Ladder
+  - component: {fileID: 2451938497323545841}
+  - component: {fileID: 3515011616307786426}
+  - component: {fileID: 698170494411964198}
+  - component: {fileID: 1621106791338333214}
+  - component: {fileID: -4928856406408865795}
+  - component: {fileID: 8999008286872661065}
+  m_Layer: 14
+  m_Name: Potion_Sleep
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5133431566808064843
+--- !u!4 &2451938497323545841
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 467121121154917611}
+  m_GameObject: {fileID: 1964806522869936434}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -3.5899963, y: -2.39, z: 19.25}
-  m_LocalScale: {x: 2, y: 5, z: 0.20000002}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -35.242626, y: 18.034002, z: 39.348618}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
---- !u!33 &44990759100434463
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &3515011616307786426
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 467121121154917611}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &5596703298943798394
+  m_GameObject: {fileID: 1964806522869936434}
+  m_Mesh: {fileID: 7601493551111660949, guid: edcc86a903182d0429c0d7b2c727fec0, type: 3}
+--- !u!23 &698170494411964198
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 467121121154917611}
+  m_GameObject: {fileID: 1964806522869936434}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -70,7 +69,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 1c5e7420d2e5a03439ec245b61ca3ff9, type: 2}
+  - {fileID: 2100000, guid: ca32cada060cf774dbd29b2f3410086a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -94,13 +93,13 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &1160352511744139226
-BoxCollider:
+--- !u!64 &1621106791338333214
+MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 467121121154917611}
+  m_GameObject: {fileID: 1964806522869936434}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -112,66 +111,45 @@ BoxCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!54 &4242159063530805388
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 467121121154917611}
   serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
---- !u!114 &9016172243501097876
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 7601493551111660949, guid: edcc86a903182d0429c0d7b2c727fec0, type: 3}
+--- !u!114 &-4928856406408865795
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 467121121154917611}
+  m_GameObject: {fileID: 1964806522869936434}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1bc2fd8b8aa91ad43aaba6351cd5df8e, type: 3}
+  m_Script: {fileID: 11500000, guid: 5fea29bb7c508c244a1f805a5fd3fc4d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Nexush.Interactables.Ladder
---- !u!65 &9001472946288222618
-BoxCollider:
+  m_EditorClassIdentifier: Assembly-CSharp::Outline
+  outlineMode: 0
+  outlineColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  outlineWidth: 2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
+--- !u!114 &8999008286872661065
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 467121121154917611}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
+  m_GameObject: {fileID: 1964806522869936434}
   m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.9, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 1}
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03aa5a5106e55fe419499868255298ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Interactables.ItemPickup
+  unlockParalyze: 1
+  unlockMad: 0
+  unlockBomb: 0
+  addDash: 0
+  addSleepFungus: 1
+  addAggroFungus: 0
+  addBombFungus: 0
+  destroyOnPickup: 1
