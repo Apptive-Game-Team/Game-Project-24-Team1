@@ -632,10 +632,10 @@ MonoBehaviour:
   _maxDashCount: 1
   _dashCount: 1
   _dashChargeTime: 3
-  _maxSleepFungus: 2
+  _maxSleepFungus: 5
   _maxAggroFungus: 2
   _maxBombFungus: 2
-  _sleepFungus: 2
+  _sleepFungus: 5
   _aggroFungus: 2
   _bombFungus: 2
   _paralyzeUnlocked: 0
@@ -945,6 +945,9 @@ MonoBehaviour:
     m_Bits: 4294967295
   targetCamera: {fileID: 0}
   memorySporeModelPrefab: {fileID: 0}
+  absorbedMemoryText: "\uAE30\uC5B5\uC774 \uD758\uB7EC\uB4E4\uC5B4\uC628\uB2E4."
+  absorbedMemoryTextDuration: 60
+  absorbedMemoryFont: {fileID: 11400000, guid: dea47f8dba9dbf04598d95950f1e4eda, type: 2}
 --- !u!136 &8042948556577861415
 CapsuleCollider:
   m_ObjectHideFlags: 0

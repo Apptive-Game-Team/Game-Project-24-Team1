@@ -11,7 +11,7 @@ namespace MushOut.UI
 {
     public class MemorySporeFloatingText : MonoBehaviour
     {
-        private const float DefaultDuration = 2.5f;
+        private const float DefaultDuration = 60f;
 
         [SerializeField] private string message = "기억이 흘러들어온다.";
         [SerializeField] private float duration = DefaultDuration;
@@ -96,16 +96,19 @@ namespace MushOut.UI
             GameObject textObject = new GameObject("Text", typeof(RectTransform));
             textObject.transform.SetParent(panelObject.transform, false);
 
-            TextMeshProUGUI text = textObject.AddComponent<TextMeshProUGUI>();
+            Text text = textObject.AddComponent<Text>();
             text.text = message;
-            text.fontSize = fontSize;
+            text.fontSize = Mathf.RoundToInt(fontSize);
             text.color = textColor;
-            text.alignment = TextAlignmentOptions.Center;
-            text.enableWordWrapping = true;
+            text.alignment = TextAnchor.MiddleCenter;
+            text.horizontalOverflow = HorizontalWrapMode.Wrap;
+            text.verticalOverflow = VerticalWrapMode.Overflow;
             text.raycastTarget = false;
-            if (fontAsset != null)
+
+            Font uiFont = fontAsset != null ? fontAsset.sourceFontFile : null;
+            if (uiFont != null)
             {
-                text.font = fontAsset;
+                text.font = uiFont;
             }
 
             RectTransform textRect = text.rectTransform;

@@ -59,7 +59,8 @@ namespace MushOut.UI
             Transform playerHead = FindHead(playerRoot);
 
             Vector3 source = (enemyHead != null ? enemyHead.position : enemyRoot.position) + Vector3.up * spawnHeight;
-            Vector3 target = (playerHead != null ? playerHead.position : playerRoot.position) + Vector3.up * targetHeight;
+            Transform absorbTarget = playerHead != null ? playerHead : playerRoot;
+            Vector3 absorbOffset = playerHead != null ? Vector3.zero : Vector3.up * targetHeight;
             Transform textTarget = enemyHead != null ? enemyHead : enemyRoot;
             Collider textFollowCollider = FindFollowCollider(enemyRoot);
 
@@ -72,7 +73,7 @@ namespace MushOut.UI
                 return;
             }
 
-            StartCoroutine(PlayRoutine(source, target, textTarget, textFollowCollider));
+            StartCoroutine(PlayRoutine(source, absorbTarget, absorbOffset, textTarget, textFollowCollider));
         }
 
         private void CollectSpores(Transform root)
@@ -90,11 +91,11 @@ namespace MushOut.UI
             }
         }
 
-        private IEnumerator PlayRoutine(Vector3 source, Vector3 target, Transform textTarget, Collider textFollowCollider)
+        private IEnumerator PlayRoutine(Vector3 source, Transform absorbTarget, Vector3 absorbOffset, Transform textTarget, Collider textFollowCollider)
         {
             for (int i = 0; i < _spores.Count; i++)
             {
-                StartCoroutine(AnimateSpore(i, source, target));
+                StartCoroutine(AnimateSpore(i, source, absorbTarget, absorbOffset));
                 yield return new WaitForSeconds(delayBetweenSpores);
             }
 
@@ -103,7 +104,7 @@ namespace MushOut.UI
             Destroy(gameObject);
         }
 
-        private IEnumerator AnimateSpore(int index, Vector3 source, Vector3 target)
+        private IEnumerator AnimateSpore(int index, Vector3 source, Transform absorbTarget, Vector3 absorbOffset)
         {
             Transform spore = _spores[index];
             Vector3 originalScale = _originalScales[index] * sporeScaleMultiplier;
@@ -136,6 +137,7 @@ namespace MushOut.UI
             {
                 float t = elapsed / flyDuration;
                 float eased = t * t * (3f - 2f * t);
+                Vector3 target = GetAbsorbTargetPosition(absorbTarget, absorbOffset);
                 Vector3 line = Vector3.Lerp(popPosition, target, eased);
                 line.y += Mathf.Sin(t * Mathf.PI) * arcHeight;
                 spore.position = line;
@@ -145,6 +147,16 @@ namespace MushOut.UI
             }
 
             spore.gameObject.SetActive(false);
+        }
+
+        private Vector3 GetAbsorbTargetPosition(Transform absorbTarget, Vector3 absorbOffset)
+        {
+            if (absorbTarget == null)
+            {
+                return transform.position + absorbOffset;
+            }
+
+            return absorbTarget.position + absorbOffset;
         }
 
         private static Transform FindHead(Transform root)

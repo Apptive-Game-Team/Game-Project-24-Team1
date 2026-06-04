@@ -46,7 +46,7 @@ namespace MushOut.Player
         private float _dashCooldownVisualTimer = 0f;
         
         [Tooltip("최대 수면 포자 보유 개수입니다.")]
-        [SerializeField] private int _maxSleepFungus = 2;
+        [SerializeField] private int _maxSleepFungus = 5;
         
         [Tooltip("최대 광분 포자 보유 개수입니다.")]
         [SerializeField] private int _maxAggroFungus = 2;
@@ -55,7 +55,7 @@ namespace MushOut.Player
         [SerializeField] private int _maxBombFungus = 2;
 
         [Tooltip("현재 수면 포자 보유 개수입니다.")]
-        [SerializeField] private int _sleepFungus = 2;
+        [SerializeField] private int _sleepFungus = 5;
         
         [Tooltip("현재 광분 포자 보유 개수입니다.")]
         [SerializeField] private int _aggroFungus = 2;
