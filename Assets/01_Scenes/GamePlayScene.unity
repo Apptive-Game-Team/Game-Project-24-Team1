@@ -6358,13 +6358,34 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4484464910407984773, guid: 6221facbb649ccc4881eb3c48465ce9e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 58365159}
   m_SourcePrefab: {fileID: 100100000, guid: 6221facbb649ccc4881eb3c48465ce9e, type: 3}
 --- !u!4 &58365157 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3852783022858452031, guid: 6221facbb649ccc4881eb3c48465ce9e, type: 3}
   m_PrefabInstance: {fileID: 58365156}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &58365158 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4484464910407984773, guid: 6221facbb649ccc4881eb3c48465ce9e, type: 3}
+  m_PrefabInstance: {fileID: 58365156}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &58365159
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 58365158}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27e5f743141f1164d890444a553243ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Enemy.EnemyMemoryText
+  memoryText: "\uC774 \uBC29 \uC5B4\uB518\uAC00\uC5D0 \uD0C8\uCD9C\uAD6C\uAC00 \uC788\uC5B4"
 --- !u!1 &58867139 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8461142568533513622, guid: 4f2ef453356bf9140b16ecbb756ab15d, type: 3}
