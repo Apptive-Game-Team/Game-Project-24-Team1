@@ -162,7 +162,7 @@ MonoBehaviour:
   _eyeOffset: {x: 0, y: 0, z: 0}
   _gizmoObstacleLayer:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 32375
   _gizmoClipBias: 1
 --- !u!1 &4895314050258676276
 GameObject:
@@ -301,14 +301,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8248955095099424129}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.12940949, y: 0.12940949, z: -0.017037077, w: 0.98296297}
+  m_LocalRotation: {x: 0.1036342, y: 0.12981112, z: -0.013643698, w: 0.98601365}
   m_LocalPosition: {x: 0.28100002, y: 2.9490001, z: 0.031999867}
   m_LocalScale: {x: 0.66666657, y: 0.6666667, z: 0.66666657}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1444146701953553548}
   m_Father: {fileID: 7203972345249680341}
-  m_LocalEulerAnglesHint: {x: 15, y: 15, z: 0}
+  m_LocalEulerAnglesHint: {x: 12, y: 15, z: 0}
 --- !u!114 &2612292048258492539
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -326,7 +326,7 @@ MonoBehaviour:
   _eyeOffset: {x: 0, y: 0, z: 0}
   _gizmoObstacleLayer:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 32375
   _gizmoClipBias: 1
 --- !u!1001 &7238164019308473406
 PrefabInstance:
@@ -1365,7 +1365,7 @@ NavMeshAgent:
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
-  m_StoppingDistance: 0
+  m_StoppingDistance: 1
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1

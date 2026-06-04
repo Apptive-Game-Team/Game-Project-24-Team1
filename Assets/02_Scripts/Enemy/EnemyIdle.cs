@@ -41,6 +41,9 @@ namespace MushOut.Enemy
             // PatrolPoints[0]이 지정되어 있지 않거나, 이미 도달(충돌 범위 내)했다면 대기
             if (pointA == null || Vector3.Distance(transform.position, pointA.position) <= _agent.stoppingDistance + 0.1f)
             {
+                // NavMeshAgent가 자체적으로 회전하려고 하는 것을 막기 위해 자동 회전을 끕니다.
+                _agent.updateRotation = false;
+
                 if (Quaternion.Angle(transform.rotation, _initialRotation) > 0.1f)
                 {
                     // 처음에 바라보던 방향(_initialRotation)으로 부드럽게 회전합니다.
@@ -63,6 +66,9 @@ namespace MushOut.Enemy
             }
             else
             {
+                // 다시 이동을 시작할 때는 NavMeshAgent의 자동 회전을 켜줍니다.
+                _agent.updateRotation = true;
+
                 // PatrolPoints[0]에 아직 도달하지 않았다면 해당 위치로 이동
                 _agent.isStopped = false;
                 _agent.speed = _enemyController.MoveSpeed;
