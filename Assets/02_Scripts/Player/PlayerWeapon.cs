@@ -125,6 +125,7 @@ namespace MushOut.Player
                     return;
                 }
                 _abilityController.SleepFungus--;
+                RecentItemUseRefund.RecordSleepFungusUse(_abilityController);
             }
 
             ExecuteDoubleRaycast();
