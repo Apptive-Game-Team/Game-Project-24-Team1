@@ -84,7 +84,7 @@ namespace MushOut.Player
             // [보정] 공중에서는 점프 중이 아닐 때(낙하 중일 때)만 사다리를 잡을 수 있게 하여 '공중 부양' 현상 방지
             if (_climbHandler != null && _climbHandler.IsNearLadder && _input.MoveInput.y > 0.1f)
             {
-                if (_detector.IsGrounded || _motor.VerticalVelocity <= 0f)
+                if (_detector.IsGrounded || _detector.IsInWater || _motor.VerticalVelocity <= 0f)
                 {
                     ChangeState(PlayerState.Climbing);
                     return;
@@ -135,7 +135,7 @@ namespace MushOut.Player
                 {
                     _fallTimeoutDelta -= Time.deltaTime;
                 }
-                else if (_motor.VerticalVelocity < 0f && !_detector.IsInWater)
+                else if (_motor.VerticalVelocity < 0f || _detector.IsInWater)
                 {
                     ChangeState(PlayerState.Fall);
                 }
