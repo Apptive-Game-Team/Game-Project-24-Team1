@@ -11,20 +11,45 @@ namespace MushOut.Core
     {
         private void CachePlayerSpawn()
         {
-            if (PlayerEnemyCollisionHandler.TryGetInitialSpawn(out Vector3 initialPosition, out Quaternion initialRotation))
-            {
-                _playerSpawnPosition = initialPosition;
-                _playerSpawnRotation = initialRotation;
-            }
-
             _playerObject = GameManager.Instance != null && GameManager.Instance.PlayerTransform != null
                 ? GameManager.Instance.PlayerTransform.gameObject
                 : GameObject.FindGameObjectWithTag("Player") ?? GameObject.Find("Player");
 
-            if (_playerObject != null && !PlayerEnemyCollisionHandler.TryGetInitialSpawn(out _, out _))
+            // 씬 내에 "PlayerSpawnPoint" 이름을 가지거나 "Respawn" 태그가 붙은 스폰 포인트 오브젝트가 있는지 검색합니다.
+            GameObject spawnPointObj = GameObject.Find("PlayerSpawnPoint") ?? GameObject.FindGameObjectWithTag("Respawn");
+            if (spawnPointObj != null)
             {
-                _playerSpawnPosition = _playerObject.transform.position;
-                _playerSpawnRotation = _playerObject.transform.rotation;
+                _playerSpawnPosition = spawnPointObj.transform.position;
+                _playerSpawnRotation = spawnPointObj.transform.rotation;
+
+                // 지정된 스폰 포인트가 존재하면 게임 시작 시 플레이어를 해당 위치로 텔레포트합니다.
+                if (_playerObject != null)
+                {
+                    CharacterController controller = _playerObject.GetComponent<CharacterController>();
+                    if (controller != null)
+                    {
+                        controller.enabled = false;
+                    }
+                    _playerObject.transform.SetPositionAndRotation(_playerSpawnPosition, _playerSpawnRotation);
+                    if (controller != null)
+                    {
+                        controller.enabled = true;
+                    }
+                }
+            }
+            else
+            {
+                // 별도의 스폰 포인트 오브젝트가 배치되지 않은 경우 기존 배치 위치를 기반으로 작동합니다.
+                if (PlayerEnemyCollisionHandler.TryGetInitialSpawn(out Vector3 initialPosition, out Quaternion initialRotation))
+                {
+                    _playerSpawnPosition = initialPosition;
+                    _playerSpawnRotation = initialRotation;
+                }
+                else if (_playerObject != null)
+                {
+                    _playerSpawnPosition = _playerObject.transform.position;
+                    _playerSpawnRotation = _playerObject.transform.rotation;
+                }
             }
         }
 
