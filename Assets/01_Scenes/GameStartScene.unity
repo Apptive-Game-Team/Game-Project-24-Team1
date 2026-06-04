@@ -954,7 +954,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7abe1f5fe2b418041bb824dd07460ef6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Nexush.Core.StartMenuController
-  gameSceneName: MainMapScene
+  gameSceneName: GamePlayScene
   settingsPanel: {fileID: 0}
 --- !u!4 &931935786
 Transform:

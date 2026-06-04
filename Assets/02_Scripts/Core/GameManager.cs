@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using UnityEngine.SceneManagement;
 
 namespace MushOut.Core
 {
@@ -102,19 +103,61 @@ namespace MushOut.Core
             }
         }
 
+        private void OnEnable()
+        {
+            SceneManager.sceneLoaded += HandleSceneLoaded;
+        }
+
+        private void OnDisable()
+        {
+            SceneManager.sceneLoaded -= HandleSceneLoaded;
+        }
+
         private void Start()
         {
-            // 초기 상태 설정
             if (CurrentState == GameState.None)
             {
                 ChangeState(GameState.Ready);
             }
 
-            // 전역 플레이어 찾아서 캐싱 (Enemy 등에서 무거운 Find를 매번 하지 않도록)
+            CachePlayerTransform();
+            ApplyStateForScene(SceneManager.GetActiveScene());
+        }
+
+        private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            CachePlayerTransform();
+            ApplyStateForScene(scene);
+        }
+
+        private void CachePlayerTransform()
+        {
             GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
             if (playerObj == null) playerObj = GameObject.Find("Player");
-            if (playerObj != null) PlayerTransform = playerObj.transform;
+            PlayerTransform = playerObj != null ? playerObj.transform : null;
         }
+
+        private void ApplyStateForScene(Scene scene)
+        {
+            if (scene.name == "GamePlayScene" && CurrentState != GameState.GameOver && CurrentState != GameState.Success)
+            {
+                ClearRuntimePause();
+                ChangeState(GameState.Playing);
+            }
+            else if (scene.name == "GameStartScene")
+            {
+                ChangeState(GameState.Ready);
+            }
+        }
+
+        private void ClearRuntimePause()
+        {
+            Time.timeScale = 1f;
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPaused = false;
+#endif
+        }
+
 
         /// <summary>
         /// 게임의 상태를 변경합니다.
