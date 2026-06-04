@@ -135,7 +135,7 @@ namespace MushOut.Player
                 {
                     _fallTimeoutDelta -= Time.deltaTime;
                 }
-                else if (_motor.VerticalVelocity < 0f && !_detector.IsInWater)
+                else if (_motor.VerticalVelocity < 0f || _detector.IsInWater)
                 {
                     ChangeState(PlayerState.Fall);
                 }
