@@ -12841,6 +12841,79 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 130734075}
   m_Mesh: {fileID: 1495554743}
+--- !u!1 &131502486
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 131502489}
+  - component: {fileID: 131502488}
+  - component: {fileID: 131502487}
+  m_Layer: 0
+  m_Name: SavePoint_4
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &131502487
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 131502486}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d3286192e1169d44858f595bb81b936, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.SavePoint.SavePointTrigger
+  savePointId: SavePoint_4
+  activationMode: 1
+  respawnPoint: {fileID: 0}
+  usePlayerPositionOnSave: 1
+  usePlayerRotationOnSave: 0
+  requireGrounded: 1
+  allowWater: 0
+--- !u!65 &131502488
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 131502486}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0.5, z: 0}
+--- !u!4 &131502489
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 131502486}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -36, y: 5.95, z: -8.5}
+  m_LocalScale: {x: 18, y: 3, z: 28}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 604842842}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &133551951
 Mesh:
   m_ObjectHideFlags: 0
@@ -47074,15 +47147,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8079827641806581382, guid: 20a622014d72d2b45bf499a10b4d74ce, type: 3}
       propertyPath: m_SelectedEdges.Array.size
-      value: 4
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8079827641806581382, guid: 20a622014d72d2b45bf499a10b4d74ce, type: 3}
       propertyPath: m_SelectedFaces.Array.size
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8079827641806581382, guid: 20a622014d72d2b45bf499a10b4d74ce, type: 3}
       propertyPath: m_SelectedVertices.Array.size
-      value: 4
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8099828137395224184, guid: 20a622014d72d2b45bf499a10b4d74ce, type: 3}
       propertyPath: m_Mesh
@@ -59754,6 +59827,79 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 553139763}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &554355653
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 554355656}
+  - component: {fileID: 554355655}
+  - component: {fileID: 554355654}
+  m_Layer: 0
+  m_Name: SavePoint_5
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &554355654
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 554355653}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d3286192e1169d44858f595bb81b936, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.SavePoint.SavePointTrigger
+  savePointId: SavePoint_5
+  activationMode: 0
+  respawnPoint: {fileID: 0}
+  usePlayerPositionOnSave: 1
+  usePlayerRotationOnSave: 0
+  requireGrounded: 1
+  allowWater: 0
+--- !u!65 &554355655
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 554355653}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!4 &554355656
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 554355653}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -9.8, y: 5.95, z: -29.5}
+  m_LocalScale: {x: 36, y: 3, z: 22}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 604842842}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &554398382
 GameObject:
   m_ObjectHideFlags: 0
@@ -63098,6 +63244,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1981262872206032581, guid: 71ae8ab5e79189b48bfd435a4b5b3c31, type: 3}
+      propertyPath: useKey
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 6771128793942165011, guid: 71ae8ab5e79189b48bfd435a4b5b3c31, type: 3}
       propertyPath: interactRange
       value: 10
@@ -63643,6 +63793,44 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5701486891652077847, guid: ee13540b11108664bb2cd5974d81a24d, type: 3}
   m_PrefabInstance: {fileID: 603626842}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &604842841
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 604842842}
+  m_Layer: 0
+  m_Name: SavePoints
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &604842842
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 604842841}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: -6, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1665652927}
+  - {fileID: 1436990851}
+  - {fileID: 1411924254}
+  - {fileID: 131502489}
+  - {fileID: 554355656}
+  - {fileID: 1641621962}
+  - {fileID: 1967777004}
+  m_Father: {fileID: 612195102}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &605632720
 GameObject:
   m_ObjectHideFlags: 0
@@ -64710,6 +64898,7 @@ Transform:
   - {fileID: 239274129}
   - {fileID: 1180342730}
   - {fileID: 1388285728}
+  - {fileID: 604842842}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &612441570
@@ -66345,13 +66534,36 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3518304711194681652, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 624300736}
   m_SourcePrefab: {fileID: 100100000, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
 --- !u!4 &624300734 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4294278807925816206, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
   m_PrefabInstance: {fileID: 624300733}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &624300735 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3518304711194681652, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
+  m_PrefabInstance: {fileID: 624300733}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &624300736
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 624300735}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27e5f743141f1164d890444a553243ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Enemy.EnemyMemoryText
+  memoryText: "\uC800\uAE30 \uC5B4\uB514\uC5D0 \uD3ED\uBC1C \uD3EC\uC790\uAC00 \uC788\uB2E4\uB358\uB370..
+    \uC587\uC740 \uBCBD \uAC19\uC740\uAC74 \uBD80\uC234\uBC84\uB9B4 \uD30C\uAD34\uB825\uC774\uB2C8
+    \uC870\uC2EC\uD574\uC57C\uC9C0.."
 --- !u!1001 &625309439
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -70231,13 +70443,36 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3518304711194681652, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 669059998}
   m_SourcePrefab: {fileID: 100100000, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
 --- !u!4 &669059996 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4294278807925816206, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
   m_PrefabInstance: {fileID: 669059995}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &669059997 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3518304711194681652, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
+  m_PrefabInstance: {fileID: 669059995}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &669059998
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 669059997}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27e5f743141f1164d890444a553243ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Enemy.EnemyMemoryText
+  memoryText: "\uC800\uAE30 \uC5B4\uB514\uC5D0 \uD3ED\uBC1C \uD3EC\uC790\uAC00 \uC788\uB2E4\uB358\uB370..
+    \uC587\uC740 \uBCBD \uAC19\uC740\uAC74 \uBD80\uC234\uBC84\uB9B4 \uD30C\uAD34\uB825\uC774\uB2C8
+    \uC870\uC2EC\uD574\uC57C\uC9C0.."
 --- !u!1001 &669796751
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -145636,13 +145871,35 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3518304711194681652, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1192422850}
   m_SourcePrefab: {fileID: 100100000, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
 --- !u!4 &1192422848 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4294278807925816206, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
   m_PrefabInstance: {fileID: 1192422847}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1192422849 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3518304711194681652, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
+  m_PrefabInstance: {fileID: 1192422847}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1192422850
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1192422849}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27e5f743141f1164d890444a553243ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Enemy.EnemyMemoryText
+  memoryText: "\uC694 \uC55E \uBC29\uC5D0 \uC218\uB85C\uC5D0 \uBB3C\uC744 \uBE7C\uB294
+    \uBC84\uD2BC(\uB808\uBC84)\uAC00 \uC788\uC5C8\uC9C0?"
 --- !u!1 &1193834060
 GameObject:
   m_ObjectHideFlags: 0
@@ -147507,13 +147764,36 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4484464910407984773, guid: 6221facbb649ccc4881eb3c48465ce9e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1204243042}
   m_SourcePrefab: {fileID: 100100000, guid: 6221facbb649ccc4881eb3c48465ce9e, type: 3}
 --- !u!4 &1204243040 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3852783022858452031, guid: 6221facbb649ccc4881eb3c48465ce9e, type: 3}
   m_PrefabInstance: {fileID: 1204243039}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1204243041 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4484464910407984773, guid: 6221facbb649ccc4881eb3c48465ce9e, type: 3}
+  m_PrefabInstance: {fileID: 1204243039}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1204243042
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1204243041}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27e5f743141f1164d890444a553243ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Enemy.EnemyMemoryText
+  memoryText: "\uAD11\uBD84 \uD3EC\uC790\uB97C \uC4F0\uBA74 \uBC84\uC12F\uB4E4\uC774
+    \uD765\uBD84\uD574\uC11C \uB3CC\uC9C4\uD574.. \uC587\uC740 \uBCBD \uC815\uB3C4\uB294
+    \uBD80\uC234\uC9C8\uC9C0\uB3C4?"
 --- !u!1 &1206798237
 GameObject:
   m_ObjectHideFlags: 0
@@ -152463,13 +152743,35 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3518304711194681652, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1259823244}
   m_SourcePrefab: {fileID: 100100000, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
 --- !u!4 &1259823242 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4294278807925816206, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
   m_PrefabInstance: {fileID: 1259823241}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1259823243 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3518304711194681652, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
+  m_PrefabInstance: {fileID: 1259823241}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1259823244
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1259823243}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27e5f743141f1164d890444a553243ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Enemy.EnemyMemoryText
+  memoryText: "\uC67C\uCABD \uBCBD\uC774 \uC587\uC740\uAC70 \uAC19\uB2E4\uB294 \uB9D0\uC774
+    \uC788\uB358\uB370"
 --- !u!1 &1260446046
 GameObject:
   m_ObjectHideFlags: 0
@@ -165359,6 +165661,79 @@ NavMeshObstacle:
   m_CarveOnlyStationary: 1
   m_Center: {x: 0, y: 0, z: 0}
   m_TimeToStationary: 0.5
+--- !u!1 &1411924251
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1411924254}
+  - component: {fileID: 1411924253}
+  - component: {fileID: 1411924252}
+  m_Layer: 0
+  m_Name: SavePoint_3
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1411924252
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1411924251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d3286192e1169d44858f595bb81b936, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.SavePoint.SavePointTrigger
+  savePointId: SavePoint_3
+  activationMode: 0
+  respawnPoint: {fileID: 0}
+  usePlayerPositionOnSave: 1
+  usePlayerRotationOnSave: 0
+  requireGrounded: 1
+  allowWater: 0
+--- !u!65 &1411924253
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1411924251}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0.5, z: 0}
+--- !u!4 &1411924254
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1411924251}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -34.5, y: 2.95, z: 16}
+  m_LocalScale: {x: 18, y: 3, z: 18}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 604842842}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1412728557
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -167062,6 +167437,79 @@ Mesh:
       - serializedVersion: 1
         m_IndexStart: 0
         m_IndexCount: 0
+--- !u!1 &1436990848
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1436990851}
+  - component: {fileID: 1436990850}
+  - component: {fileID: 1436990849}
+  m_Layer: 0
+  m_Name: SavePoint_2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1436990849
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1436990848}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d3286192e1169d44858f595bb81b936, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.SavePoint.SavePointTrigger
+  savePointId: SavePoint_2
+  activationMode: 0
+  respawnPoint: {fileID: 0}
+  usePlayerPositionOnSave: 1
+  usePlayerRotationOnSave: 0
+  requireGrounded: 1
+  allowWater: 0
+--- !u!65 &1436990850
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1436990848}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0.5, z: 0}
+--- !u!4 &1436990851
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1436990848}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 35.5, y: 5.95, z: -22}
+  m_LocalScale: {x: 34, y: 3, z: 26}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 604842842}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1437634095
 GameObject:
   m_ObjectHideFlags: 0
@@ -170574,13 +171022,35 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3518304711194681652, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1487801397}
   m_SourcePrefab: {fileID: 100100000, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
 --- !u!4 &1487801395 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4294278807925816206, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
   m_PrefabInstance: {fileID: 1487801394}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1487801396 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3518304711194681652, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
+  m_PrefabInstance: {fileID: 1487801394}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1487801397
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1487801396}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27e5f743141f1164d890444a553243ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Enemy.EnemyMemoryText
+  memoryText: "\uC694 \uC55E \uBC29\uC5D0 \uC218\uB85C\uC5D0 \uBB3C\uC744 \uBE7C\uB294
+    \uBC84\uD2BC(\uB808\uBC84)\uAC00 \uC788\uC5C8\uC9C0?"
 --- !u!43 &1488665232
 Mesh:
   m_ObjectHideFlags: 0
@@ -172526,13 +172996,35 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3518304711194681652, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1504682741}
   m_SourcePrefab: {fileID: 100100000, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
 --- !u!4 &1504682739 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4294278807925816206, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
   m_PrefabInstance: {fileID: 1504682738}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1504682740 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3518304711194681652, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
+  m_PrefabInstance: {fileID: 1504682738}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1504682741
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1504682740}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27e5f743141f1164d890444a553243ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Enemy.EnemyMemoryText
+  memoryText: "\uC694 \uC55E \uBC29\uC5D0 \uC218\uB85C\uC5D0 \uBB3C\uC744 \uBE7C\uB294
+    \uBC84\uD2BC(\uB808\uBC84)\uAC00 \uC788\uC5C8\uC9C0?"
 --- !u!43 &1508908389
 Mesh:
   m_ObjectHideFlags: 0
@@ -186299,6 +186791,79 @@ Mesh:
       - serializedVersion: 1
         m_IndexStart: 0
         m_IndexCount: 0
+--- !u!1 &1641621959
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1641621962}
+  - component: {fileID: 1641621961}
+  - component: {fileID: 1641621960}
+  m_Layer: 0
+  m_Name: SavePoint_6
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1641621960
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1641621959}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d3286192e1169d44858f595bb81b936, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.SavePoint.SavePointTrigger
+  savePointId: SavePoint_6
+  activationMode: 0
+  respawnPoint: {fileID: 0}
+  usePlayerPositionOnSave: 1
+  usePlayerRotationOnSave: 0
+  requireGrounded: 1
+  allowWater: 1
+--- !u!65 &1641621961
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1641621959}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!4 &1641621962
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1641621959}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -1, y: 5.95, z: -24.5}
+  m_LocalScale: {x: 28, y: 3, z: 5}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 604842842}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1642257769
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -189274,6 +189839,79 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1663029915}
   m_Mesh: {fileID: 41915039}
+--- !u!1 &1665652924
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1665652927}
+  - component: {fileID: 1665652926}
+  - component: {fileID: 1665652925}
+  m_Layer: 0
+  m_Name: SavePoint_1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1665652925
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1665652924}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d3286192e1169d44858f595bb81b936, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.SavePoint.SavePointTrigger
+  savePointId: SavePoint_1
+  activationMode: 0
+  respawnPoint: {fileID: 0}
+  usePlayerPositionOnSave: 1
+  usePlayerRotationOnSave: 0
+  requireGrounded: 1
+  allowWater: 0
+--- !u!65 &1665652926
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1665652924}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0.5, z: 0}
+--- !u!4 &1665652927
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1665652924}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 40, y: 6.1, z: 30}
+  m_LocalScale: {x: 48, y: 3, z: 48}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 604842842}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1666727693
 GameObject:
   m_ObjectHideFlags: 0
@@ -214822,6 +215460,79 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1967649422}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1967777001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1967777004}
+  - component: {fileID: 1967777003}
+  - component: {fileID: 1967777002}
+  m_Layer: 0
+  m_Name: SavePoint_7
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1967777002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1967777001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d3286192e1169d44858f595bb81b936, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.SavePoint.SavePointTrigger
+  savePointId: SavePoint_7
+  activationMode: 0
+  respawnPoint: {fileID: 0}
+  usePlayerPositionOnSave: 1
+  usePlayerRotationOnSave: 0
+  requireGrounded: 1
+  allowWater: 1
+--- !u!65 &1967777003
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1967777001}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!4 &1967777004
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1967777001}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 54, y: 13.9, z: 36.5}
+  m_LocalScale: {x: 14, y: 3, z: 10}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 604842842}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1972423517
 GameObject:
   m_ObjectHideFlags: 0
@@ -240794,13 +241505,36 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3518304711194681652, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2055956685}
   m_SourcePrefab: {fileID: 100100000, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
 --- !u!4 &2055956683 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4294278807925816206, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
   m_PrefabInstance: {fileID: 2055956682}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2055956684 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3518304711194681652, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
+  m_PrefabInstance: {fileID: 2055956682}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2055956685
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2055956684}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27e5f743141f1164d890444a553243ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Enemy.EnemyMemoryText
+  memoryText: "\uC800\uAE30 \uC5B4\uB514\uC5D0 \uD3ED\uBC1C \uD3EC\uC790\uAC00 \uC788\uB2E4\uB358\uB370..
+    \uC587\uC740 \uBCBD \uAC19\uC740\uAC74 \uBD80\uC234\uBC84\uB9B4 \uD30C\uAD34\uB825\uC774\uB2C8
+    \uC870\uC2EC\uD574\uC57C\uC9C0.."
 --- !u!1 &2056025295
 GameObject:
   m_ObjectHideFlags: 0
@@ -252577,8 +253311,31 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3518304711194681652, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6722952342476272142}
   m_SourcePrefab: {fileID: 100100000, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
+--- !u!1 &6722952342476272141 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3518304711194681652, guid: 1b158cda0e0682347a0eddae52e724c5, type: 3}
+  m_PrefabInstance: {fileID: 6722952342476272140}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6722952342476272142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6722952342476272141}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27e5f743141f1164d890444a553243ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MushOut.Enemy.EnemyMemoryText
+  memoryText: "\uC800\uAE30 \uC5B4\uB514\uC5D0 \uD3ED\uBC1C \uD3EC\uC790\uAC00 \uC788\uB2E4\uB358\uB370..
+    \uC587\uC740 \uBCBD \uAC19\uC740\uAC74 \uBD80\uC234\uBC84\uB9B4 \uD30C\uAD34\uB825\uC774\uB2C8
+    \uC870\uC2EC\uD574\uC57C\uC9C0.."
 --- !u!1001 &7518360253891483724
 PrefabInstance:
   m_ObjectHideFlags: 0
