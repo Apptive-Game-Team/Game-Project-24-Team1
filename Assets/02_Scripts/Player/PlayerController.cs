@@ -96,6 +96,7 @@ namespace MushOut.Player
 
             if (_currentState != PlayerState.Climbing && _currentState != PlayerState.ClimbOver)
             {
+                _motor.UpdateWallCling(_input.IsFiring, _detector.IsGrounded, _detector.IsInWater);
                 _motor.ApplyGravity(Time.deltaTime, _detector.IsInWater, _detector.IsGrounded);
                 _motor.ApplyMovement(Time.deltaTime, _input.MoveInput, _input.IsSprinting, _detector.IsInWater, _detector.IsGrounded, _interactor.GrabbedObject, _detector.HitNormal, _detector.groundLayers);
                 

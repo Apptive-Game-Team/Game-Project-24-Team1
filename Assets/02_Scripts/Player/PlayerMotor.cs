@@ -40,8 +40,18 @@ namespace MushOut.Player
         [Tooltip("물 속에서 받는 수직 저항력(Drag)입니다.")]
         [SerializeField] private float _waterDrag = 3.0f;
 
+        [Header("벽 붙기 설정")]
+        [Tooltip("벽으로 인식할 레이어입니다.")]
+        [SerializeField] private LayerMask _wallLayer;
+        [Tooltip("벽을 감지할 최대 거리입니다.")]
+        [SerializeField] private float _wallClingDistance = 0.5f;
+        [Tooltip("벽에 붙어있을 때 수평 이동(WASD)을 허용할지 여부입니다.")]
+        [SerializeField] private bool _allowHorizontalMovementWhileClinging = false;
+
         public float VerticalVelocity { get; set; }
         public Vector3 ExternalVelocity { get; set; }
+
+        public bool IsClinging { get; private set; }
 
         /// <summary>중력 값을 외부에서 읽을 수 있는 프로퍼티입니다.</summary>
         public float Gravity => _gravity;
@@ -77,6 +87,27 @@ namespace MushOut.Player
         }
 
         /// <summary>
+        /// 벽 붙기 상태를 업데이트합니다. (공중에 있을 때만 가능)
+        /// </summary>
+        /// <param name="isClingKeyPressed">붙기 키(좌클릭 등) 입력 여부</param>
+        /// <param name="isGrounded">지면 접촉 여부</param>
+        /// <param name="isInWater">물 속 여부</param>
+        public void UpdateWallCling(bool isClingKeyPressed, bool isGrounded, bool isInWater)
+        {
+            // 키를 누르지 않았거나, 땅에 있거나, 물 속에 있으면 벽 붙기 불가
+            if (!isClingKeyPressed || isGrounded || isInWater)
+            {
+                IsClinging = false;
+                return;
+            }
+
+            // 플레이어 중심에서 구형 캐스트를 통해 벽 레이어를 감지
+            float checkRadius = _controller.radius + _wallClingDistance;
+            Vector3 center = transform.position + _controller.center;
+            IsClinging = Physics.CheckSphere(center, checkRadius, _wallLayer);
+        }
+
+        /// <summary>
         /// 중력을 수직 속도에 누적 적용합니다.
         /// 물 속에서는 수직 저항(Drag)으로 대체하고, 지면 위에서는 소량의 하방 속도를 유지합니다.
         /// </summary>
@@ -85,6 +116,12 @@ namespace MushOut.Player
         /// <param name="isGrounded">지면 접촉 여부</param>
         public void ApplyGravity(float deltaTime, bool isInWater, bool isGrounded)
         {
+            if (IsClinging)
+            {
+                VerticalVelocity = 0f;
+                return; // 벽에 붙어있을 때는 중력 무시
+            }
+
             if (isInWater)
             {
                 // 물 속에서는 수직 저항(Drag) 적용
@@ -148,6 +185,11 @@ namespace MushOut.Player
         /// <param name="groundLayers">지면으로 인식할 레이어 마스크</param>
         public void ApplyMovement(float deltaTime, Vector2 moveInput, bool isSprinting, bool isInWater, bool isGrounded, MushOut.Interactables.PushPullInteractable grabbedObject, Vector3 hitNormal, LayerMask groundLayers)
         {
+            if (IsClinging && !_allowHorizontalMovementWhileClinging)
+            {
+                moveInput = Vector2.zero;
+            }
+
             if (isSprinting && !_wasSprinting && !_isDashing && grabbedObject == null)
             {
                 bool canDash = true;
